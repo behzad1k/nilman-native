@@ -9,7 +9,7 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-import { Order } from '@/src/features/cart/types'
+import { Order } from '@/src/features/order/types'
 
 interface ICartItemProps {
   item: Order;

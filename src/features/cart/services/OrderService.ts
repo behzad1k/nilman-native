@@ -1,6 +1,6 @@
 import ENDPOINTS from '@/src/configs/api/endpoints';
 import { ApiResponse } from '@/src/types/api';
-import { Order } from '@/src/features/cart/types'
+import { Order } from '@/src/features/order/types'
 import { ServiceDependencies } from '@/src/types/services';
 
 export class OrderServiceError extends Error {
