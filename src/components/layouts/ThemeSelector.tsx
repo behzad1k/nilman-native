@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { useTheme } from '@/src/contexts/ThemeContext';
+import { useTheme } from '@/src/components/contexts/ThemeContext';
 import { ThemeMode } from '@/src/styles/theme/colors';
 
 export const ThemeSelector: React.FC = () => {
@@ -37,7 +37,7 @@ export const ThemeSelector: React.FC = () => {
   const currentThemeOption = themeOptions.find(option => option.value === themeMode);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.surface }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Text style={[styles.label, { color: theme.text }]}>Theme</Text>
       <TouchableOpacity
         style={[styles.selector, { backgroundColor: theme.card, borderColor: theme.border }]}

@@ -1,11 +1,11 @@
-import { serviceService } from '@/src/services/ServiceService';
-import { extractChildren } from '@/src/utils/funs';
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import globalType from '@/src/types/globalType';
+import { ServiceService } from '@/src/features/service/services/ServiceService';
+import { Service } from '@/src/features/service/serviceTypes';
+import { extractChildren, getServiceIcon } from '@/src/utils/funs';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 interface serviceState {
-  services: globalType.Service[];
-  allServices: globalType.Service[];
+  services: Service[];
+  allServices: Service[];
   lastSync: string | null
   loading: boolean
   error: string | null
@@ -18,23 +18,21 @@ const initialState: serviceState = {
   loading: false,
   error: null,
 };
-export const fetchServices = createAsyncThunk('services/fetchServices', serviceService.getAllServices);
+export const fetchServices = createAsyncThunk('services/fetchServices', ServiceService.getAllServices);
 
 const serviceSlice = createSlice({
-  name: 'serviceSlice',
+  name: 'service',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchServices.fulfilled, (state, action) => {
-      console.log(action.payload);
       if (action.payload.code == 200) {
-        const sortedData: globalType.Service[] = [];
+        const sortedData: Service[] = [];
 
         action.payload.data.map(e => extractChildren(e, sortedData));
 
         state.allServices = sortedData;
         state.services = action.payload.data;
-
         state.loading = false
       }
     })
@@ -44,7 +42,7 @@ const serviceSlice = createSlice({
     })
     .addCase(fetchServices.rejected, (state, action) => {
       state.loading = false
-      state.error = action.payload as string
+      state.error = action.payload as string || 'Fetch Error'
     });
 
   },

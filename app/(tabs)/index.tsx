@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import { useLanguage } from '@/src/hooks/useLanguage';
+import { useThemedStyles } from '@/src/hooks/useThemedStyles';
+import { Theme } from '@/src/styles/theme/colors';
+import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   SafeAreaView,
@@ -10,17 +12,20 @@ import {
 import { Header } from '@/src/components/layouts/Header';
 
 const NewOrder: React.FC = () => {
+  const { t } = useLanguage();
+  const styles = useThemedStyles(createStyles);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      <Header title="سفارش جدید" />
+      <Header />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
+
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -29,10 +34,11 @@ const NewOrder: React.FC = () => {
 
 export default NewOrder;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: theme.background,
   },
   scrollView: {
     flex: 1,

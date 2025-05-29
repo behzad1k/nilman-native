@@ -1,21 +1,22 @@
-import { userService } from '@/src/services/userService';
+import UserService from '@/src/features/user/services/UserService';
+import { User } from '@/src/features/user/types';
+import { DEFAULT_USER } from '@/src/utils/constants';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-
-interface User {
-  id: string
-  name: string
-  email: string
-}
+import { Address } from '@/src/features/address/types'
 
 interface UserState {
-  profile: User | null
+  data: User
+  addresses: Address[]
+  workers: User[]
   lastSync: string | null
   loading: boolean
   error: string | null
 }
 
 const initialState: UserState = {
-  profile: null,
+  data: DEFAULT_USER,
+  addresses: [],
+  workers: [],
   lastSync: null,
   loading: false,
   error: null,
@@ -23,15 +24,24 @@ const initialState: UserState = {
 
 export const fetchUser = createAsyncThunk(
   'user/fetchUser',
-  userService.getCurrentUser
+  UserService.getCurrentUser
 )
+
+export const addresses = createAsyncThunk(
+  'user/fetchAddress',
+  UserService.getAddresses
+);
+export const getWorkers = createAsyncThunk(
+  'user/fetchWorkers',
+  UserService.getUserWorkers
+  );
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<User>) => {
-      state.profile = action.payload
+      state.data = action.payload
       state.loading = false
       state.error = null
     },
@@ -47,11 +57,19 @@ const userSlice = createSlice({
     })
     .addCase(fetchUser.fulfilled, (state, action) => {
       state.loading = false
-      state.profile = action.payload
+      state.data = action.payload.data
     })
     .addCase(fetchUser.rejected, (state, action) => {
       state.loading = false
       state.error = action.payload as string
+    })
+    .addCase(addresses.fulfilled, (state, action) => {
+      state.loading = false
+      state.addresses = action.payload.data
+    })
+    .addCase(getWorkers.fulfilled, (state, action) => {
+      state.loading = false
+      state.workers = action.payload.data
     })
   },
 })

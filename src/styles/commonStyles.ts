@@ -1,35 +1,6 @@
 import { StyleSheet } from 'react-native';
-
-export const colors = {
-  primary: '#007bff',
-  secondary: '#6c757d',
-  success: '#28a745',
-  danger: '#dc3545',
-  warning: '#ffc107',
-  info: '#17a2b8',
-  light: '#f8f9fa',
-  dark: '#343a40',
-  white: '#ffffff',
-  gray100: '#f8f9fa',
-  gray200: '#e9ecef',
-  gray300: '#dee2e6',
-  gray400: '#ced4da',
-  gray500: '#adb5bd',
-  gray600: '#6c757d',
-  gray700: '#495057',
-  gray800: '#343a40',
-  gray900: '#212529',
-};
-
-export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
-};
-
+import { colors } from './theme/colors'
+import { spacing } from './theme/spacing'
 export const borderRadius = {
   sm: 4,
   md: 8,

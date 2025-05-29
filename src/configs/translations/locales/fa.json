@@ -15,5 +15,18 @@
     "loading": "Loading...",
     "error": "Something went wrong",
     "success": "Operation completed successfully"
+  },
+  "general": {
+    "newOrder": "سفارش جدید",
+    "loading": "در حال بارگذاری",
+    "profile": "پروفایل",
+    "orders": "سفارش ها",
+    "login": "ورود"
+  },
+  "validation": {
+    "phoneNumberInvalid": "شماره تلفن نامعتبر است",
+    "phoneNumberNotSet": "شماره تلفن وارذ نشده است",
+    "otpInvalid": "کد تایید نامعتبر است",
+    "otpNotSet": "لطفا کد تایید را وارد کنید"
   }
 }

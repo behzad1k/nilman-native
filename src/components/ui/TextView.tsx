@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TextProps, TextStyle } from 'react-native';
 import { Typography, FontFamilies } from '@/src/styles/theme/typography';
 
-type FontWeight = 'thin' | 'light' | 'medium' | 'bold';
+type FontWeight = keyof typeof Typography.weights;
 type TypographyVariant = keyof typeof Typography.variants;
 
 interface TextViewProps extends TextProps {
@@ -21,14 +21,16 @@ const TextView: React.FC<TextViewProps> = ({
   const getTextStyle = (): TextStyle => {
     let baseStyle: TextStyle = {};
 
-    // Apply variant style if provided
     if (variant && Typography.variants[variant]) {
       baseStyle = { ...Typography.variants[variant] };
     }
 
-    // Override with weight if provided
     if (weight) {
       baseStyle.fontFamily = FontFamilies.vazir[weight];
+    }
+
+    if (!weight && !variant){
+      baseStyle.fontFamily = FontFamilies.vazir.medium
     }
 
     return baseStyle;

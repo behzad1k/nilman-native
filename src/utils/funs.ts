@@ -1,4 +1,4 @@
-import globalType from '../types/globalType';
+import { Service } from '@/src/features/service/serviceTypes';
 
 type WorkerOff = {
   date: number;
@@ -28,7 +28,7 @@ export const findRootCount = (arr: any[], value: any, key: string = 'id') => {
   }
   return count;
 }
-export const findAncestors = (arr: any[], value: any, key: string = 'id'): globalType.Service[] => {
+export const findAncestors = (arr: any[], value: any, key: string = 'id'): Service[] => {
   let obj = arr.find(e => e[key] == value);
   let ancestors = [obj];
 
@@ -65,35 +65,6 @@ export const omit = (keys: any, obj: any): any => {
   const { [keys.pop()]: omitted, ...rest } = obj;
   return omit(keys, rest);
 }
-export function createSchedule(length: number, workerOff: WorkerOff[]) {
-  const start = 8;
-  const end = 23;
-
-  const allHours: number[] = Array.from(
-    {length: end - start + 1},
-    (_, index) => index + start,
-  );
-  const busyHours: number[] = [];
-  workerOff.forEach((item) => {
-    let i = item.fromTime;
-    while (i <= item.toTime) {
-      busyHours.push(i);
-      i++;
-    }
-  });
-  const busySet = new Set(busyHours);
-
-  const freeHours: number[] = allHours.filter((hour) => !busySet.has(hour));
-  const freeHoursSet = new Set(freeHours);
-
-  const scheduleCards: ScheduleCard[] = [];
-  freeHours.forEach((hour) => {
-    if (freeHoursSet.has(hour + length))
-      scheduleCards.push({fromTime: hour, toTime: hour + length});
-  });
-
-  return scheduleCards;
-}
 
 export const isEmpty = (obj: any) => {
   return Object.keys(obj)?.length == 0;
@@ -103,4 +74,4 @@ export const persianNumToEn = (str: any) => str.replace(/[۰-۹]/g, (d: any) => 
 
 
 
-export const getServiceIcon = (slug: string) => '/img/' + slug + '.png'
+export const getServiceIcon = (slug: string) => ({ uri: `https://app.nilman.co/img/${slug}.png`})

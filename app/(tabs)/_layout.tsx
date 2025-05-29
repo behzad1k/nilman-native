@@ -1,29 +1,63 @@
+import { useDrawer } from '@/src/components/contexts/DrawerContext';
+import { useSplash } from '@/src/components/contexts/SplashContext';
 import LanguageSwitcher from '@/src/components/layouts/LanguageSwitcher';
-import { fetchServices } from '@/src/configs/redux/slices/serviceSlice';
-import { useSplash } from '@/src/contexts/SplashContext';
-import { useLanguage } from '@/src/hooks/useLanguage';
 import { useAppDispatch, useAppSelector } from '@/src/configs/redux/hooks';
+import { cart, order } from '@/src/configs/redux/slices/orderSlice';
+import { fetchServices } from '@/src/configs/redux/slices/serviceSlice';
+import { addresses, fetchUser, getWorkers } from '@/src/configs/redux/slices/userSlice';
+import { services } from '@/src/configs/services';
+import LoginDrawer from '@/src/features/auth/views/LoginDrawer';
+import { useLanguage } from '@/src/hooks/useLanguage';
 import { colors } from '@/src/styles/theme/colors';
 import { spacing } from '@/src/styles/theme/spacing';
-import { Tabs } from 'expo-router';
-import { PlusCircle, User, Clipboard } from 'phosphor-react-native';
-import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import Typography from '@/src/styles/theme/typography';
+import { router, Tabs } from 'expo-router';
+import { Clipboard, PlusCircle, User } from 'phosphor-react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();
-  const { loading: serviceLoading, error: serviceError } = useAppSelector((state) => state.service);
+  const {
+    loading: serviceLoading,
+    error: serviceError
+  } = useAppSelector((state) => state.service);
   const { hideSplash } = useSplash();
-  const {t, isLanguageLoaded, currentLanguage} = useLanguage();
-  console.log('c', currentLanguage);
-  useEffect(() => {
+  const { openDrawer } = useDrawer();
+  const {
+    t,
+    isLanguageLoaded,
+  } = useLanguage();
+  const [userIsLoggedIn, setUserIsLoggedIn] = useState(false);
+
+  const initializeApp = async () => {
+    const userLoggedIn = await services.auth.isAuthenticated()
+
+    setUserIsLoggedIn(userLoggedIn)
+
     dispatch(fetchServices());
-  }, [dispatch]);
+
+    if (userLoggedIn) {
+      await Promise.all([
+        dispatch(fetchUser()),
+        dispatch(order()),
+        dispatch(cart()),
+        dispatch(getWorkers()),
+        dispatch(addresses()),
+      ]);
+    }
+  };
+
   useEffect(() => {
-    if (!serviceLoading && isLanguageLoaded) {
+    initializeApp();
+
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!serviceLoading && !serviceError && isLanguageLoaded) {
       const timer = setTimeout(() => {
         hideSplash();
-      }, 500); // 500ms delay
+      }, 600);
 
       return () => clearTimeout(timer);
     }
@@ -38,54 +72,68 @@ export default function TabLayout() {
       screenOptions={{
         // tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        sceneStyle: {
-          height: 300,
-          backgroundColor: 'red'
-        },
         tabBarStyle: styles.container
       }}>
-      <LanguageSwitcher />
+      <LanguageSwitcher/>
       <Tabs.Screen
-        name="orders"
+        name="cart"
         options={{
+          title: t('general.orders'),
           tabBarLabelStyle: {
-            color: colors.white
+            color: colors.white,
+            ...Typography.variants.h4
           },
-          title: 'Orders',
-          tabBarIcon: ({ color }) =>  <Clipboard
+          tabBarIcon: ({ color }) => <Clipboard
             color={colors.white}
-            size={24}
+            size={26}
           />,
         }}
       />
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t('general.newOrder'),
           tabBarLabelStyle: {
-            color: colors.white
+            color: colors.white,
+            ...Typography.variants.h4
           },
           tabBarIcon: ({ color }) =>
-              <PlusCircle
-                // weight={isActive('NewOrder') ? 'fill' : 'regular'}
-                color={colors.white}
-                size={24}
-              />
+            <PlusCircle
+              // weight={isActive('NewOrder') ? 'fill' : 'regular'}
+              color={colors.white}
+              size={26}
+            />
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: userIsLoggedIn ? t('general.profile') : t('general.login'),
           tabBarLabelStyle: {
-            color: colors.white
+            color: colors.white,
+            ...Typography.variants.h4
           },
           tabBarIcon: ({ color }) =>
             <User
-            // weight={isActive('Profile') || isActive('Login') ? 'fill' : 'regular'}
-            color={colors.white}
-            size={24}
-          />,
+              // weight={isActive('Profile') || isActive('Login') ? 'fill' : 'regular'}
+              color={colors.white}
+              size={26}
+            />,
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+
+            if (userIsLoggedIn) {
+              router.push('/profile');
+            } else {
+              openDrawer('login', <LoginDrawer/>, {
+                position: 'bottom',
+                drawerHeight: 'auto',
+                drawerWidth: width
+              });
+            }
+          },
         }}
       />
     </Tabs>
@@ -98,8 +146,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: colors.midPink,
-    height: 55,
+    backgroundColor: colors.logoPink,
+    height: 70,
     width: width,
     position: 'absolute',
     bottom: 0,
@@ -141,4 +189,4 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-})
+});

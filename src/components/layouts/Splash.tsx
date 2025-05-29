@@ -1,22 +1,25 @@
-import { useTheme } from '@/src/contexts/ThemeContext';
+import { useSplash } from '@/src/components/contexts/SplashContext';
+import { useTheme } from '@/src/components/contexts/ThemeContext';
 import { colors } from '@/src/styles/theme/colors';
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Image } from 'react-native';
 
-export default function Splash() {
+
+
+export default function Splash({ textValue }: { textValue: string }) {
   const { isDark } = useTheme();
-  
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.midPink }]}>
+    <View style={[styles.container, { backgroundColor: colors.darkPink }]}>
       {/* You can add your app logo here */}
-      {/* <Image source={require('@/src/assets/images/logo.png')} style={styles.logo} /> */}
+      <Image source={require('@/src/assets/images/logo.png')} style={styles.logo} />
 
       <Text style={[styles.appName, { color: isDark ? '#fff' : '#000' }]}>
         nilman
       </Text>
 
       <Text style={[styles.loadingText, { color: isDark ? '#ccc' : '#666' }]}>
-        Loading...
+        { textValue }
       </Text>
     </View>
   );

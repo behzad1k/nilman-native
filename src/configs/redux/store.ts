@@ -2,6 +2,7 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import userSlice from './slices/userSlice'
 import serviceSlice from './slices/serviceSlice';
+import orderSlice from './slices/orderSlice';
 
 const persistConfig = {
   key: 'root',
@@ -12,7 +13,8 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   user: userSlice,
-  service: serviceSlice
+  service: serviceSlice,
+  order: orderSlice,
 })
 
 export const store = configureStore({

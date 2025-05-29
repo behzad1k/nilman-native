@@ -7,12 +7,12 @@ import {Language} from '@/src/types/translation';
 import en from './locales/en.json';
 import fa from './locales/fa.json';
 
-export const defaultLanguage: Language = 'en';
-export const supportedLanguages: Language[] = ['en', 'fa'];
+export const defaultLanguage: Language = 'fa';
+export const supportedLanguages: Language[] = ['fa', 'en'];
 
 const resources = {
-  en: { translation: en },
   fa: { translation: fa },
+  en: { translation: en },
 } as const;
 
 const LANGUAGE_DETECTOR = {

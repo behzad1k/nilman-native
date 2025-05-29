@@ -1,18 +1,27 @@
 import Splash from '@/src/components/layouts/Splash';
+import { Drawer } from '@/src/components/ui/Drawer';
+import { LoadingGlobal } from '@/src/components/ui/LoadingGlobal';
 import { store } from '@/src/configs/redux/store';
-import { LanguageProvider } from '@/src/contexts/LanguageContext';
-import { SplashProvider, useSplash } from '@/src/contexts/SplashContext';
-import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
+import { DrawerProvider } from '@/src/components/contexts/DrawerContext';
+import { LanguageProvider } from '@/src/components/contexts/LanguageContext';
+import { LoadingProvider } from '@/src/components/contexts/LoadingContext';
+import { SplashProvider, useSplash } from '@/src/components/contexts/SplashContext';
+import { ThemeProvider, useTheme } from '@/src/components/contexts/ThemeContext';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { Theme } from '@/src/styles/theme/colors';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar, StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 
 function AppContent() {
-  const { showSplash } = useSplash();
+  const {
+    showSplash,
+    textValue
+  } = useSplash();
   const {
     theme,
     isDark
@@ -20,15 +29,33 @@ function AppContent() {
   const styles = useThemedStyles(createStyles);
 
   return (
-    <>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }}/>
-        <Stack.Screen name="+not-found"/>
-      </Stack>
-      <StatusBar barStyle={(isDark ? 'light-content' : 'dark-content')}
-                 backgroundColor={theme.background}/>
-      {showSplash && <Splash/>}
-    </>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <DrawerProvider
+          initialConfig={{
+            position: 'left',
+            transitionType: 'slide',
+            transitionDuration: 300,
+            overlayOpacity: 0.5,
+            drawerWidth: 280,
+            enableGestures: true,
+            enableOverlay: true,
+          }}
+        >
+          <Drawer>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }}/>
+              <Stack.Screen name="+not-found"/>
+            </Stack>
+            <StatusBar
+              barStyle={(isDark ? 'light-content' : 'dark-content')}
+              backgroundColor={theme.background}
+            />
+            {showSplash && <Splash textValue={textValue}/>}
+          </Drawer>
+        </DrawerProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 
@@ -46,13 +73,16 @@ export default function RootLayout() {
 
   return (
     <Provider store={store}>
-      <LanguageProvider>
-        <SplashProvider>
-          <ThemeProvider>
-            <AppContent/>
-          </ThemeProvider>
-        </SplashProvider>
-      </LanguageProvider>
+      <LoadingProvider>
+        <LanguageProvider>
+          <SplashProvider>
+            <ThemeProvider>
+              <AppContent/>
+              <LoadingGlobal />
+            </ThemeProvider>
+          </SplashProvider>
+        </LanguageProvider>
+      </LoadingProvider>
     </Provider>
   );
 }
@@ -100,4 +130,3 @@ const createStyles = (theme: Theme) =>
       borderRadius: 25,
     },
   });
-

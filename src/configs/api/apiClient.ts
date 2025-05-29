@@ -48,7 +48,7 @@ class ApiClient {
     return new Request(url, finalConfig);
   }
 
-  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
+  private async handleResponse<T>(response: Response): Promise<T> {
     const contentType = response.headers.get('content-type');
 
     if (!response.ok) {
@@ -83,14 +83,14 @@ class ApiClient {
     const text = await response.text();
     return {
       code: response.status,
-      data: text as T,
-    };
+      data: text,
+    } as T;
   }
 
   async request<T = any>(
     endpoint: string,
     config: RequestConfig = {}
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     try {
       const request = await this.buildRequest(endpoint, config);
       const response = await fetch(request);
@@ -109,7 +109,7 @@ class ApiClient {
   }
 
   // Convenience methods
-  async get<T = any>(endpoint: string, config?: RequestConfig): Promise<ApiResponse<T>> {
+  async get<T = any>(endpoint: string, config?: RequestConfig): Promise<T> {
     return this.request<T>(endpoint, { ...config, method: 'GET' });
   }
 
@@ -117,7 +117,7 @@ class ApiClient {
     endpoint: string,
     data?: any,
     config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       ...config,
       method: 'POST',
@@ -129,7 +129,7 @@ class ApiClient {
     endpoint: string,
     data?: any,
     config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PUT',
@@ -141,7 +141,7 @@ class ApiClient {
     endpoint: string,
     data?: any,
     config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PATCH',
@@ -149,7 +149,7 @@ class ApiClient {
     });
   }
 
-  async delete<T = any>(endpoint: string, config?: RequestConfig): Promise<ApiResponse<T>> {
+  async delete<T = any>(endpoint: string, config?: RequestConfig): Promise<T> {
     return this.request<T>(endpoint, { ...config, method: 'DELETE' });
   }
 
