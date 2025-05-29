@@ -13,7 +13,7 @@ interface Props {
   items: Order[]
   orders: Order[]
   cartItems: Order[]
-  tab: CartPageTabKey,
+  tab: CartPageTabKey | null,
   setTab: React.Dispatch<React.SetStateAction<CartPageTabKey>>
   setItems: React.Dispatch<React.SetStateAction<Order[]>>
 }
@@ -32,8 +32,6 @@ const initCounts: Record<CartPageTabKey, number> = {
 
 const CartPageTabs = ({ cartItems, tab, orders, setTab, items, setItems }: Props) => {
   const [counts, setCounts] = useState<Record<CartPageTabKey, number>>(initCounts);
-  const dispatch = useAppDispatch();
-
 
   useEffect(() => {
     switch (tab) {
@@ -50,14 +48,12 @@ const CartPageTabs = ({ cartItems, tab, orders, setTab, items, setItems }: Props
   }, [tab, orders]);
 
   useEffect(() => {
-    if (!tab) {
-      if (cartItems.length > 0) {
-        setTab(CartPageTabEnum.Created);
-      } else if (orders.filter(e => [OrderStatus.InProgress, OrderStatus.Assigned, OrderStatus.Paid].includes(e.status)).length > 0) {
-        setTab(CartPageTabEnum.InProgress);
-      } else {
-        setTab(CartPageTabEnum.Done);
-      }
+    if (cartItems.length > 0) {
+      setTab(CartPageTabEnum.Created);
+    } else if (orders.filter(e => [OrderStatus.InProgress, OrderStatus.Assigned, OrderStatus.Paid].includes(e.status)).length > 0) {
+      setTab(CartPageTabEnum.InProgress);
+    } else {
+      setTab(CartPageTabEnum.Done);
     }
     setCounts({
       Created: cartItems.length,

@@ -4,14 +4,13 @@ import { Order } from '@/src/features/order/types'
 import React from 'react';
 import { View } from 'react-native';
 
-
 interface Props {
   items: Order[]
 }
 const OrderTab = ({ items }: Props) => {
   return (
     <View style={orderStyles.orderCardContainer}>
-      {items.map(item => <OrderCard key={item.id} item={item}/>)}
+      {items.map(item => <OrderCard key={item.id} item={item} />)}
     </View>
   )
 }

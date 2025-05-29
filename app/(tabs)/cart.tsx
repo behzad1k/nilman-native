@@ -6,30 +6,10 @@ import { orderStyles } from '@/src/features/cart/styles';
 import { CartPageTabKey } from '@/src/features/cart/types';
 import CartPageTabs from '@/src/features/cart/views/cart/CartPageTabs';
 import CartTab from '@/src/features/cart/views/cart/CartTab';
-import OrderCard from '@/src/features/cart/views/shared/OrderCard';
+import OrderTab from '@/src/features/cart/views/cart/OrderTab';
 import type { Order } from '@/src/features/order/types';
 import React, { useState } from 'react';
 import { ScrollView, StatusBar, View, } from 'react-native';
-
-type tabKeys = 'Created' | 'InProgress' | 'Done'
-
-const tabs: Record<tabKeys, string> = {
-  Created: 'Created',
-  InProgress: 'InProgress',
-  Done: 'Done',
-};
-
-const tabTitles: Record<tabKeys, string> = {
-  Created: 'سبد خرید',
-  InProgress: 'در حال انجام',
-  Done: 'تکمیل شده',
-};
-
-const initCounts: Record<tabKeys, number> = {
-  Created: 0,
-  InProgress: 0,
-  Done: 0,
-};
 
 export default function Cart() {
   const cartItems = useAppSelector((state) => state.order?.cart);
@@ -39,16 +19,11 @@ export default function Cart() {
 
   const renderContent = () => {
     if (items.length > 0) {
-      if (tab == CartPageTabEnum.Created) {
-        return (
-          <CartTab items={items}/>
-        );
-      } else {
-        return (
-          <View style={orderStyles.orderCardContainer}>
-            {items.map(item => <OrderCard key={item.id} item={item}/>)}
-          </View>
-        );
+      switch (tab) {
+        case(CartPageTabEnum.Created):
+          return <CartTab items={items} />
+        default:
+          return <OrderTab items={items} />
       }
     } else {
       return (
