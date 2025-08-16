@@ -2,7 +2,7 @@
 version: '3.8'
 
 services:
-  nilman-web:
+  nilman-app:
     build: .
     container_name: nilman-container
     ports:
@@ -10,14 +10,3 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-    volumes:
-      # Optional: Mount logs directory
-      - ./logs:/var/log/apache2
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3003"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.nilman.rule=Host(`your-domain.com`)"

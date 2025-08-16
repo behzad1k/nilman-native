@@ -1,5 +1,5 @@
 # Dockerfile
-FROM node:18-alpine AS builder
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
@@ -16,11 +16,11 @@ COPY . .
 # Build web app
 RUN npx expo export --platform web
 
-# Production stage with Apache
-FROM httpd:2.4-alpine
+# Install serve to serve static files
+RUN npm install -g serve
 
-# Expose port
+# Expose port 3003
 EXPOSE 3003
 
-# Start Apache
-CMD ["httpd-foreground"]
+# Start the app
+CMD ["serve", "-s", "dist", "-l", "3003"]
