@@ -19,18 +19,8 @@ RUN npx expo export --platform web
 # Production stage with Apache
 FROM httpd:2.4-alpine
 
-# Copy built files to Apache document root
-COPY --from=builder /app/dist /usr/local/apache2/htdocs/
-
-# Copy custom Apache configuration
-COPY apache.conf /usr/local/apache2/conf/httpd.conf
-
-# Create necessary directories and set permissions
-RUN chown -R www-data:www-data /usr/local/apache2/htdocs/ && \
-    chmod -R 755 /usr/local/apache2/htdocs/
-
 # Expose port
-EXPOSE 80
+EXPOSE 3003
 
 # Start Apache
 CMD ["httpd-foreground"]

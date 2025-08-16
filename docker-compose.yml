@@ -6,7 +6,7 @@ services:
     build: .
     container_name: nilman-container
     ports:
-      - "3006:80"
+      - "3003:3003"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -14,7 +14,7 @@ services:
       # Optional: Mount logs directory
       - ./logs:/var/log/apache2
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3006"]
+      test: ["CMD", "curl", "-f", "http://localhost:3003"]
       interval: 30s
       timeout: 10s
       retries: 3
