@@ -1,0 +1,36 @@
+{
+  "welcome": "Welcome",
+  "hello": "Hello {{name}}!",
+  "buttons": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "navigation": {
+    "home": "Home",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "success": "Operation completed successfully"
+  },
+  "general": {
+    "newOrder": "سفارش جدید",
+    "loading": "در حال بارگذاری",
+    "profile": "پروفایل",
+    "orders": "سفارش ها",
+    "login": "ورود",
+    "changeLanguage": "تغییر زبان",
+    "selectLanguage": "زبان خود را انتخاب کنید",
+    "selectTheme": "تم رنگی را انتخاب کنید",
+    "changeTheme": "تغییر تم رنگی"
+  },
+  "validation": {
+    "phoneNumberInvalid": "شماره تلفن نامعتبر است",
+    "phoneNumberNotSet": "شماره تلفن وارذ نشده است",
+    "otpInvalid": "کد تایید نامعتبر است",
+    "otpNotSet": "لطفا کد تایید را وارد کنید"
+  }
+}
