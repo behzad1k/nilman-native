@@ -16,207 +16,117 @@ RUN npm ci --only=production
 # Copy source code
 COPY . .
 
-# Create patch files
-RUN cat > /tmp/async-storage-patch.js <<'EOF' \
-function getValue(key) { \
-  if (typeof window === 'undefined' || !window.localStorage) { \
-    return null; \
-  } \
-  try { \
-    return window.localStorage.getItem(key); \
-  } catch (e) { \
-    return null; \
-  } \
-} \
-\
-function setValue(key, value) { \
-  if (typeof window === 'undefined' || !window.localStorage) { \
-    return; \
-  } \
-  try { \
-    window.localStorage.setItem(key, value); \
-  } catch (e) { \
-    // Silent fail \
-  } \
-} \
-\
-const AsyncStorage = { \
-  getItem: function(key, callback) { \
-    return new Promise((resolve) => { \
-      const result = getValue(key); \
-      callback && callback(null, result); \
-      resolve(result); \
-    }); \
-  }, \
-  setItem: function(key, value, callback) { \
-    return new Promise((resolve) => { \
-      setValue(key, value); \
-      callback && callback(null); \
-      resolve(); \
-    }); \
-  }, \
-  removeItem: function(key, callback) { \
-    return new Promise((resolve) => { \
-      if (typeof window !== 'undefined' && window.localStorage) { \
-        try { \
-          window.localStorage.removeItem(key); \
-        } catch (e) {} \
-      } \
-      callback && callback(null); \
-      resolve(); \
-    }); \
-  }, \
-  clear: function(callback) { \
-    return new Promise((resolve) => { \
-      if (typeof window !== 'undefined' && window.localStorage) { \
-        try { \
-          window.localStorage.clear(); \
-        } catch (e) {} \
-      } \
-      callback && callback(null); \
-      resolve(); \
-    }); \
-  }, \
-  getAllKeys: function(callback) { \
-    return new Promise((resolve) => { \
-      let result = []; \
-      if (typeof window !== 'undefined' && window.localStorage) { \
-        try { \
-          result = Object.keys(window.localStorage); \
-        } catch (e) {} \
-      } \
-      callback && callback(null, result); \
-      resolve(result); \
-    }); \
-  }, \
-  multiGet: function(keys, callback) { \
-    return new Promise((resolve) => { \
-      const result = keys.map(key => [key, getValue(key)]); \
-      callback && callback(null, result); \
-      resolve(result); \
-    }); \
-  }, \
-  multiSet: function(keyValuePairs, callback) { \
-    return new Promise((resolve) => { \
-      keyValuePairs.forEach(([key, value]) => setValue(key, value)); \
-      callback && callback(null); \
-      resolve(); \
-    }); \
-  }, \
-  multiRemove: function(keys, callback) { \
-    return new Promise((resolve) => { \
-      if (typeof window !== 'undefined' && window.localStorage) { \
-        try { \
-          keys.forEach(key => window.localStorage.removeItem(key)); \
-        } catch (e) {} \
-      } \
-      callback && callback(null); \
-      resolve(); \
-    }); \
-  } \
-}; \
-\
-module.exports = AsyncStorage; \
-EOF
+# Create patch script
+RUN echo '#!/bin/sh' > /tmp/patch-packages.sh && \
+    echo 'echo "🔧 Patching packages for web build..."' >> /tmp/patch-packages.sh && \
+    echo '' >> /tmp/patch-packages.sh && \
+    echo '# Patch AsyncStorage' >> /tmp/patch-packages.sh && \
+    echo 'ASYNC_STORAGE_PATH="node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js"' >> /tmp/patch-packages.sh && \
+    echo 'if [ -f "$ASYNC_STORAGE_PATH" ]; then' >> /tmp/patch-packages.sh && \
+    echo '  echo "📝 Patching AsyncStorage for web..."' >> /tmp/patch-packages.sh && \
+    echo '  cp "$ASYNC_STORAGE_PATH" "${ASYNC_STORAGE_PATH}.backup"' >> /tmp/patch-packages.sh && \
+    echo '  cat > "$ASYNC_STORAGE_PATH" << '\''EOFA'\''' >> /tmp/patch-packages.sh && \
+    echo 'const AsyncStorage = {' >> /tmp/patch-packages.sh && \
+    echo '  getItem: function(key, callback) {' >> /tmp/patch-packages.sh && \
+    echo '    return new Promise((resolve) => {' >> /tmp/patch-packages.sh && \
+    echo '      const result = (typeof window !== "undefined" && window.localStorage) ? window.localStorage.getItem(key) : null;' >> /tmp/patch-packages.sh && \
+    echo '      callback && callback(null, result);' >> /tmp/patch-packages.sh && \
+    echo '      resolve(result);' >> /tmp/patch-packages.sh && \
+    echo '    });' >> /tmp/patch-packages.sh && \
+    echo '  },' >> /tmp/patch-packages.sh && \
+    echo '  setItem: function(key, value, callback) {' >> /tmp/patch-packages.sh && \
+    echo '    return new Promise((resolve) => {' >> /tmp/patch-packages.sh && \
+    echo '      if (typeof window !== "undefined" && window.localStorage) {' >> /tmp/patch-packages.sh && \
+    echo '        try { window.localStorage.setItem(key, value); } catch (e) {}' >> /tmp/patch-packages.sh && \
+    echo '      }' >> /tmp/patch-packages.sh && \
+    echo '      callback && callback(null);' >> /tmp/patch-packages.sh && \
+    echo '      resolve();' >> /tmp/patch-packages.sh && \
+    echo '    });' >> /tmp/patch-packages.sh && \
+    echo '  },' >> /tmp/patch-packages.sh && \
+    echo '  removeItem: function(key, callback) {' >> /tmp/patch-packages.sh && \
+    echo '    return new Promise((resolve) => {' >> /tmp/patch-packages.sh && \
+    echo '      if (typeof window !== "undefined" && window.localStorage) {' >> /tmp/patch-packages.sh && \
+    echo '        try { window.localStorage.removeItem(key); } catch (e) {}' >> /tmp/patch-packages.sh && \
+    echo '      }' >> /tmp/patch-packages.sh && \
+    echo '      callback && callback(null);' >> /tmp/patch-packages.sh && \
+    echo '      resolve();' >> /tmp/patch-packages.sh && \
+    echo '    });' >> /tmp/patch-packages.sh && \
+    echo '  },' >> /tmp/patch-packages.sh && \
+    echo '  clear: function(callback) {' >> /tmp/patch-packages.sh && \
+    echo '    return new Promise((resolve) => {' >> /tmp/patch-packages.sh && \
+    echo '      if (typeof window !== "undefined" && window.localStorage) {' >> /tmp/patch-packages.sh && \
+    echo '        try { window.localStorage.clear(); } catch (e) {}' >> /tmp/patch-packages.sh && \
+    echo '      }' >> /tmp/patch-packages.sh && \
+    echo '      callback && callback(null);' >> /tmp/patch-packages.sh && \
+    echo '      resolve();' >> /tmp/patch-packages.sh && \
+    echo '    });' >> /tmp/patch-packages.sh && \
+    echo '  },' >> /tmp/patch-packages.sh && \
+    echo '  getAllKeys: function(callback) {' >> /tmp/patch-packages.sh && \
+    echo '    return new Promise((resolve) => {' >> /tmp/patch-packages.sh && \
+    echo '      const result = (typeof window !== "undefined" && window.localStorage) ? Object.keys(window.localStorage) : [];' >> /tmp/patch-packages.sh && \
+    echo '      callback && callback(null, result);' >> /tmp/patch-packages.sh && \
+    echo '      resolve(result);' >> /tmp/patch-packages.sh && \
+    echo '    });' >> /tmp/patch-packages.sh && \
+    echo '  },' >> /tmp/patch-packages.sh && \
+    echo '  multiGet: function(keys, callback) {' >> /tmp/patch-packages.sh && \
+    echo '    return new Promise((resolve) => {' >> /tmp/patch-packages.sh && \
+    echo '      const result = keys.map(key => [key, (typeof window !== "undefined" && window.localStorage) ? window.localStorage.getItem(key) : null]);' >> /tmp/patch-packages.sh && \
+    echo '      callback && callback(null, result);' >> /tmp/patch-packages.sh && \
+    echo '      resolve(result);' >> /tmp/patch-packages.sh && \
+    echo '    });' >> /tmp/patch-packages.sh && \
+    echo '  },' >> /tmp/patch-packages.sh && \
+    echo '  multiSet: function(keyValuePairs, callback) {' >> /tmp/patch-packages.sh && \
+    echo '    return new Promise((resolve) => {' >> /tmp/patch-packages.sh && \
+    echo '      if (typeof window !== "undefined" && window.localStorage) {' >> /tmp/patch-packages.sh && \
+    echo '        try { keyValuePairs.forEach(([key, value]) => window.localStorage.setItem(key, value)); } catch (e) {}' >> /tmp/patch-packages.sh && \
+    echo '      }' >> /tmp/patch-packages.sh && \
+    echo '      callback && callback(null);' >> /tmp/patch-packages.sh && \
+    echo '      resolve();' >> /tmp/patch-packages.sh && \
+    echo '    });' >> /tmp/patch-packages.sh && \
+    echo '  },' >> /tmp/patch-packages.sh && \
+    echo '  multiRemove: function(keys, callback) {' >> /tmp/patch-packages.sh && \
+    echo '    return new Promise((resolve) => {' >> /tmp/patch-packages.sh && \
+    echo '      if (typeof window !== "undefined" && window.localStorage) {' >> /tmp/patch-packages.sh && \
+    echo '        try { keys.forEach(key => window.localStorage.removeItem(key)); } catch (e) {}' >> /tmp/patch-packages.sh && \
+    echo '      }' >> /tmp/patch-packages.sh && \
+    echo '      callback && callback(null);' >> /tmp/patch-packages.sh && \
+    echo '      resolve();' >> /tmp/patch-packages.sh && \
+    echo '    });' >> /tmp/patch-packages.sh && \
+    echo '  }' >> /tmp/patch-packages.sh && \
+    echo '};' >> /tmp/patch-packages.sh && \
+    echo 'module.exports = AsyncStorage;' >> /tmp/patch-packages.sh && \
+    echo 'EOFA' >> /tmp/patch-packages.sh && \
+    echo '  echo "✅ AsyncStorage patched successfully"' >> /tmp/patch-packages.sh && \
+    echo 'else' >> /tmp/patch-packages.sh && \
+    echo '  echo "⚠️ AsyncStorage not found, skipping patch"' >> /tmp/patch-packages.sh && \
+    echo 'fi' >> /tmp/patch-packages.sh && \
+    echo '' >> /tmp/patch-packages.sh && \
+    echo '# Patch MapLibre' >> /tmp/patch-packages.sh && \
+    echo 'MAPLIBRE_PATH="node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js"' >> /tmp/patch-packages.sh && \
+    echo 'if [ -f "$MAPLIBRE_PATH" ]; then' >> /tmp/patch-packages.sh && \
+    echo '  echo "📝 Patching MapLibre for web..."' >> /tmp/patch-packages.sh && \
+    echo '  cp "$MAPLIBRE_PATH" "${MAPLIBRE_PATH}.backup"' >> /tmp/patch-packages.sh && \
+    echo '  cat > "$MAPLIBRE_PATH" << '\''EOFM'\''' >> /tmp/patch-packages.sh && \
+    echo 'function factory() {' >> /tmp/patch-packages.sh && \
+    echo '  return {' >> /tmp/patch-packages.sh && \
+    echo '    MapView: function() { return null; },' >> /tmp/patch-packages.sh && \
+    echo '    Camera: function() { return null; },' >> /tmp/patch-packages.sh && \
+    echo '    MarkerView: function() { return null; },' >> /tmp/patch-packages.sh && \
+    echo '    PointAnnotation: function() { return null; },' >> /tmp/patch-packages.sh && \
+    echo '    Callout: function() { return null; },' >> /tmp/patch-packages.sh && \
+    echo '    UserLocation: function() { return null; }' >> /tmp/patch-packages.sh && \
+    echo '  };' >> /tmp/patch-packages.sh && \
+    echo '}' >> /tmp/patch-packages.sh && \
+    echo 'module.exports = factory;' >> /tmp/patch-packages.sh && \
+    echo 'EOFM' >> /tmp/patch-packages.sh && \
+    echo '  echo "✅ MapLibre patched successfully"' >> /tmp/patch-packages.sh && \
+    echo 'else' >> /tmp/patch-packages.sh && \
+    echo '  echo "⚠️ MapLibre not found, skipping patch"' >> /tmp/patch-packages.sh && \
+    echo 'fi' >> /tmp/patch-packages.sh && \
+    chmod +x /tmp/patch-packages.sh
 
-RUN cat > /tmp/maplibre-patch.js <<'EOF' \
-// Web-safe MapLibre mock \
-function factory() { \
-  return { \
-    MapView: function() { return null; }, \
-    Camera: function() { return null; }, \
-    MarkerView: function() { return null; }, \
-    PointAnnotation: function() { return null; }, \
-    Callout: function() { return null; }, \
-    UserLocation: function() { return null; }, \
-    Logger: { \
-      setLogLevel: function() {}, \
-      setLogCallback: function() {} \
-    }, \
-    UserTrackingMode: { \
-      None: 0, \
-      Follow: 1, \
-      FollowWithHeading: 2, \
-      FollowWithCourse: 3 \
-    }, \
-    CameraModes: { \
-      Flight: 'flight', \
-      Ease: 'ease', \
-      Linear: 'linear' \
-    } \
-  }; \
-} \
-\
-module.exports = factory; \
-EOF
-
-RUN cat > /tmp/maplibre-index-patch.js <<'EOF' \
-// Web-safe MapLibre exports \
-const MockComponent = function() { return null; }; \
-\
-export const MapView = MockComponent; \
-export const Camera = MockComponent; \
-export const MarkerView = MockComponent; \
-export const PointAnnotation = MockComponent; \
-export const Callout = MockComponent; \
-export const UserLocation = MockComponent; \
-\
-export const Logger = { \
-  setLogLevel: function() {}, \
-  setLogCallback: function() {} \
-}; \
-\
-export const UserTrackingMode = { \
-  None: 0, \
-  Follow: 1, \
-  FollowWithHeading: 2, \
-  FollowWithCourse: 3 \
-}; \
-\
-export const CameraModes = { \
-  Flight: 'flight', \
-  Ease: 'ease', \
-  Linear: 'linear' \
-}; \
-\
-export default MockComponent; \
-EOF
-
-# Apply AsyncStorage patch
-RUN if [ -f "node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js" ]; then \
-    echo "📝 Patching AsyncStorage for web..." && \
-    cp node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js \
-       node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js.backup && \
-    cp /tmp/async-storage-patch.js node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js && \
-    echo "✅ AsyncStorage patched successfully"; \
-else \
-    echo "⚠️ AsyncStorage not found, skipping patch"; \
-fi
-
-# Apply MapLibre MLRNModule patch
-RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js" ]; then \
-    echo "📝 Patching MapLibre MLRNModule for web..." && \
-    cp node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js \
-       node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js.backup && \
-    cp /tmp/maplibre-patch.js node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js && \
-    echo "✅ MapLibre MLRNModule patched successfully"; \
-else \
-    echo "⚠️ MapLibre MLRNModule not found, skipping patch"; \
-fi
-
-# Apply MapLibre index patch
-RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/index.js" ]; then \
-    echo "📝 Patching MapLibre index for web..." && \
-    cp node_modules/@maplibre/maplibre-react-native/lib/module/index.js \
-       node_modules/@maplibre/maplibre-react-native/lib/module/index.js.backup && \
-    cp /tmp/maplibre-index-patch.js node_modules/@maplibre/maplibre-react-native/lib/module/index.js && \
-    echo "✅ MapLibre index patched successfully"; \
-else \
-    echo "⚠️ MapLibre index not found, skipping patch"; \
-fi
-
-# Clean up patch files
-RUN rm -f /tmp/async-storage-patch.js /tmp/maplibre-patch.js /tmp/maplibre-index-patch.js
+# Run the patch script
+RUN /tmp/patch-packages.sh
 
 # Set environment variables for build
 ENV NODE_ENV=production
@@ -232,10 +142,10 @@ RUN echo "🏗️ Building web app..." && \
 
 # Verify build output
 RUN if [ ! -d "dist" ]; then \
-        echo "❌ Build failed - dist directory not created" && \
+        echo "❌ Build failed - dist directory not created"; \
         exit 1; \
     else \
-        echo "✅ Build successful - dist directory created" && \
+        echo "✅ Build successful - dist directory created"; \
         ls -la dist/; \
     fi
 
