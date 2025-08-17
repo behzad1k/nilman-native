@@ -21,7 +21,7 @@ RUN if [ -f "node_modules/@react-native-async-storage/async-storage/lib/commonjs
     echo "📝 Patching AsyncStorage for web..." && \
     cp node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js \
        node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js.backup && \
-    cat > node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js << 'EOF'
+    cat > node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js >> 'EOF'
 function getValue(key) {
   if (typeof window === 'undefined' || !window.localStorage) {
     return null;
@@ -132,7 +132,7 @@ RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.
     echo "📝 Patching MapLibre for web..." && \
     cp node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js \
        node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js.backup && \
-    cat > node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js << 'EOF'
+    cat > node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js >> 'EOF'
 // Web-safe MapLibre mock
 function factory() {
   return {
@@ -172,7 +172,7 @@ RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/index.js" ]
     echo "📝 Patching MapLibre index for web..." && \
     cp node_modules/@maplibre/maplibre-react-native/lib/module/index.js \
        node_modules/@maplibre/maplibre-react-native/lib/module/index.js.backup && \
-    cat > node_modules/@maplibre/maplibre-react-native/lib/module/index.js << 'EOF'
+    cat > node_modules/@maplibre/maplibre-react-native/lib/module/index.js >> 'EOF'
 // Web-safe MapLibre exports
 const MockComponent = function() { return null; };
 
