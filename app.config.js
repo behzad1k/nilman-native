@@ -6,13 +6,13 @@ export default {
         slug: "Nilman",
         version: "1.0.0",
         orientation: "portrait",
-        icon: "./src/assets/images/logo.png",
+        icon: "./src/assets/images/favicon.png",
         scheme: "nilman",
         userInterfaceStyle: "automatic",
         newArchEnabled: true,
         jsEngine: "hermes",
         splash: {
-            image: "./src/assets/images/logo.png",
+            image: "./src/assets/images/favicon.png",
             resizeMode: "contain",
             backgroundColor: "#ffffff"
         },
@@ -27,13 +27,16 @@ export default {
             package: "com.nilman.app",
             edgeToEdgeEnabled: true,
             adaptiveIcon: {
-                foregroundImage: "./src/assets/images/adaptive-icon.png",
+                foregroundImage: "./src/assets/images/favicon.png",
                 backgroundColor: "#FFFFFF"
             }
         },
         web: {
             bundler: "metro",
             output: "static",
+            title: "Nilman",
+            name: "Nilman",
+            description: "Online beauty service provider",
             favicon: "./src/assets/images/favicon.png"
         },
         experiments: {
@@ -63,7 +66,7 @@ export default {
         [
             "expo-splash-screen",
             {
-                "image": "./assets/images/splash-icon.png",
+                "image": "./src/assets/images/favicon.png",
                 "imageWidth": 200,
                 "resizeMode": "contain",
                 "backgroundColor": "#ffffff"

@@ -10,8 +10,9 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies including dotenv-cli
+RUN npm ci --only=production && \
+    npm install -g dotenv-cli
 
 # Copy source code
 COPY . .
@@ -133,15 +134,12 @@ ENV NODE_ENV=production
 ENV EXPO_PLATFORM=web
 ENV EXPO_USE_FAST_RESOLVER=1
 
-# Install dotenv-cli to load environment variables during build
-RUN npm install -g dotenv-cli
-
 # Clear any existing build artifacts
 RUN rm -rf dist/ .expo/ node_modules/.cache/
 
 # Build web app with environment variables
 RUN echo "🏗️ Building web app with environment variables..." && \
-    dotenv -e .env npx expo export --platform web --clear
+    sh -c 'dotenv -e .env npx expo export --platform web --clear'
 
 # Verify build output
 RUN if [ ! -d "dist" ]; then \
