@@ -7,7 +7,7 @@ import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { Theme } from '@/src/types/theme';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Keyboard, KeyboardAvoidingView, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 
 const LoginDrawer: React.FC = () => {
   const [loginState, setLoginState] = useState<LoginState>('phoneNumber');
@@ -34,7 +34,7 @@ const LoginDrawer: React.FC = () => {
 
   return (
     <KeyboardAvoidingView style={styles.loginContainer}>
-      <TouchableWithoutFeedback style={styles.container} onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback style={styles.container} onPress={() => Platform.OS == 'ios' && Keyboard.dismiss()}>
 
       <View style={styles.formContainer}>
         {loginState === 'phoneNumber' && (
