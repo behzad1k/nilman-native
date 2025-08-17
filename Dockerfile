@@ -16,12 +16,8 @@ RUN npm ci --only=production
 # Copy source code
 COPY . .
 
-# Patch AsyncStorage for web compatibility
-RUN if [ -f "node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js" ]; then \
-    echo "📝 Patching AsyncStorage for web..." && \
-    cp node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js \
-       node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js.backup && \
-    cat > node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js >> 'EOF'
+# Create patch files first
+RUN cat > /tmp/async-storage-patch.js << 'EOF'
 function getValue(key) {
   if (typeof window === 'undefined' || !window.localStorage) {
     return null;
@@ -122,17 +118,8 @@ const AsyncStorage = {
 
 module.exports = AsyncStorage;
 EOF
-    echo "✅ AsyncStorage patched successfully"; \
-else \
-    echo "⚠️ AsyncStorage not found, skipping patch"; \
-fi
 
-# Patch MapLibre for web compatibility
-RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js" ]; then \
-    echo "📝 Patching MapLibre for web..." && \
-    cp node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js \
-       node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js.backup && \
-    cat > node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js >> 'EOF'
+RUN cat > /tmp/maplibre-patch.js << 'EOF'
 // Web-safe MapLibre mock
 function factory() {
   return {
@@ -162,17 +149,8 @@ function factory() {
 
 module.exports = factory;
 EOF
-    echo "✅ MapLibre patched successfully"; \
-else \
-    echo "⚠️ MapLibre not found, skipping patch"; \
-fi
 
-# Patch main MapLibre index if it exists
-RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/index.js" ]; then \
-    echo "📝 Patching MapLibre index for web..." && \
-    cp node_modules/@maplibre/maplibre-react-native/lib/module/index.js \
-       node_modules/@maplibre/maplibre-react-native/lib/module/index.js.backup && \
-    cat > node_modules/@maplibre/maplibre-react-native/lib/module/index.js >> 'EOF'
+RUN cat > /tmp/maplibre-index-patch.js << 'EOF'
 // Web-safe MapLibre exports
 const MockComponent = function() { return null; };
 
@@ -203,10 +181,42 @@ export const CameraModes = {
 
 export default MockComponent;
 EOF
+
+# Apply AsyncStorage patch
+RUN if [ -f "node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js" ]; then \
+    echo "📝 Patching AsyncStorage for web..." && \
+    cp node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js \
+       node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js.backup && \
+    cp /tmp/async-storage-patch.js node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js && \
+    echo "✅ AsyncStorage patched successfully"; \
+else \
+    echo "⚠️ AsyncStorage not found, skipping patch"; \
+fi
+
+# Apply MapLibre MLRNModule patch
+RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js" ]; then \
+    echo "📝 Patching MapLibre MLRNModule for web..." && \
+    cp node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js \
+       node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js.backup && \
+    cp /tmp/maplibre-patch.js node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js && \
+    echo "✅ MapLibre MLRNModule patched successfully"; \
+else \
+    echo "⚠️ MapLibre MLRNModule not found, skipping patch"; \
+fi
+
+# Apply MapLibre index patch
+RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/index.js" ]; then \
+    echo "📝 Patching MapLibre index for web..." && \
+    cp node_modules/@maplibre/maplibre-react-native/lib/module/index.js \
+       node_modules/@maplibre/maplibre-react-native/lib/module/index.js.backup && \
+    cp /tmp/maplibre-index-patch.js node_modules/@maplibre/maplibre-react-native/lib/module/index.js && \
     echo "✅ MapLibre index patched successfully"; \
 else \
     echo "⚠️ MapLibre index not found, skipping patch"; \
 fi
+
+# Clean up patch files
+RUN rm -f /tmp/async-storage-patch.js /tmp/maplibre-patch.js /tmp/maplibre-index-patch.js
 
 # Set environment variables for build
 ENV NODE_ENV=production
