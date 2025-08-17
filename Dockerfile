@@ -204,7 +204,7 @@ EOF \
     echo "✅ MapLibre index patched successfully"; \
 else \
     echo "⚠️ MapLibre index not found, skipping patch"; \
-fi \
+fi
 
 # Set environment variables for build
 ENV NODE_ENV=production
