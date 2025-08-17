@@ -48,9 +48,9 @@ export default {
             eas: {
                 projectId: "e74d8537-a1e8-432b-acb0-0e6d62eddb89"
             },
-            apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
-            apiTimeout: process.env.EXPO_PUBLIC_API_TIMEOUT,
-            appEnv: process.env.EXPO_PUBLIC_APP_ENV,
+            API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL,
+            API_TIMEOUT: process.env.EXPO_PUBLIC_API_TIMEOUT,
+            APP_ENV: process.env.EXPO_PUBLIC_APP_ENV,
         }
     },
     plugins: [
