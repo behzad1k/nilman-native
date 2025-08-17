@@ -125,7 +125,7 @@ EOF \
     echo "✅ AsyncStorage patched successfully"; \
 else \
     echo "⚠️ AsyncStorage not found, skipping patch"; \
-fi
+fi \
 # Patch MapLibre for web compatibility
 RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js" ]; then \
     echo "📝 Patching MapLibre for web..." && \
