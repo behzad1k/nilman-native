@@ -125,7 +125,7 @@ EOF \
     echo "✅ AsyncStorage patched successfully"; \
 else \
     echo "⚠️ AsyncStorage not found, skipping patch"; \
-fi \
+fi
 # Patch MapLibre for web compatibility
 RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js" ]; then \
     echo "📝 Patching MapLibre for web..." && \
@@ -164,7 +164,7 @@ EOF \
     echo "✅ MapLibre patched successfully"; \
 else \
     echo "⚠️ MapLibre not found, skipping patch"; \
-fi \
+fi
 # Patch main MapLibre index if it exists
 RUN if [ -f "node_modules/@maplibre/maplibre-react-native/lib/module/index.js" ]; then \
     echo "📝 Patching MapLibre index for web..." && \
