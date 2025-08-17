@@ -18,105 +18,105 @@ COPY . .
 
 # Create patch files first
 RUN cat > /tmp/async-storage-patch.js << 'EOF'
-function getValue(key) {
-  if (typeof window === 'undefined' || !window.localStorage) {
-    return null;
-  }
-  try {
-    return window.localStorage.getItem(key);
-  } catch (e) {
-    return null;
-  }
-}
+	function getValue(key) {
+	  if (typeof window === 'undefined' || !window.localStorage) {
+	    return null;
+	  }
+	  try {
+	    return window.localStorage.getItem(key);
+	  } catch (e) {
+	    return null;
+	  }
+	}
 
-function setValue(key, value) {
-  if (typeof window === 'undefined' || !window.localStorage) {
-    return;
-  }
-  try {
-    window.localStorage.setItem(key, value);
-  } catch (e) {
-    // Silent fail
-  }
-}
+	function setValue(key, value) {
+	  if (typeof window === 'undefined' || !window.localStorage) {
+	    return;
+	  }
+	  try {
+	    window.localStorage.setItem(key, value);
+	  } catch (e) {
+	    // Silent fail
+	  }
+	}
 
-const AsyncStorage = {
-  getItem: function(key, callback) {
-    return new Promise((resolve) => {
-      const result = getValue(key);
-      callback && callback(null, result);
-      resolve(result);
-    });
-  },
-  setItem: function(key, value, callback) {
-    return new Promise((resolve) => {
-      setValue(key, value);
-      callback && callback(null);
-      resolve();
-    });
-  },
-  removeItem: function(key, callback) {
-    return new Promise((resolve) => {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        try {
-          window.localStorage.removeItem(key);
-        } catch (e) {}
-      }
-      callback && callback(null);
-      resolve();
-    });
-  },
-  clear: function(callback) {
-    return new Promise((resolve) => {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        try {
-          window.localStorage.clear();
-        } catch (e) {}
-      }
-      callback && callback(null);
-      resolve();
-    });
-  },
-  getAllKeys: function(callback) {
-    return new Promise((resolve) => {
-      let result = [];
-      if (typeof window !== 'undefined' && window.localStorage) {
-        try {
-          result = Object.keys(window.localStorage);
-        } catch (e) {}
-      }
-      callback && callback(null, result);
-      resolve(result);
-    });
-  },
-  multiGet: function(keys, callback) {
-    return new Promise((resolve) => {
-      const result = keys.map(key => [key, getValue(key)]);
-      callback && callback(null, result);
-      resolve(result);
-    });
-  },
-  multiSet: function(keyValuePairs, callback) {
-    return new Promise((resolve) => {
-      keyValuePairs.forEach(([key, value]) => setValue(key, value));
-      callback && callback(null);
-      resolve();
-    });
-  },
-  multiRemove: function(keys, callback) {
-    return new Promise((resolve) => {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        try {
-          keys.forEach(key => window.localStorage.removeItem(key));
-        } catch (e) {}
-      }
-      callback && callback(null);
-      resolve();
-    });
-  }
-};
+	const AsyncStorage = {
+	  getItem: function(key, callback) {
+	    return new Promise((resolve) => {
+	      const result = getValue(key);
+	      callback && callback(null, result);
+	      resolve(result);
+	    });
+	  },
+	  setItem: function(key, value, callback) {
+	    return new Promise((resolve) => {
+	      setValue(key, value);
+	      callback && callback(null);
+	      resolve();
+	    });
+	  },
+	  removeItem: function(key, callback) {
+	    return new Promise((resolve) => {
+	      if (typeof window !== 'undefined' && window.localStorage) {
+	        try {
+	          window.localStorage.removeItem(key);
+	        } catch (e) {}
+	      }
+	      callback && callback(null);
+	      resolve();
+	    });
+	  },
+	  clear: function(callback) {
+	    return new Promise((resolve) => {
+	      if (typeof window !== 'undefined' && window.localStorage) {
+	        try {
+	          window.localStorage.clear();
+	        } catch (e) {}
+	      }
+	      callback && callback(null);
+	      resolve();
+	    });
+	  },
+	  getAllKeys: function(callback) {
+	    return new Promise((resolve) => {
+	      let result = [];
+	      if (typeof window !== 'undefined' && window.localStorage) {
+	        try {
+	          result = Object.keys(window.localStorage);
+	        } catch (e) {}
+	      }
+	      callback && callback(null, result);
+	      resolve(result);
+	    });
+	  },
+	  multiGet: function(keys, callback) {
+	    return new Promise((resolve) => {
+	      const result = keys.map(key => [key, getValue(key)]);
+	      callback && callback(null, result);
+	      resolve(result);
+	    });
+	  },
+	  multiSet: function(keyValuePairs, callback) {
+	    return new Promise((resolve) => {
+	      keyValuePairs.forEach(([key, value]) => setValue(key, value));
+	      callback && callback(null);
+	      resolve();
+	    });
+	  },
+	  multiRemove: function(keys, callback) {
+	    return new Promise((resolve) => {
+	      if (typeof window !== 'undefined' && window.localStorage) {
+	        try {
+	          keys.forEach(key => window.localStorage.removeItem(key));
+	        } catch (e) {}
+	      }
+	      callback && callback(null);
+	      resolve();
+	    });
+	  }
+	};
 
-module.exports = AsyncStorage;
+	module.exports = AsyncStorage;
 EOF
 
 RUN cat > /tmp/maplibre-patch.js << 'EOF'
