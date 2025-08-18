@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  nilman-app:
+    build: .
+    container_name: nilman-native
+    ports:
+      - "3003:3003"
+    restart: unless-stopped
+    env_file:
+      - .env  # Load environment variables from .env file
+    environment:
+      - NODE_ENV=production
+      - EXPO_PLATFORM=web
+    volumes:
+      - ./.env:/app/.env  # Mount the .env file directly

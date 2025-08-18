@@ -1,0 +1,252 @@
+import TextInputView from '@/src/components/ui/TextInputView';
+import TextView from '@/src/components/ui/TextView';
+import { useAppSelector } from '@/src/configs/redux/hooks';
+import { addOnDrawerStyles } from '@/src/features/order/styles/addOnDrawer';
+import { sharedOrderStyles } from '@/src/features/order/styles/serviceStep';
+import { Form } from '@/src/features/order/types';
+import { Service } from '@/src/features/service/types';
+import { useThemedStyles } from '@/src/hooks/useThemedStyles';
+import { Theme } from '@/src/types/theme';
+import { formatPrice } from '@/src/utils/funs';
+import React, { useCallback, useMemo } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Minus, Plus, Trash2 } from 'react-native-feather';
+
+interface IAddOnDrawerProps {
+  currentAttribute: Service;
+  selected: Form;
+  setSelected: React.Dispatch<React.SetStateAction<Form>>;
+  setShouldPickAddOns: (value: boolean) => void;
+  setPickingColor: (value: any) => void;
+}
+
+const AddOnDrawer = ({
+                       currentAttribute,
+                       selected,
+                       setSelected,
+                       setShouldPickAddOns,
+                       setPickingColor,
+                     }: IAddOnDrawerProps) => {
+  const serviceReducer = useAppSelector(state => state.service);
+  const styles = useThemedStyles(createStyles);
+
+  const sortedAddOns = useMemo(() => {
+    return currentAttribute?.addOns
+    ?.slice()
+    ?.sort((a, b) => (a?.sort || 1000) - (b?.sort || 1000))
+    ?.filter(addOn => addOn?.id) || [];
+  }, [currentAttribute?.addOns]);
+
+  const handleAddOnSelect = useCallback((secAttr: Service) => {
+    setSelected(prev => {
+      const newOptions = { ...prev.options };
+      const currentOption = newOptions[currentAttribute.id] || { count: 1 };
+      const currentAddOns = currentOption.addOns || {};
+
+      if (!prev.isMulti && Object.keys(currentAddOns).length > 0) {
+        // Replace existing add-on in single mode
+        newOptions[currentAttribute.id] = {
+          ...currentOption,
+          addOns: { [secAttr.id]: { count: 1 } }
+        };
+      } else {
+        // Add or increment in multi mode
+        const existingAddOn = currentAddOns[secAttr.id];
+        const shouldIncrement = existingAddOn && prev.isMulti;
+
+        newOptions[currentAttribute.id] = {
+          ...currentOption,
+          count: currentOption.count + (shouldIncrement ? 0 : 1),
+          addOns: {
+            ...currentAddOns,
+            [secAttr.id]: {
+              count: shouldIncrement ? existingAddOn.count + 1 : 1
+            }
+          }
+        };
+      }
+
+      return { ...prev, options: newOptions };
+    });
+  }, [currentAttribute.id, setSelected]);
+
+  const handleQuantityChange = useCallback((secAttr: Service, newCount: number) => {
+    setSelected(prev => {
+      const newOptions = { ...prev.options };
+      const currentOption = newOptions[currentAttribute.id];
+
+      if (!currentOption?.addOns) return prev;
+
+      if (newCount <= 0) {
+        delete currentOption.addOns[secAttr.id];
+      } else {
+        currentOption.addOns[secAttr.id] = {
+          ...currentOption.addOns[secAttr.id],
+          count: newCount
+        };
+      }
+
+      return { ...prev, options: newOptions };
+    });
+  }, [currentAttribute.id, setSelected]);
+
+  const handleConfirm = useCallback(() => {
+    setShouldPickAddOns(false);
+
+    const currentOption = selected.options[currentAttribute.id];
+    if (currentOption?.addOns) {
+      const colorService = Object.keys(currentOption.addOns).find(e =>
+        serviceReducer.allServices?.some(j =>
+          e === j.id.toString() && j.hasColor
+        )
+      );
+
+      if (colorService) {
+        const matchingService = serviceReducer.allServices?.find(
+          j => j.id.toString() === colorService
+        );
+        if (matchingService) {
+          setPickingColor({
+            attr: matchingService,
+            open: true
+          });
+        }
+      }
+    }
+  }, [setShouldPickAddOns, selected.options, currentAttribute.id, serviceReducer.allServices, setPickingColor]);
+
+  return (
+    <View style={sharedOrderStyles.drawerContainer}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <TextView style={styles.subtitle}>
+          برای ثبت خدمت {currentAttribute?.title} باید یکی از خدمات زیر را نیز انتخاب کنید
+        </TextView>
+
+        <View style={addOnDrawerStyles.addOnsList}>
+          {sortedAddOns.map((secAttr) => {
+            const currentOption = selected.options[currentAttribute.id];
+            const isSelected = currentOption?.addOns?.[secAttr.id] !== undefined;
+            const count = currentOption?.addOns?.[secAttr.id]?.count || 1;
+            const price = count * secAttr.price * (selected.isUrgent ? 1.5 : 1);
+
+            return (
+              <TouchableOpacity
+                key={secAttr.id}
+                style={[styles.attrBox, isSelected && styles.selectedAttrBox]}
+                onPress={() => handleAddOnSelect(secAttr)}
+                activeOpacity={0.7}
+              >
+                <View style={sharedOrderStyles.priceContainer}>
+                  <View style={sharedOrderStyles.priceRow}>
+                    <TextView style={styles.currency}>تومان</TextView>
+                    <TextView style={styles.price}>
+                      {formatPrice(price)}
+                    </TextView>
+                  </View>
+
+                  {isSelected && selected.isMulti && (
+                    <View style={sharedOrderStyles.quantityContainer}>
+                      <TouchableOpacity
+                        style={sharedOrderStyles.quantityButton}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handleQuantityChange(secAttr, Math.max(1, count - 1));
+                        }}
+                      >
+                        {count === 1 ? (
+                          <Trash2 width={16} color="#ff4444" />
+                        ) : (
+                          <Minus width={16} color="#666" />
+                        )}
+                      </TouchableOpacity>
+
+                      <TextInputView
+                        style={sharedOrderStyles.quantityInput}
+                        value={count.toString()}
+                        onChangeText={(text) => {
+                          const newCount = Math.max(1, parseInt(text) || 1);
+                          handleQuantityChange(secAttr, newCount);
+                        }}
+                        keyboardType="numeric"
+                        textAlign="center"
+                      />
+
+                      <TouchableOpacity
+                        style={sharedOrderStyles.quantityButton}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handleQuantityChange(secAttr, count + 1);
+                        }}
+                      >
+                        <Plus width={16} color="#666" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+
+                <TextView style={styles.attrTitle}>
+                  {secAttr.title}
+                  {isSelected ? <TextView style={styles.selectedIcon}> ✓</TextView> : ''}
+                </TextView>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </ScrollView>
+
+      <TouchableOpacity style={sharedOrderStyles.confirmButton} onPress={handleConfirm}>
+        <TextView style={sharedOrderStyles.confirmButtonText}>ثبت</TextView>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const createStyles = (theme: Theme) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.background,
+    height: 'auto',
+    maxHeight: 700,
+    paddingBottom: 40
+  },
+  attrBox: {
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    borderWidth: 2,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    borderColor: 'transparent',
+    backgroundColor: theme.primary
+  },
+  currency: {
+    fontSize: 14,
+    color: theme.text,
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.text,
+  },
+  attrTitle: {
+    fontSize: 16,
+    color: theme.text,
+    fontWeight: '500',
+  },
+  selectedAttrBox: {
+    borderColor: '#007AFF',
+    backgroundColor: theme.third,
+  },
+  selectedIcon: {
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
+  subtitle: {
+    fontSize: 13,
+    color: theme.text,
+    marginBottom: 16,
+    lineHeight: 16,
+  },
+});
+
+export default AddOnDrawer;
