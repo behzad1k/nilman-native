@@ -31,14 +31,16 @@ export const PickColorDrawerStyles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
+    paddingVertical: 4,
     gap: 12,
   },
   confirmButton: {
     flex: 1,
     backgroundColor: '#4b794b',
     borderRadius: 12,
-    paddingVertical: 16,
     alignItems: 'center',
+    paddingVertical: 8,
+
     justifyContent: 'center',
   },
   confirmButtonText: {
@@ -51,7 +53,7 @@ export const PickColorDrawerStyles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#ccc',
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 8,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',

@@ -1,16 +1,14 @@
 import TextView from '@/src/components/ui/TextView';
 import { PickColorDrawerStyles } from '@/src/features/order/styles/pickColorDrawer';
+import { Color, Form, PickingColor } from '@/src/features/order/types';
 import { Service } from '@/src/features/service/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { Theme } from '@/src/types/theme';
 import React, { useCallback } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
-import { Color, Form, PickingColor } from '@/src/features/order/types';
+import { ScrollView, StyleSheet, TouchableOpacity, View, } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '@/src/components/contexts/ThemeContext';
+import { colors } from '@/src/styles/theme/colors';
 
 interface IPickColorDrawerProps {
   colors: Color[];
@@ -22,14 +20,14 @@ interface IPickColorDrawerProps {
 }
 
 const PickColorDrawer = ({
-                           colors,
+                           colors : allColors,
                            selected,
                            setSelected,
                            currentAttribute,
                            setPickingColor,
                          }: IPickColorDrawerProps) => {
   const styles = useThemedStyles(createStyles);
-
+  const { theme } = useTheme()
   const handleColorSelect = useCallback((colorItem: Color) => {
     setSelected(prev => {
       const newOptions = { ...prev.options };
@@ -49,7 +47,10 @@ const PickColorDrawer = ({
         ? currentColors.filter(color => color !== colorItem.slug)
         : [...currentColors, colorItem.slug];
 
-      return { ...prev, options: newOptions };
+      return {
+        ...prev,
+        options: newOptions
+      };
     });
   }, [currentAttribute?.id, setSelected]);
 
@@ -57,42 +58,54 @@ const PickColorDrawer = ({
     const selectedColors = selected.options[currentAttribute?.id]?.colors;
 
     if (Array.isArray(selectedColors) && selectedColors.length > 0) {
-      setPickingColor({ attr: null, open: false });
+      setPickingColor({
+        attr: null,
+        open: false
+      });
     } else {
       // Show error toast: 'لطفا حداقل یک رنگ را انتخاب کنید'
     }
   }, [selected.options, currentAttribute?.id, setPickingColor]);
 
   const handleCancel = useCallback(() => {
-    setPickingColor({ attr: null, open: false });
+    setPickingColor({
+      attr: null,
+      open: false
+    });
   }, [setPickingColor]);
 
   const selectedColors = selected.options[currentAttribute?.id]?.colors || [];
 
   return (
     <View style={styles.container}>
-      <TextView style={styles.subtitle}>انتخاب رنگ</TextView>
+      <TextView style={styles.subtitle}>حداقل یکی از رنگ های زیر را انتخاب کنید</TextView>
 
       <ScrollView style={PickColorDrawerStyles.colorContainer} showsVerticalScrollIndicator={false}>
-        {colors.map((colorItem) => {
+        {allColors.map((colorItem) => {
           const isSelected = selectedColors.includes(colorItem.slug);
 
           return (
             <TouchableOpacity
               key={colorItem.slug}
-              style={[styles.colorRow, isSelected && styles.selectedColorRow]}
               onPress={() => handleColorSelect(colorItem)}
-              activeOpacity={0.7}
             >
-              <View
-                style={[
-                  PickColorDrawerStyles.colorSpan,
-                  { backgroundColor: colorItem.code }
-                ]}
-              />
-              <TextView style={styles.colorTitle}>
-                {colorItem.title}
-              </TextView>
+              <LinearGradient dither={false} colors={[colorItem.code, theme.primary]} start={[.1, 1]} end={[.7, 0]} style={[styles.colorRow, isSelected && styles.selectedColorRow]} >
+                {/* <View */}
+                {/*   style={[ */}
+                {/*     PickColorDrawerStyles.colorSpan, */}
+                {/*     { backgroundColor: colorItem.code } */}
+                {/*   ]} */}
+                {/* /> */}
+
+                <View style={{ flexDirection: 'row', gap: 10}}>
+                  <TextView style={styles.colorTitle}>
+                    {colorItem.title}
+                  </TextView>
+                  <View style={{ justifyContent: 'center', alignItems: 'center', width: 24, height: 24, borderRadius: 12, borderWidth: .5, borderColor: colors.pink}}>
+                    {isSelected && <View style={styles.selectedIcon}></View>}
+                  </View>
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
           );
         })}
@@ -124,32 +137,42 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     backgroundColor: theme.background,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: 'bold',
     color: theme.text,
     marginBottom: 16,
-    lineHeight: 16,
-  },
+    textAlign: 'right',
+  }
+  ,
   colorRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     backgroundColor: theme.primary,
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 4,
+    paddingRight: 16,
     marginBottom: 8,
     borderWidth: 2,
     borderColor: 'transparent',
+    opacity: .9
+
   },
   colorTitle: {
     width: 'auto',
-    fontSize: 16,
+    fontSize: 17,
     color: theme.text,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   selectedColorRow: {
-    borderColor: '#007AFF',
-    backgroundColor: theme.third,
+    borderColor: colors.pink,
   },
+  selectedIcon: {
+    width: 18,
+    height: 18,
+    borderRadius: 10,
+    backgroundColor: colors.pink,
+  }
 });
 
 export default PickColorDrawer;

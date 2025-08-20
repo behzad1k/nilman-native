@@ -1,19 +1,20 @@
 import TextView from '@/src/components/ui/TextView';
 import { useAppSelector } from '@/src/configs/redux/hooks';
 import { cartItemStyle } from '@/src/features/cart/styles';
+import useNumerals from '@/src/hooks/useNumerals';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { Theme } from '@/src/types/theme';
-import { findAncestors, formatPrice } from '@/src/utils/funs';
+import { findAncestors } from '@/src/utils/funs';
 import moment from 'jalali-moment';
 import { Calendar, MapPin, Timer, Trash } from 'phosphor-react-native';
-import { colors } from '@/src/styles/theme/colors';
 import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity, StyleSheet,
 } from 'react-native';
-import { Order } from '@/src/features/order/types'
+import { Order } from '@/src/features/order/types';
+import { useTheme } from '@/src/components/contexts/ThemeContext';
 
 interface ICartItemProps {
   item: Order;
@@ -23,7 +24,8 @@ interface ICartItemProps {
 const CartItem = ({ item, deleteCartItem }: ICartItemProps) => {
   const services = useAppSelector(state => state.service.allServices);
   const styles = useThemedStyles(createStyles)
-  console.log(item);
+  const { theme } = useTheme();
+  const { formatPrice } = useNumerals()
   return (
     <View style={styles.cartItemContainer}>
       <View style={cartItemStyle.orderInfo}>
@@ -48,11 +50,11 @@ const CartItem = ({ item, deleteCartItem }: ICartItemProps) => {
         <View key={index} style={cartItemStyle.orderInfo}>
           <View style={cartItemStyle.orderInfoDelete}>
             <View style={cartItemStyle.orderInfoAddon}>
-              <Text style={cartItemStyle.priceText}>{formatPrice(attribute.price)} تومان</Text>
+              <TextView style={cartItemStyle.priceText}>{formatPrice(attribute.price)} تومان</TextView>
               {attribute.addOns?.map((e, addOnIndex) => (
-                <Text key={addOnIndex} style={cartItemStyle.priceText}>
+                <TextView key={addOnIndex} style={cartItemStyle.priceText}>
                   {formatPrice(e.addOn?.price * e.count)} تومان
-                </Text>
+                </TextView>
               ))}
             </View>
           </View>
@@ -84,12 +86,12 @@ const CartItem = ({ item, deleteCartItem }: ICartItemProps) => {
         <TextView style={cartItemStyle.orderInfoText}>ایاب ذهاب</TextView>
       </View>
 
-      {item.discountAmount && item.discountAmount > 0 && (
+      {item.discountAmount && item.discountAmount > 0 ? (
         <View style={cartItemStyle.orderInfo}>
           <TextView style={cartItemStyle.discountText}>{formatPrice(item.discountAmount)}- تومان</TextView>
           <TextView style={cartItemStyle.orderInfoText}>تخفیف</TextView>
         </View>
-      )}
+      ): null}
 
       <View style={[cartItemStyle.orderInfo, cartItemStyle.dashedBottom]}>
         <TextView style={cartItemStyle.finalPrice}>{formatPrice(item.finalPrice)} تومان</TextView>
@@ -98,17 +100,17 @@ const CartItem = ({ item, deleteCartItem }: ICartItemProps) => {
 
       <View style={cartItemStyle.orderInfo}>
         <View style={cartItemStyle.orderInfoIcon}>
-          <MapPin size={20} color="#666" />
-          <Text style={cartItemStyle.addressText}>{item.address?.title}</Text>
+          <TextView style={cartItemStyle.addressText}>{item.address?.title}</TextView>
+          <MapPin size={20} color={theme.text} />
         </View>
 
           <View style={cartItemStyle.orderInfoIcon}>
             <TextView style={cartItemStyle.dateTimeText}>{item.date}</TextView>
-            <Calendar size={20} color="#666" />
+            <Calendar size={20} color={theme.text} />
           </View>
           <View style={cartItemStyle.orderInfoIcon}>
-            <TextView style={cartItemStyle.dateTimeText}>{item?.fromTime}</TextView>
-            <Timer style={cartItemStyle.timerIcon} />
+            <TextView style={cartItemStyle.dateTimeText}>{item?.fromTime.toString()}</TextView>
+            <Timer style={cartItemStyle.timerIcon} color={theme.text} />
           </View>
       </View>
     </View>
@@ -116,7 +118,7 @@ const CartItem = ({ item, deleteCartItem }: ICartItemProps) => {
 };
 const createStyles = (theme: Theme) => StyleSheet.create({
   cartItemContainer: {
-    backgroundColor: colors.white,
+    backgroundColor: theme.primary,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',

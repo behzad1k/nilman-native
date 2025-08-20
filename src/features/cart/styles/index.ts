@@ -1,7 +1,7 @@
+import { colors } from '@/src/styles/theme/colors';
 import { spacing } from '@/src/styles/theme/spacing';
 import typography from '@/src/styles/theme/typography';
 import { StyleSheet } from 'react-native';
-import { colors } from '@/src/styles/theme/colors';
 
 export const orderStyles = StyleSheet.create({
   container: {
@@ -16,7 +16,6 @@ export const orderStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     borderRadius: 12,
-    paddingVertical: 4,
     elevation: 5,
     gap: spacing.sm
   },
@@ -52,44 +51,31 @@ export const orderStyles = StyleSheet.create({
   },
   cartContainer: {
     gap: spacing.sm,
+    flex: 1,
   },
-  cartItemContainer: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-    gap: 12,
-  },
+
   orderInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    width: '100%',
     paddingVertical: 8,
   },
   orderInfoTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    textAlign: 'right',
+    marginLeft: 'auto'
   },
   orderInfoTitleBold: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
   },
   orderInfoText: {
     fontSize: 14,
-    color: '#666',
   },
   orderInfoPrice: {
     fontSize: 14,
-    color: '#333',
     fontWeight: '500',
   },
   dashedBottom: {
@@ -104,29 +90,13 @@ export const orderStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.pink,
   },
-  cartIsCredit: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
   walletText: {
     fontSize: 14,
-    color: '#333',
     fontWeight: '500',
   },
   payButton: {
-    backgroundColor: colors.pink,
+    width: '100%',
+    backgroundColor: colors.green,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -140,11 +110,6 @@ export const orderStyles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  payButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -156,10 +121,10 @@ export const orderStyles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  orderCardContainer:{
+  orderCardContainer: {
     gap: spacing.md,
     paddingBottom: 20
-}
+  }
 });
 
 export const orderCardStyles = StyleSheet.create({
@@ -283,7 +248,6 @@ export const orderCardStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   reOrderButtonText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -326,7 +290,6 @@ export const cartItemStyle = StyleSheet.create({
   serviceTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
   },
   isUrgent: {
     backgroundColor: '#ff4444',
@@ -354,7 +317,6 @@ export const cartItemStyle = StyleSheet.create({
   },
   orderInfoTitle: {
     fontSize: 14,
-    color: '#333',
     fontWeight: '500',
     textAlign: 'right'
   },
@@ -369,12 +331,9 @@ export const cartItemStyle = StyleSheet.create({
   },
   priceText: {
     fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
   },
   orderInfoText: {
     fontSize: 14,
-    color: '#666',
   },
   discountText: {
     fontSize: 14,
@@ -391,7 +350,6 @@ export const cartItemStyle = StyleSheet.create({
   totalTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
   },
   finalPrice: {
     fontSize: 16,
@@ -405,7 +363,6 @@ export const cartItemStyle = StyleSheet.create({
   },
   addressText: {
     fontSize: 14,
-    color: '#666',
   },
   orderInfoCol: {
     gap: 8,
@@ -413,17 +370,13 @@ export const cartItemStyle = StyleSheet.create({
     justifyContent: 'flex-end',
     backgroundColor: 'red',
     flex: 1,
-    // alignItems: 'flex-end',
   },
   dateTimeText: {
     fontSize: 14,
-    color: '#666',
   },
   timerIcon: {
     width: 20,
     height: 20,
-    color: '#666',
     borderRadius: 10,
-    // You can replace this with an actual timer icon component
   }
 });

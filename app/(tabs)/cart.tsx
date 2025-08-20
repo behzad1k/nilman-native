@@ -8,7 +8,6 @@ export default function Cart() {
   const { theme, isDark } = useTheme();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.primary }} >
-      <StatusBar barStyle={isDark ? 'dark-content' : 'light-content'} />
       <Header/>
       <CartPage />
     </SafeAreaView>

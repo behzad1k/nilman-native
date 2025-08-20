@@ -3,6 +3,7 @@ import { serviceDrawerStyles } from '@/src/features/order/styles/serviceDrawer';
 import { Form } from '@/src/features/order/types';
 import { Service } from '@/src/features/service/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
+import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
 import { formatPrice } from '@/src/utils/funs';
 import React, { useCallback, useMemo } from 'react';
@@ -125,10 +126,14 @@ const ServiceDrawer = ({
                 </View>
               )}
 
-              <TextView style={styles.attrTitle}>
-                {secAttr.title}
-                {isSelected && <TextView style={styles.selectedIcon}> ✓</TextView>}
-              </TextView>
+              <View style={{ flexDirection: 'row', gap: 10}}>
+                <TextView style={styles.attrTitle}>
+                  {secAttr.title}
+                </TextView>
+                <View style={{ justifyContent: 'center', alignItems: 'center', width: 24, height: 24, borderRadius: 12, borderWidth: .5, borderColor: colors.pink}}>
+                  {isSelected && <View style={styles.selectedIcon}></View>}
+                </View>
+              </View>
             </TouchableOpacity>
           );
         })}
@@ -161,22 +166,23 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     color: theme.text,
   },
   price: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: theme.text,
   },
   attrTitle: {
-    fontSize: 16,
+    fontSize: 17,
     color: theme.text,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   selectedAttrBox: {
-    borderColor: '#007AFF',
-    backgroundColor: theme.third,
+    borderColor: colors.pink,
   },
   selectedIcon: {
-    color: '#007AFF',
-    fontWeight: 'bold',
+    width: 18,
+    height: 18,
+    borderRadius: 10,
+    backgroundColor: colors.pink,
   },
 });
 

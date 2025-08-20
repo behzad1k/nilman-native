@@ -10,6 +10,11 @@ import fa from './locales/fa.json';
 export const defaultLanguage: Language = 'fa';
 export const supportedLanguages: Language[] = ['fa', 'en'];
 
+export const LOCALES = {
+  'fa' : 'fa-IR',
+  'en' : 'en-US',
+}
+
 const resources = {
   fa: { translation: fa },
   en: { translation: en },

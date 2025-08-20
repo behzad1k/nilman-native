@@ -9,6 +9,7 @@ import Typography from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
 import { ServiceEnum } from '@/src/utils/enums';
 import { findAncestors, getServiceIcon } from '@/src/utils/funs';
+import { Trash, TrashSimple } from 'phosphor-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
@@ -20,6 +21,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { attributeStepStyles } from '@/src/features/order/styles/attributeStep';
+import { colors } from '@/src/styles/theme/colors';
 
 interface Props {
   selected: Form;
@@ -185,7 +187,7 @@ const AttributeStep = ({ selected, setSelected, setIsNextStepAllowed }: Props) =
                     onPress={() => handleUnselectAttribute(attribute)}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Ionicons name="trash-outline" size={26} color="#FF3B30" />
+                    <TrashSimple size={24} />
                   </TouchableOpacity>
                 )}
                 <View style={attributeStepStyles.attributeCardRight}>
@@ -217,7 +219,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     gap: 16,
     backgroundColor: theme.primary,
     borderRadius: 12,
-    padding: 16,
+    paddingHorizontal: 16,
     marginBottom: 16,
     width: '100%',
     alignItems: 'center',
@@ -230,23 +232,22 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     borderColor: 'transparent',
   },
   selectedCard: {
-    borderColor: '#007AFF',
+    borderColor: colors.pink,
     backgroundColor: theme.primary,
   },
   cardImage: {
-    width: 60,
-    height: 60,
+    width: 40,
+    height: 40,
     marginBottom: 12,
     tintColor: theme.text,
   },
   attributeTitle: {
-    ...Typography.weights.medium,
-    fontSize: 16,
+    ...Typography.weights.normal,
+    fontSize: 18,
     color: theme.text,
     textAlign: 'left',
   },
   deleteButton: {
-    backgroundColor: theme.third,
     borderRadius: 20,
     padding: 3,
     marginLeft: 10,

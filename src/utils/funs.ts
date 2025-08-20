@@ -1,3 +1,4 @@
+import { defaultLanguage, LOCALES } from '@/src/configs/translations';
 import { Service } from '@/src/features/service/types';
 
 export const findRootCount = (arr: any[], value: any, key: string = 'id') => {
@@ -43,8 +44,8 @@ export const extractChildren = (node: any, array: any[], index: number = 0, dept
   return array;
 }
 
-export const formatPrice = (value: number | string) =>
-  Intl.NumberFormat().format(value as number);
+export const formatPrice = (value: number | string, lang = defaultLanguage) =>
+  Intl.NumberFormat(LOCALES[lang]).format(value as number);
 
 export const omit = (keys: any, obj: any): any => {
   if (!keys.length) return obj
