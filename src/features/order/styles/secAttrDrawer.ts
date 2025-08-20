@@ -29,8 +29,8 @@ export const secAttrDrawerStyles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingHorizontal: 10,
+    paddingTop: 8,
   },
   drawerTitle:{
     fontSize: 16,

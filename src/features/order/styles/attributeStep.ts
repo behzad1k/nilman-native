@@ -55,7 +55,6 @@ export const attributeStepStyles = StyleSheet.create({
     position: 'relative',
   },
   attributeCard: {
-    minHeight: 80,
     justifyContent: 'space-between'
   },
   selectedCard: {

@@ -15,6 +15,7 @@ interface NativeMapProps {
   position: number[];
   setPosition: React.Dispatch<React.SetStateAction<number[]>>;
 }
+
 let MapView: any;
 let Camera: any;
 let MapViewRef: any;
@@ -23,12 +24,13 @@ let CameraRef: any;
 
 if (Platform.OS !== 'web') {
   const MapLibre = require('@maplibre/maplibre-react-native');
-  MapView = MapLibre.default;
+  MapView = MapLibre.MapView;
   Camera = MapLibre.Camera;
   MapViewRef = MapLibre.MapViewRef;
   PointAnnotation = MapLibre.PointAnnotation;
   CameraRef = MapLibre.CameraRef;
 }
+
 const NativeMap = ({ position, setPosition }: NativeMapProps) => {
   const { isDark } = useTheme();
   const [searchResult, setSearchResult] = useState<AddressSearchResult[]>([]);
@@ -36,8 +38,9 @@ const NativeMap = ({ position, setPosition }: NativeMapProps) => {
   const styles = useThemedStyles(createStyles);
   const { theme } = useTheme();
 
-  const mapRef = useRef<typeof MapViewRef>(null);
-  const cameraRef = useRef<typeof CameraRef>(null);
+  const mapRef = useRef<any>(null);
+  const cameraRef = useRef<any>(null);
+
   const search = async (query: string) => {
     const res = await services.address.searchByQuery({
       search_text: query,
@@ -58,15 +61,23 @@ const NativeMap = ({ position, setPosition }: NativeMapProps) => {
   };
 
   useEffect(() => {
-    cameraRef?.current?.flyTo(
-      [position[0], position[1]]
-    );
+    if (cameraRef.current) {
+      cameraRef.current.flyTo([position[0], position[1]]);
+    }
     setSearchResult([]);
   }, [position]);
 
+  // Return web fallback
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.container}>
+        <TextView>Map not available on web</TextView>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -76,31 +87,6 @@ const NativeMap = ({ position, setPosition }: NativeMapProps) => {
         onLongPress={(address: any) => setPosition(prev => 'coordinates' in address.geometry ? (address.geometry?.coordinates as number[]) : prev)}
         mapStyle={`https://www.parsimap.ir/styles/${isDark ? 'dark' : 'light'}.json?key=p1f7c17ef0b0fa499ca024f0a448a62eac98fcbfdb`}
       >
-        <View style={styles.searchContainer}>
-          <MagnifyingGlass style={styles.searchIcon} color={theme.secondary} size={30}/>
-          <TextInputView
-            onChangeText={async (input) => {
-              if (input.length > 3) {
-                await search(input);
-              } else {
-                setSearchResult([]);
-              }
-            }}
-            style={styles.searchInput}
-          />
-        </View>
-        {searchResult.length > 0 ?
-          <ScrollView style={styles.searchResultContainer}>
-            {searchResult.length > 0 ? (
-              searchResult.slice(0, 10).map(e =>
-                <View>
-                  <TextView style={styles.searchResultTitle} onPress={() => setPosition([e.geo_location.center.lng, e.geo_location.center.lat])}>{e.geo_location?.title}</TextView>
-                  <TextView style={styles.searchResultSubtitle}>{e.description?.substring(0, 50)}</TextView>
-                </View>
-              )
-            ) : null}
-          </ScrollView>
-          : null}
         <Camera
           ref={cameraRef}
           defaultSettings={{
@@ -108,13 +94,52 @@ const NativeMap = ({ position, setPosition }: NativeMapProps) => {
             zoomLevel: 13,
           }}
         />
-        <PointAnnotation id={'id124'} coordinate={position}  draggable onDragEnd={(payload: any) => setPosition(payload.geometry.coordinates)}>
-          <Image style={{
-            width: 60,
-            height: 60
-          }} source={require('@/src/assets/images/pin.png')}/>
+        <PointAnnotation
+          id={'id124'}
+          coordinate={position}
+          draggable
+          onDragEnd={(payload: any) => setPosition(payload.geometry.coordinates)}
+        >
+          <Image
+            style={{ width: 60, height: 60 }}
+            source={require('@/src/assets/images/pin.png')}
+          />
         </PointAnnotation>
       </MapView>
+
+      {/* Search components outside MapView */}
+      <View style={styles.searchContainer}>
+        <MagnifyingGlass style={styles.searchIcon} color={theme.secondary} size={30}/>
+        <TextInputView
+          onChangeText={async (input) => {
+            if (input.length > 3) {
+              await search(input);
+            } else {
+              setSearchResult([]);
+            }
+          }}
+          style={styles.searchInput}
+        />
+      </View>
+
+      {searchResult.length > 0 && (
+        <ScrollView style={styles.searchResultContainer}>
+          {searchResult.slice(0, 10).map((e, index) => (
+            <View key={index}>
+              <TextView
+                style={styles.searchResultTitle}
+                onPress={() => setPosition([e.geo_location.center.lng, e.geo_location.center.lat])}
+              >
+                {e.geo_location?.title}
+              </TextView>
+              <TextView style={styles.searchResultSubtitle}>
+                {e.description?.substring(0, 50)}
+              </TextView>
+            </View>
+          ))}
+        </ScrollView>
+      )}
+
       <TouchableOpacity style={styles.centerAddress} onPress={centerTarget}>
         <Crosshair size={40} color={theme.text}/>
       </TouchableOpacity>
@@ -127,6 +152,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     height: '100%',
     width: '100%',
     flex: 1,
+    position: 'relative',
   },
   map: {
     flex: 1,
@@ -145,16 +171,17 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     zIndex: 1000,
-
   },
   searchInput: {
     color: theme.text,
     borderWidth: 0,
     zIndex: 10000,
-    fontSize: 16
+    fontSize: 16,
+    flex: 1,
   },
   searchIcon: {
-    marginVertical: 'auto',
+    alignSelf: 'center',
+    marginRight: 8,
   },
   searchResultContainer: {
     minHeight: 100,
@@ -173,7 +200,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     borderTopWidth: 0,
     borderTopStartRadius: 0,
     borderTopEndRadius: 0,
-    overflow: 'scroll'
+    zIndex: 1001,
   },
   searchResultTitle: {
     color: theme.text,
@@ -186,9 +213,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     textAlign: 'right',
     fontFamily: FontFamilies.vazir.light,
     fontSize: 13,
-  },
-  searchInputContainer: {
-    width: '100%'
   },
   centerAddress: {
     position: 'absolute',

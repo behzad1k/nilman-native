@@ -10,7 +10,7 @@ import type { Order } from '@/src/features/order/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { Theme } from '@/src/types/theme';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 const CartPage = () => {
   const cartItems = useAppSelector((state) => state.order?.cart);
@@ -41,13 +41,9 @@ const CartPage = () => {
     <View style={styles.container}>
       <View style={styles.contentContainer}>
         <CartPageTabs cartItems={cartItems} items={items} setTab={setTab} tab={tab} orders={orders} setItems={setItems}/>
-        <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
-
-          {/* <View style={orderStyles.cartContainer}> */}
-          {renderContent()}
-          {/* </View> */}
-        </ScrollView>
-
+          <ScrollView contentContainerStyle={[styles.cartContainer, Platform.OS == 'web' && styles.contentContainerWEB]} showsVerticalScrollIndicator={false}>
+            {renderContent()}
+          </ScrollView>
       </View>
     </View>
   );
@@ -58,7 +54,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.primary,
-    paddingBottom: 60
   },
   switchLabel: {
     fontSize: 16,
@@ -76,12 +71,11 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
   },
-  scrollVew: {
-  },
   cartContainer: {
-    gap: 15,
-    flexGrow: 1,
-    paddingBottom: 10
+    paddingBottom: 70,
+    paddingHorizontal: 8,
+    gap: 20,
+    backgroundColor: theme.background,
   },
   bottomSection: {
     backgroundColor: theme.primary,
@@ -100,11 +94,15 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   contentContainer: {
     paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 70,
     paddingHorizontal: 8,
     gap: 20,
-    backgroundColor: theme.background
+    backgroundColor: theme.background,
+    flex: 1
   },
+  contentContainerWEB: {
+    paddingBottom: 30
+  }
 });
 
 export default CartPage;

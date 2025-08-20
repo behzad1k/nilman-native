@@ -7,6 +7,7 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View, } from 'react-native';
 import { Address } from '../../types';
 import { useTheme } from '@/src/components/contexts/ThemeContext';
+import { colors } from '@/src/styles/theme/colors';
 
 interface IAddressRowProps {
   address: Address;
@@ -105,6 +106,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     color: theme.text,
   },
   selected: {
-    borderColor: '#007AFF',
+    borderColor: colors.pink,
   },
 });

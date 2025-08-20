@@ -73,27 +73,26 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     flex: 1,
   },
   serviceCard: {
-    minHeight: 100,
+    minHeight: 70,
   },
   cardImage: {
     width: 60,
     height: 60,
-    marginBottom: 12,
     tintColor: theme.text
   },
   cardTitle: {
-    ...Typography.weights.medium,
+    ...Typography.weights.normal,
     fontSize: 20,
     color: theme.text,
     textAlign: 'left',
   },
   card: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
     gap: 16,
     backgroundColor: theme.primary,
     borderRadius: 12,
-    padding: 16,
+    paddingHorizontal: 16,
     marginBottom: 16,
     width: '100%',
     alignItems: 'center',

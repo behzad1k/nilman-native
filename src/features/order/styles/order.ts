@@ -46,12 +46,12 @@ export const orderStyles = StyleSheet.create({
     width: '100%',
   },
   submitButton: {
-    backgroundColor: '#28A745',
-    paddingVertical: 16,
+    backgroundColor: colors.green,
+    paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#28A745',
+    shadowColor: colors.green,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -66,12 +66,12 @@ export const orderStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
   continueButton: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.green,
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.blue,
+    shadowColor: colors.green,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -213,4 +213,7 @@ export const orderStyles = StyleSheet.create({
   slideOut: {
     transform: [{ translateX: width }],
   },
+  paddingBottom84: {
+    paddingBottom: 84
+  }
 });

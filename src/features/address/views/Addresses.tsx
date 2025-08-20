@@ -13,6 +13,7 @@ import { StyleSheet, TouchableOpacity, View, } from 'react-native';
 import type { Address } from '../types';
 import { router } from 'expo-router';
 import { Theme } from '@/src/types/theme';
+import { colors } from '@/src/styles/theme/colors';
 
 interface IAddressProps {
   onClick?: (address: Address) => void;
@@ -90,7 +91,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   addAddressText: {
     fontSize: 18,
-    color: '#3b93f3',
+    color: colors.blue,
     fontWeight: '500',
     textAlign: 'right',
     flex: 1
