@@ -12,6 +12,7 @@ export const calenderStepStyles = StyleSheet.create({
     marginBottom: 20,
   },
   calTabsContent: {
+    flexDirection: 'row',
     paddingRight: 16,
     paddingBottom: 10
   },

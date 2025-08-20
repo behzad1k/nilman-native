@@ -153,21 +153,21 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
       <View style={calenderStepStyles.content}>
         <TextView style={styles.hintText}>لطفا تاریخ و ساعت را انتخاب کنید</TextView>
 
-        <View style={calenderStepStyles.discountContainer}>
-          <Controller
-            name="discount"
-            control={control}
-            defaultValue=""
-            render={({ field: { onChange, value } }) => (
-              <TextInputView
-                value={value}
-                onChangeText={onChange}
-                style={styles.discountInput}
-                placeholder="کد تخفیف را وارد کنید"
-              />
-            )}
-          />
-        </View>
+        {/* <View style={calenderStepStyles.discountContainer}> */}
+        {/*   <Controller */}
+        {/*     name="discount" */}
+        {/*     control={control} */}
+        {/*     defaultValue="" */}
+        {/*     render={({ field: { onChange, value } }) => ( */}
+        {/*       <TextInputView */}
+        {/*         value={value} */}
+        {/*         onChangeText={onChange} */}
+        {/*         style={styles.discountInput} */}
+        {/*         placeholder="کد تخفیف را وارد کنید" */}
+        {/*       /> */}
+        {/*     )} */}
+        {/*   /> */}
+        {/* </View> */}
 
         <View style={styles.calendarContainer}>
           <ScrollView
@@ -233,7 +233,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     elevation: 3,
   },
   calTabCell: {
-    backgroundColor: theme.secondary,
+    backgroundColor: theme.surface,
     borderRadius: 8,
     padding: 4,
     marginRight: 8,
@@ -244,20 +244,20 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     gap: 4
   },
   selectedTab: {
-    backgroundColor: colors.blue,
-    borderColor: colors.blue,
+    backgroundColor: colors.pink,
+    borderColor: colors.pink,
   },
   tabDateText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme.textSecondary,
+    color: theme.text,
   },
   tabDayText: {
-    fontSize: 14,
-    color: theme.textSecondary,
+    fontSize: 16,
+    color: theme.text,
   },
   selectedTabText: {
-    color: theme.text,
+    color: theme.textSecondary,
   },
   timeSlotsTitle: {
     fontSize: 16,
@@ -266,7 +266,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     marginBottom: 12,
   },
   timeSlot: {
-    backgroundColor: theme.secondary,
+    backgroundColor: theme.surface,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -276,23 +276,23 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     borderColor: 'transparent',
   },
   selectedTimeSlot: {
-    backgroundColor: colors.blue,
-    borderColor: colors.blue,
+    backgroundColor: colors.pink,
+    borderColor: colors.pink,
   },
   disabledTimeSlot: {
     backgroundColor: theme.third,
-    opacity: 0.5,
+    opacity: 0.8,
   },
   timeSlotText: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.textSecondary,
-  },
-  selectedTimeSlotText: {
     color: theme.text,
   },
-  disabledTimeSlotText: {
+  selectedTimeSlotText: {
     color: theme.textSecondary,
+  },
+  disabledTimeSlotText: {
+    color: theme.text,
   },
   urgentBox: {
     backgroundColor: '#fff3cd',

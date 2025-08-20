@@ -6,6 +6,7 @@ import { sharedOrderStyles } from '@/src/features/order/styles/serviceStep';
 import { Form } from '@/src/features/order/types';
 import { Service } from '@/src/features/service/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
+import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
 import { formatPrice } from '@/src/utils/funs';
 import React, { useCallback, useMemo } from 'react';
@@ -184,10 +185,14 @@ const AddOnDrawer = ({
                   )}
                 </View>
 
-                <TextView style={styles.attrTitle}>
-                  {secAttr.title}
-                  {isSelected ? <TextView style={styles.selectedIcon}> ✓</TextView> : ''}
-                </TextView>
+                <View style={{ flexDirection: 'row', gap: 10}}>
+                  <TextView style={styles.attrTitle}>
+                    {secAttr.title}
+                  </TextView>
+                  <View style={{ justifyContent: 'center', alignItems: 'center', width: 24, height: 24, borderRadius: 12, borderWidth: .5, borderColor: colors.pink}}>
+                    {isSelected && <View style={styles.selectedIcon}></View>}
+                  </View>
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -209,6 +214,20 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     maxHeight: 700,
     paddingBottom: 40
   },
+  attrTitle: {
+    fontSize: 17,
+    color: theme.text,
+    fontWeight: '600',
+  },
+  selectedAttrBox: {
+    borderColor: colors.pink,
+  },
+  selectedIcon: {
+    width: 18,
+    height: 18,
+    borderRadius: 10,
+    backgroundColor: colors.pink,
+  },
   attrBox: {
     borderRadius: 12,
     paddingVertical: 16,
@@ -228,25 +247,15 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     fontWeight: 'bold',
     color: theme.text,
   },
-  attrTitle: {
-    fontSize: 16,
-    color: theme.text,
-    fontWeight: '500',
-  },
-  selectedAttrBox: {
-    borderColor: '#007AFF',
-    backgroundColor: theme.third,
-  },
-  selectedIcon: {
-    color: '#007AFF',
-    fontWeight: 'bold',
-  },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: 'bold',
     color: theme.text,
     marginBottom: 16,
     lineHeight: 16,
-  },
+
+    textAlign: 'right',
+  }
 });
 
 export default AddOnDrawer;

@@ -7,10 +7,11 @@ export const colors = {
   lightGrey: 'rgba(224, 222, 222, 1)',
   darkPink: '#6d1f60',
   logoPink: '#a3238e',
-  pink: '#e175d1',
+  pink: '#c89dc7',
   whitePinkOpacity: 'rgba(236, 170, 151, 0.5)',
   dashboardDark: '#3f4d67',
   success: '#4b794b',
+  green: '#28A745',
   error: '#e76f6f',
   warning: '#f8d486',
   info: '#758fbe',
@@ -31,13 +32,14 @@ export const lightTheme = {
   third: '#a3a1a1',
   text: '#313131',
   textSecondary: '#eceaea',
-  surface: '#F5F5F5',
+  surface: '#e3e3e3',
   border: '#E5E5E5',
   card: '#FFFFFF',
   notification: '#FF3B30',
   success: '#34C759',
   warning: '#FF9500',
   error: '#FF3B30',
+  pink: '#c89dc7',
 };
 
 export const darkTheme = {
@@ -53,5 +55,7 @@ export const darkTheme = {
   success: '#30D158',
   warning: '#FF9F0A',
   error: '#FF453A',
+  pink: '#c89dc7',
+  surface: '#e3e3e3',
 };
 

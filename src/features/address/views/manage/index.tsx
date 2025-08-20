@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/src/configs/redux/hooks';
 import { addresses } from '@/src/configs/redux/slices/userSlice';
 import { services } from '@/src/configs/services';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
+import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -282,7 +283,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     bottom: 0,
     left: '5%',
     width: '90%',
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.green,
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 8,

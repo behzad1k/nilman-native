@@ -23,7 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 const OrderPage = () => {
@@ -217,7 +217,7 @@ const OrderPage = () => {
   }, [totalPrice]);
 
   return (
-    <View style={orderStyles.main}>
+    <View style={[orderStyles.main, Platform.OS == 'web' && orderStyles.paddingBottom84]}>
       <Header onBackPress={step.index > 0 ? handleBackPress : undefined}/>
 
       <View style={styles.progressContainer}>
@@ -237,20 +237,21 @@ const OrderPage = () => {
 
       {step.index > 0 && (
         <View style={styles.bottomSection}>
-          {selected.isUrgent && (
-            <View style={orderStyles.urgentWarning}>
-              <Ionicons name="warning" size={25} color="#FF9500"/>
-              <TextView style={orderStyles.urgentWarningText}>
-                سفارش شما در حالت فوری قرار دارد و با افزایش قیمت همراه است
-              </TextView>
-            </View>
-          )}
+          {/* {selected.isUrgent && ( */}
+          {/*   <View style={orderStyles.urgentWarning}> */}
+          {/*     <Ionicons name="warning" size={25} color="#FF9500"/> */}
+          {/*     <TextView style={orderStyles.urgentWarningText}> */}
+          {/*       سفارش شما در حالت فوری قرار دارد و با افزایش قیمت همراه است */}
+          {/*     </TextView> */}
+          {/*   </View> */}
+          {/* )} */}
 
           <View style={orderStyles.switchContainer}>
             <View style={styles.switchRow}>
               <Switch
                 value={selected.isUrgent}
                 onValueChange={toggleUrgentMode}
+
                 trackColor={{
                   false: theme.textSecondary,
                   true: colors.pink
@@ -264,6 +265,7 @@ const OrderPage = () => {
                 <Switch
                   value={selected.isMulti}
                   onValueChange={toggleMultiMode}
+
                   trackColor={{
                     false: theme.textSecondary,
                     true: colors.pink
@@ -296,7 +298,7 @@ const OrderPage = () => {
               >
                 <TextView style={[
                   orderStyles.continueButtonText,
-                  !isNextStepAllowed && orderStyles.disabledButtonText
+                  !isNextStepAllowed ? orderStyles.disabledButtonText : undefined
                 ]}>
                   ادامه
                 </TextView>
@@ -318,9 +320,8 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   switchLabel: {
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: '600',
     textAlign: 'right',
-    color: colors.black
   },
   switchRow: {
     flexDirection: 'row',
@@ -328,7 +329,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: colors.lightPink,
+    // backgroundColor: colors.lightPink,
     borderRadius: 8,
     marginBottom: 4,
     width: '48%'

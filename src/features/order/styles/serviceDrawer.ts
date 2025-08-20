@@ -1,3 +1,4 @@
+import { colors } from '@/src/styles/theme/colors';
 import { StyleSheet } from 'react-native';
 
 export const serviceDrawerStyles = StyleSheet.create({
@@ -55,7 +56,7 @@ export const serviceDrawerStyles = StyleSheet.create({
   },
   confirmButton: {
     position: 'static',
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.green,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

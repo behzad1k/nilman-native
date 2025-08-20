@@ -1,3 +1,4 @@
+import { colors } from '@/src/styles/theme/colors';
 import { StyleSheet } from 'react-native';
 
 export const addressesStyles = StyleSheet.create({
@@ -62,8 +63,8 @@ export const addressRowStyles = StyleSheet.create({
     borderWidth: 2,
   },
   addressSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: colors.pink,
+    borderColor: colors.pink,
   },
   addressNotSelected: {
     backgroundColor: 'transparent',

@@ -105,7 +105,7 @@ export const Typography = {
       fontWeight: FontWeights.light,
     } as TextStyle,
 
-    medium: {
+    normal: {
       fontFamily: FontFamilies.vazir.medium,
       fontWeight: FontWeights.medium,
     } as TextStyle,
@@ -114,7 +114,38 @@ export const Typography = {
       fontFamily: FontFamilies.vazir.bold,
       fontWeight: FontWeights.bold,
     } as TextStyle,
-  },
+  } as FontWeight,
 };
 
+type FontTransform = {
+  [key: string]: keyof typeof Typography.weights;
+}
+
+type FontWeight = {
+  [key: string]: Partial<TextStyle>;
+}
+
+export const weightTransforms: FontTransform = {
+'normal': 'normal',
+'bold': 'bold',
+'100': 'thin',
+'200': 'thin',
+'300': 'light',
+'400': 'light',
+'500': 'light',
+'600': 'normal',
+'700': 'normal',
+'800': 'bold',
+'900': 'bold',
+'ultralight': 'thin',
+'thin': 'thin',
+'light': 'light',
+'medium': 'normal',
+'regular': 'normal',
+'semibold': 'normal',
+'condensedBold': 'bold',
+'condensed': 'bold',
+'heavy': 'bold',
+'black': 'bold',
+}
 export default Typography;

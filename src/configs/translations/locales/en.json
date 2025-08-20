@@ -19,7 +19,8 @@
   "general": {
     "newOrder": "New Order",
     "loading": "Loading",
-    "login": "Login"
+    "login": "Login",
+    "profile": "Profile"
   },
   "error": {
     "phoneNumberInvalid": "Phone number is invalid",

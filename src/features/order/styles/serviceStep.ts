@@ -1,3 +1,4 @@
+import { colors } from '@/src/styles/theme/colors';
 import { StyleSheet } from 'react-native';
 
 export const serviceStepStyles = StyleSheet.create({
@@ -13,7 +14,6 @@ export const sharedOrderStyles = StyleSheet.create({
   drawerContainer:{
     flex: 1,
     height: '100%',
-    paddingHorizontal: 4
   },
   attrBox: {
     backgroundColor: '#f8f9fa',
@@ -79,7 +79,7 @@ export const sharedOrderStyles = StyleSheet.create({
   },
   confirmButton: {
     position: 'static',
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.green,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
