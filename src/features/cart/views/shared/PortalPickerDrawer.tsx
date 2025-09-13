@@ -16,7 +16,7 @@ import {
   Alert,
   Linking
 } from 'react-native';
-import Toast from 'react-native-toast-message';
+import { Toast } from 'toastify-react-native';
 
 // Conditional import for WebView (only on native)
 let WebView: any = null;
@@ -40,11 +40,11 @@ interface PaymentResult {
 }
 
 const PaymentOptions = {
-  ap: {
-    title: 'آسان پرداخت',
-    icon: require('@/src/assets/images/ap.png'),
-    slug: 'ap',
-  },
+  // ap: {
+  //   title: 'آسان پرداخت',
+  //   icon: require('@/src/assets/images/ap.png'),
+  //   slug: 'ap',
+  // },
   sep: {
     title: 'بانک سامان',
     icon: require('@/src/assets/images/sep.png'),
@@ -54,12 +54,7 @@ const PaymentOptions = {
     title: 'زرین پال',
     icon: require('@/src/assets/images/zarinpal.png'),
     slug: 'zarinpal',
-  },
-  credit: {
-    title: 'کیف پول',
-    icon: require('@/src/assets/images/wallet.png'),
-    slug: 'credit',
-  },
+  }
 };
 
 const PortalPickerDrawer = ({
@@ -277,11 +272,12 @@ const PortalPickerDrawer = ({
   const handleWebPayment = useCallback((portalData: any) => {
     const { authority, method, url } = portalData;
 
-    if (method === PaymentMethods.zarinpal && url) {
-      // Direct URL redirect for ZarinPal
+    if ((method === PaymentMethods.zarinpal || method === PaymentMethods.sep) && url) {
       window.open(url, '_blank');
       onClose?.();
       return;
+    }else {
+      //error
     }
 
     // Create and submit forms for banks
@@ -289,21 +285,7 @@ const PortalPickerDrawer = ({
     form.method = 'post';
     form.style.display = 'none';
 
-    if (method === PaymentMethods.sep) {
-      form.action = 'https://sep.shaparak.ir/OnlinePG/OnlinePG';
-
-      const tokenInput = document.createElement('input');
-      tokenInput.type = 'hidden';
-      tokenInput.name = 'Token';
-      tokenInput.value = authority;
-      form.appendChild(tokenInput);
-
-      const getMethodInput = document.createElement('input');
-      getMethodInput.type = 'hidden';
-      getMethodInput.name = 'GetMethod';
-      getMethodInput.value = 'true';
-      form.appendChild(getMethodInput);
-    } else if (method === PaymentMethods.ap) {
+    if (method === PaymentMethods.ap) {
       form.action = 'https://asan.shaparak.ir';
 
       const refIdInput = document.createElement('input');
@@ -323,12 +305,12 @@ const PortalPickerDrawer = ({
   const handleNativePayment = useCallback((portalData: any) => {
     const { authority, method, url } = portalData;
 
-    if (method === PaymentMethods.zarinpal && url) {
-      setPaymentUrl(url);
-    } else {
+    if (method === PaymentMethods.ap) {
       const formHTML = generatePaymentHTML({ authority, method });
       const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(formHTML)}`;
       setPaymentUrl(dataUrl);
+    } else {
+      setPaymentUrl(url);
     }
 
     setShowPaymentView(true);
@@ -337,21 +319,18 @@ const PortalPickerDrawer = ({
   // Handle payment navigation changes (native only)
   const handleWebViewNavigationStateChange = useCallback((navState: any) => {
     const { url } = navState;
-
+    console.log(url);
     // Check for payment result URLs
-    if (url.includes('payment-result') ||
-      url.includes('callback') ||
-      url.includes('verify') ||
-      url.includes('return')) {
+    if (url.includes('payment/verify')){
 
       setShowPaymentView(false);
 
       try {
         const urlParams = new URLSearchParams(url.split('?')[1] || '');
-        const status = urlParams.get('status') || urlParams.get('State');
+        const status = urlParams.get('status') || urlParams.get('Status') || urlParams.get('State')
         const authority = urlParams.get('authority') || urlParams.get('Authority');
         const refId = urlParams.get('RefId') || urlParams.get('refId');
-
+        console.log(status, authority, refId);
         if (status === 'OK' || status === 'success' || refId) {
           Toast.show({
             type: 'success',
@@ -359,8 +338,8 @@ const PortalPickerDrawer = ({
           });
           onPaymentComplete?.({
             status: 'success',
-            authority,
-            refId,
+            authority: authority || '',
+            refId: refId || '',
             method: portal
           });
         } else {
@@ -370,7 +349,7 @@ const PortalPickerDrawer = ({
           });
           onPaymentComplete?.({
             status: 'failed',
-            error: status,
+            error: status || '',
             method: portal
           });
         }
@@ -408,29 +387,7 @@ const PortalPickerDrawer = ({
           text: 'تایید',
           onPress: async () => {
             setIsLoading(true);
-            try {
-              // Process credit payment
-              const result = await services.cart.processCreditPayment();
-              if (result.success) {
-                Toast.show({
-                  type: 'success',
-                  text1: 'پرداخت از کیف پول با موفقیت انجام شد',
-                });
-                onPaymentComplete?.({ status: 'success', method: 'credit' });
-              } else {
-                Toast.show({
-                  type: 'error',
-                  text1: 'خطا در پرداخت از کیف پول',
-                });
-              }
-            } catch (error) {
-              Toast.show({
-                type: 'error',
-                text1: 'خطا در پرداخت از کیف پول',
-              });
-            } finally {
-              setIsLoading(false);
-            }
+
             onClose?.();
           },
         },
@@ -445,11 +402,6 @@ const PortalPickerDrawer = ({
         type: 'error',
         text1: 'لطفا یکی از درگاه های زیر را انتخاب کنید',
       });
-      return;
-    }
-
-    if (portal === PaymentMethods.credit) {
-      handleCreditPayment();
       return;
     }
 
@@ -504,11 +456,6 @@ const PortalPickerDrawer = ({
     }
   }, [paymentUrl, onClose]);
 
-  useEffect(() => {
-    if (isCredit && userReducer?.walletBalance >= finalPrice) {
-      setPortal(PaymentMethods.credit);
-    }
-  }, [isCredit, userReducer?.walletBalance, finalPrice]);
 
   // Render WebView for native platforms
   if (showPaymentView && Platform.OS !== 'web' && WebView) {
@@ -540,7 +487,7 @@ const PortalPickerDrawer = ({
           scalesPageToFit={true}
           mixedContentMode="compatibility"
           userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15"
-          onError={(syntheticEvent) => {
+          onError={(syntheticEvent: any) => {
             const { nativeEvent } = syntheticEvent;
             console.warn('WebView error:', nativeEvent);
             Toast.show({

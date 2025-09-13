@@ -3,7 +3,8 @@ import { translate as t } from '@/src/configs/translations/staticTranslations';
 import { LoginForm, LoginRequest, LoginResponse, VerifyRequest, VerifyResponse } from '@/src/features/auth/authTypes';
 import { ApiResponse } from '@/src/types/api';
 import { ServiceDependencies } from '@/src/types/services';
-import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Toast } from 'toastify-react-native';
 
 export class AuthServiceError extends Error {
   constructor(message: string, public code?: string) {
@@ -94,7 +95,7 @@ export class AuthService {
 
   async logout(): Promise<boolean> {
     try {
-      await this.deps.storage.removeToken();
+      await AsyncStorage.clear();
 
       // Clear any other auth-related data
       // if (this.deps.sessionService) {
@@ -210,7 +211,7 @@ export class AuthService {
   async completeProfile(data: LoginForm): Promise<ApiResponse<VerifyResponse>> {
     if (!data.name || data.name.length < 3) {
       Toast.show({
-        type: 'warning',
+        type: 'warn',
         text1: 'لطفا نام خود را به درستی وارد کنید',
         position: 'bottom',
       });
@@ -219,7 +220,7 @@ export class AuthService {
 
     if (!data.lastName || data.lastName.length < 3) {
       Toast.show({
-        type: 'warning',
+        type: 'warn',
         text1: 'لطفا نام خانوادگی خود را به درستی وارد کنید',
         position: 'bottom',
       });
@@ -228,7 +229,7 @@ export class AuthService {
 
     if (!data.nationalCode || data.nationalCode.length !== 10) {
       Toast.show({
-        type: 'warning',
+        type: 'warn',
         text1: 'لطفا کد ملی خود را به درستی وارد کنید',
         position: 'bottom',
       });

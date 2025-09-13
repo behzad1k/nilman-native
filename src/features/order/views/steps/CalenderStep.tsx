@@ -1,19 +1,18 @@
-import TextInputView from '@/src/components/ui/TextInputView';
 import TextView from '@/src/components/ui/TextView';
 import { calenderStepStyles } from '@/src/features/order/styles/calenderStep';
 import { Form, Step } from '@/src/features/order/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
-import Toast from 'react-native-toast-message';
+import { Toast } from 'toastify-react-native';
 import moment from 'jalali-moment';
 
 interface Props {
@@ -24,8 +23,7 @@ interface Props {
 
 const CalendarStep = ({ setSelected, selected }: Props) => {
   const [calTab, setCalTab] = useState(0);
-  const { control, watch } = useForm();
-  const watchDiscount = watch('discount') as string;
+  const { t } = useTranslation();
   const styles = useThemedStyles(createStyles);
 
   const calendarTabs = useMemo(() => {
@@ -73,10 +71,7 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
 
   const handleTimeSlotPress = useCallback((timeSlot: any) => {
     if (timeSlot.disabled) {
-      Toast.show({
-        type: 'error',
-        text1: 'تمامی استایلیست ها در این زمان مشغول می باشند',
-      });
+      Toast.warn(t('error.noAvailableStylistInDateTime'));
     } else {
       setSelected(prev => ({
         ...prev,
@@ -128,7 +123,6 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
           timeSlot.disabled && styles.disabledTimeSlot
         ]}
         onPress={() => handleTimeSlotPress(timeSlot)}
-        disabled={timeSlot.disabled}
       >
         <TextView style={[
           styles.timeSlotText,
@@ -141,33 +135,10 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
     ));
   };
 
-  useEffect(() => {
-    setSelected(prev => ({
-      ...prev,
-      discount: watchDiscount
-    }));
-  }, [watchDiscount, setSelected]);
-
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={calenderStepStyles.content}>
         <TextView style={styles.hintText}>لطفا تاریخ و ساعت را انتخاب کنید</TextView>
-
-        {/* <View style={calenderStepStyles.discountContainer}> */}
-        {/*   <Controller */}
-        {/*     name="discount" */}
-        {/*     control={control} */}
-        {/*     defaultValue="" */}
-        {/*     render={({ field: { onChange, value } }) => ( */}
-        {/*       <TextInputView */}
-        {/*         value={value} */}
-        {/*         onChangeText={onChange} */}
-        {/*         style={styles.discountInput} */}
-        {/*         placeholder="کد تخفیف را وارد کنید" */}
-        {/*       /> */}
-        {/*     )} */}
-        {/*   /> */}
-        {/* </View> */}
 
         <View style={styles.calendarContainer}>
           <ScrollView

@@ -63,7 +63,7 @@ const CartItem = ({ item, deleteCartItem }: ICartItemProps) => {
               {findAncestors(services, attribute.serviceId)
                 .slice(0, 3)
                 .reverse()
-                .reduce((acc, curr, index) => acc + (index != 0 ? ' -> ' : '') + curr.title, '') +
+                .reduce((acc, curr, index) => acc + (index != 0 ? ' -> ' : '') + curr?.title, '') +
                 ' ' + attribute.count + 'x '}
             </TextView>
             {attribute.addOns?.map((e, addOnIndex) => (

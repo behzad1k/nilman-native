@@ -19,12 +19,15 @@ import { colors } from '@/src/styles/theme/colors';
 import { OrderNavigationProp, OrderRouteProp } from '@/src/types/navigation';
 import { Theme } from '@/src/types/theme';
 import { DEFAULT_FORM, STEPS } from '@/src/utils/constants';
+import API_ERRORS from '@/src/utils/errors';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { router } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
-import Toast from 'react-native-toast-message';
+import { Toast } from 'toastify-react-native';
 
 const OrderPage = () => {
   const navigation = useNavigation<OrderNavigationProp>();
@@ -36,6 +39,7 @@ const OrderPage = () => {
   const { isAuthenticated } = useAuth();
   const { theme } = useTheme();
   const { openDrawer } = useDrawer();
+  const { t } = useTranslation();
   const allServices = useAppSelector(state => state.service.allServices);
   const dispatch = useAppDispatch();
   const styles = useThemedStyles(createStyles);
@@ -54,16 +58,15 @@ const OrderPage = () => {
   const totalPrice = useMemo(() => {
     return selected.attributes?.reduce((total, attr) => total + attr.price, 0) || 0;
   }, [selected.attributes]);
-
   const loadSavedData = useCallback(async () => {
     try {
-      const [savedOrder, savedStep] = await Promise.all([
-        services.order.getSavedOrder(),
-        services.order.getSavedStep()
-      ]);
 
-      if (savedOrder) setSelected(savedOrder);
-      if (savedStep) setStep(savedStep);
+      const savedOrder = await services.order.getSavedOrder();
+      console.log(savedOrder);
+      if (savedOrder) {
+        setSelected(savedOrder);
+        setStep(savedOrder.step);
+      };
     } catch (error) {
       console.error('Error loading saved data:', error);
     }
@@ -72,24 +75,12 @@ const OrderPage = () => {
   const saveOrderData = useCallback(async () => {
     try {
       await Promise.all([
-        AsyncStorage.setItem('new-order', JSON.stringify(selected)),
-        AsyncStorage.setItem('step', JSON.stringify(step))
+        services.order.setSavedOrder(selected, step),
       ]);
     } catch (error) {
       console.error('Error saving order data:', error);
     }
   }, [selected, step]);
-
-  const clearSavedData = useCallback(async () => {
-    try {
-      await Promise.all([
-        AsyncStorage.removeItem('new-order'),
-        AsyncStorage.removeItem('step')
-      ]);
-    } catch (error) {
-      console.error('Error clearing saved data:', error);
-    }
-  }, []);
 
   const handleChangeStep = useCallback(async (action: 'next' | 'prev') => {
     if (action === 'next') {
@@ -108,7 +99,7 @@ const OrderPage = () => {
       }
     } else {
       if (!selected?.attributeStep && !selected?.service) {
-        await clearSavedData();
+        await services.order.removeSavedOrder();
       }
 
       if (step.index === 1) {
@@ -131,7 +122,7 @@ const OrderPage = () => {
         setStep(STEPS[step.index - 1]);
       }
     }
-  }, [step, selected, isAuthenticated, allServices, openDrawer, saveOrderData, clearSavedData]);
+  }, [step, selected, isAuthenticated, allServices, openDrawer, saveOrderData]);
 
   const handleBackPress = useCallback(() => {
     if (step.index > 0) {
@@ -146,25 +137,20 @@ const OrderPage = () => {
       const res = await submitOrder(() => services.order.submitOrder(selected));
 
       if (res.code === 201) {
-        await clearSavedData();
+        await services.order.removeSavedOrder();
         setSelected(DEFAULT_FORM);
+        setStep(STEPS[0]);
         dispatch(cart());
 
         Toast.show({
           type: 'success',
           text1: 'سفارش شما با موفقیت ثبت شد',
         });
+        await new Promise(resolve => setTimeout(resolve, 300));
+        router.push('/cart');
 
-        setTimeout(() => navigation.navigate('cart'), 300);
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: 'خطا در ثبت سفارش',
-        });
-
-        if (res.code === 1015) {
-          dispatch(cart());
-        }
+      } else{
+        Toast.error(t(API_ERRORS[res.code] ? `api_error.${API_ERRORS[res.code]}` : 'error.general'));
       }
     } catch (error) {
       Toast.show({
@@ -172,7 +158,7 @@ const OrderPage = () => {
         text1: 'خطا در ثبت سفارش',
       });
     }
-  }, [selected, submitOrder, clearSavedData, dispatch, navigation]);
+  }, [selected, submitOrder, dispatch, navigation]);
 
   const toggleUrgentMode = useCallback((value: boolean) => {
     setSelected(prev => ({
@@ -206,10 +192,13 @@ const OrderPage = () => {
   };
 
   useEffect(() => {
+    // AsyncStorage.clear();
+    console.log('loading...');
     loadSavedData();
   }, [loadSavedData]);
 
   useEffect(() => {
+
     setSelected(prev => ({
       ...prev,
       price: totalPrice

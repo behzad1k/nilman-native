@@ -10,8 +10,10 @@ import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
 import { formatPrice } from '@/src/utils/funs';
 import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Minus, Plus, Trash2 } from 'react-native-feather';
+import { Toast } from 'toastify-react-native';
 
 interface IAddOnDrawerProps {
   currentAttribute: Service;
@@ -30,6 +32,7 @@ const AddOnDrawer = ({
                      }: IAddOnDrawerProps) => {
   const serviceReducer = useAppSelector(state => state.service);
   const styles = useThemedStyles(createStyles);
+  const { t } = useTranslation();
 
   const sortedAddOns = useMemo(() => {
     return currentAttribute?.addOns
@@ -44,7 +47,7 @@ const AddOnDrawer = ({
       const currentOption = newOptions[currentAttribute.id] || { count: 1 };
       const currentAddOns = currentOption.addOns || {};
 
-      if (!prev.isMulti && Object.keys(currentAddOns).length > 0) {
+      if (!prev.isMulti) {
         // Replace existing add-on in single mode
         newOptions[currentAttribute.id] = {
           ...currentOption,
@@ -70,7 +73,7 @@ const AddOnDrawer = ({
       return { ...prev, options: newOptions };
     });
   }, [currentAttribute.id, setSelected]);
-
+  console.log(selected.options);
   const handleQuantityChange = useCallback((secAttr: Service, newCount: number) => {
     setSelected(prev => {
       const newOptions = { ...prev.options };
@@ -79,7 +82,14 @@ const AddOnDrawer = ({
       if (!currentOption?.addOns) return prev;
 
       if (newCount <= 0) {
-        delete currentOption.addOns[secAttr.id];
+        if (Object.values(currentOption?.addOns).length > 1) {
+          delete currentOption.addOns[secAttr.id];
+        } else {
+          Toast.show({
+            type: 'warn',
+            text2: t('error.atLeastOneAddOn')
+          })
+        }
       } else {
         currentOption.addOns[secAttr.id] = {
           ...currentOption.addOns[secAttr.id],
@@ -87,15 +97,24 @@ const AddOnDrawer = ({
         };
       }
 
+      currentOption.count = Object.values(currentOption?.addOns)?.reduce((acc, curr) => acc + curr.count, 0);
+
       return { ...prev, options: newOptions };
     });
   }, [currentAttribute.id, setSelected]);
 
   const handleConfirm = useCallback(() => {
     setShouldPickAddOns(false);
-
     const currentOption = selected.options[currentAttribute.id];
+
     if (currentOption?.addOns) {
+      if(Object.values(currentOption?.addOns || {})?.length == 0){
+        Toast.show({
+          type: 'warn',
+          text2: t('error.atLeastOneAddOn')
+        })
+        return;
+      }
       const colorService = Object.keys(currentOption.addOns).find(e =>
         serviceReducer.allServices?.some(j =>
           e === j.id.toString() && j.hasColor
@@ -151,7 +170,7 @@ const AddOnDrawer = ({
                         style={sharedOrderStyles.quantityButton}
                         onPress={(e) => {
                           e.stopPropagation();
-                          handleQuantityChange(secAttr, Math.max(1, count - 1));
+                          handleQuantityChange(secAttr, count - 1);
                         }}
                       >
                         {count === 1 ? (

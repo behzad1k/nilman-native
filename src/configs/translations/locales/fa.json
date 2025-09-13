@@ -1,21 +1,4 @@
 {
-  "welcome": "Welcome",
-  "hello": "Hello {{name}}!",
-  "buttons": {
-    "submit": "Submit",
-    "cancel": "Cancel",
-    "save": "Save"
-  },
-  "navigation": {
-    "home": "Home",
-    "profile": "Profile",
-    "settings": "Settings"
-  },
-  "messages": {
-    "loading": "Loading...",
-    "error": "Something went wrong",
-    "success": "Operation completed successfully"
-  },
   "general": {
     "newOrder": "سفارش جدید",
     "loading": "در حال بارگذاری",
@@ -25,12 +8,32 @@
     "changeLanguage": "تغییر زبان",
     "selectLanguage": "زبان خود را انتخاب کنید",
     "selectTheme": "تم رنگی را انتخاب کنید",
-    "changeTheme": "تغییر تم رنگی"
+    "changeTheme": "تغییر تم رنگی",
+    "welcome": "خوش آمدید"
   },
   "validation": {
     "phoneNumberInvalid": "شماره تلفن نامعتبر است",
     "phoneNumberNotSet": "شماره تلفن وارذ نشده است",
     "otpInvalid": "کد تایید نامعتبر است",
     "otpNotSet": "لطفا کد تایید را وارد کنید"
+  },
+  "error": {
+    "general": "مشکلی پیش آمده لطفا دوباره امتحان کنید",
+    "atLeastOneAddOn": "باید حداقل یکی از خدمات اجباری را انتخاب کنید",
+    "duplicateCart": "این سرویس را در سبد خرید خود تعیین وضعیت کنید",
+    "noAvailableStylistInDateTime": "تمامی استایلیست ها در این زمان مشغول می باشند"
+  },
+  "api_error": {
+    "wrongDiscountCode": "کد تخفیف اشتباه است",
+    "discountCodeInactive": "کد تخفیف فعال نیست",
+    "discountCodeMaxedOut": "دفعات مجاز کد تخفیف به اتمام رسیده است",
+    "unAuthorizedDiscountCode": "این کد تخفیف برای شما غیرمجاز است",
+    "invalidDiscountService": "کد تخفیف برای این خدمت مجاز نمی باشد",
+    "discountCodeExpired": "کد تخفیف منقضی شده است",
+    "discountCodeInUse": "کد تخفیف قبلا استفاده شده است",
+    "invalidDateTimeOrder": "زمان انتخاب شده مجاز نمی باشد. سفارش را دوباره ثبت کنید",
+    "minimumCartNotReached": "حداقل سبد خرید مبلغ ۵۰۰,۰۰۰ تومان می باشد",
+    "unableToDeletePaidOrder": "امکان حذف سفارش پرداخت شده نیست",
+    "unableToSubmitDifferentOrderServices": "ثبت سفارش از دو لاین مختلف در یک سفارش امکان پذیر نمی باشد"
   }
 }

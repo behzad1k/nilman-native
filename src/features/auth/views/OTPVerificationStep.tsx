@@ -18,10 +18,10 @@ import { Theme } from '@/src/types/theme';
 import { spacing } from '@/src/styles/theme/spacing';
 import { persianNumToEn } from '@/src/utils/funs';
 import { STORAGE_KEYS, StorageService } from '@/src/utils/storage';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import Toast from 'react-native-toast-message';
+import { StyleSheet, TouchableOpacity, View, Platform } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 interface OtpVerificationStepProps {
   formMethods: UseFormReturn<LoginForm>;
@@ -37,24 +37,29 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
                                                                           onLoginSuccess,
                                                                         }) => {
   const { getValues } = formMethods;
-  const [code, setCode] = useState<string[]>([]);
+  const [code, setCode] = useState<string[]>(new Array(6).fill(''));
   const styles = useThemedStyles(createStyles);
   const { closeDrawer } = useDrawer();
   const { checkAuthStatus } = useAuth();
+  const isVerifying = useRef(false);
+
   const {
     formattedTime,
     canResend,
     startTimer,
     resetTimer
   } = useOtpTimer();
+
   const {
     execute: codeSubmit,
     loading: isLoading
   } = useAsyncOperation();
+
   const {
     execute: initialApis,
     loading: initialApisLoading
   } = useAsyncOperation();
+
   const { t } = useLanguage();
 
   const handleResendCode = useCallback(async () => {
@@ -68,7 +73,8 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
       await services.auth.login({ phoneNumber });
       resetTimer();
       startTimer();
-      setCode([]);
+      setCode(new Array(6).fill(''));
+      isVerifying.current = false;
 
       Toast.show({
         text1: t('message.otpResent'),
@@ -96,22 +102,29 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
       );
     } catch (error) {
       console.error('Error loading user data:', error);
-      // Don't show error toast here as login was successful
     }
   }, [dispatch, initialApis]);
 
   const verifyOtp = useCallback(async () => {
-    if (code.length !== 6) {
-      Toast.show({
-        text1: t('error.otpInvalid'),
-        type: 'error'
-      });
+    const codeString = code.join('');
+
+    // Prevent multiple simultaneous verification attempts
+    if (isVerifying.current || codeString.length !== 6) {
+      if (codeString.length !== 6) {
+        Toast.show({
+          text1: t('error.otpInvalid'),
+          type: 'error'
+        });
+      }
       return;
     }
+
+    isVerifying.current = true;
 
     try {
       const tempToken = await services.auth.getTempToken();
       console.log(tempToken);
+
       if (!tempToken) {
         Toast.show({
           text1: t('error.sessionExpired'),
@@ -122,7 +135,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
       }
 
       const res = await codeSubmit(() => services.auth.verifyOTP({
-        code: persianNumToEn(code.join('')),
+        code: persianNumToEn(codeString),
         token: tempToken,
       }));
 
@@ -149,9 +162,10 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
       }
 
       Toast.show({
-        text1: t('message.welcome'),
+        text1: t('general.welcome'),
         type: 'success'
       });
+
       // Close the drawer
       closeDrawer('login');
 
@@ -171,7 +185,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
             text1: t('error.otpInvalid'),
             type: 'error'
           });
-          setCode([]);
+          setCode(new Array(6).fill(''));
         } else {
           Toast.show({
             text1: t('error.otpNotVerified'),
@@ -184,6 +198,8 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
           type: 'error'
         });
       }
+    } finally {
+      isVerifying.current = false;
     }
   }, [
     code,
@@ -199,25 +215,38 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
 
   const handleGoBack = useCallback(() => {
     resetTimer();
-    setCode([]);
+    setCode(new Array(6).fill(''));
+    isVerifying.current = false;
     setLoginState('phoneNumber');
   }, [resetTimer, setLoginState]);
 
   useEffect(() => {
     startTimer();
+    // Initialize code state
+    setCode(new Array(6).fill(''));
+    isVerifying.current = false;
 
     // Cleanup on unmount
     return () => {
       resetTimer();
+      isVerifying.current = false;
     };
   }, [startTimer, resetTimer]);
 
-  // Auto-submit when code is complete
+  // Auto-submit when code is complete (with debounce)
   useEffect(() => {
-    if (code.length === 6 && !isLoading) {
-      verifyOtp();
+    const codeString = code.join('');
+    if (codeString.length === 6 && !isLoading && !isVerifying.current) {
+      // Add a small delay to prevent rapid-fire submissions
+      const timeoutId = setTimeout(() => {
+        verifyOtp();
+      }, 300);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [code, isLoading, verifyOtp]);
+
+  const isButtonDisabled = code.join('').length !== 6 || isLoading || initialApisLoading;
 
   return (
     <View style={styles.loginBox}>
@@ -269,10 +298,10 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
         </ButtonView>
 
         <ButtonView
-          style={styles.loginButton}
+          style={[styles.loginButton, isButtonDisabled ? styles.loginButtonDisabled : {  }]}
           onPress={verifyOtp}
           loading={isLoading || initialApisLoading}
-          disabled={code.length !== 6}
+          disabled={isButtonDisabled}
         >
           <TextView style={styles.loginButtonTextView}>ثبت</TextView>
         </ButtonView>
@@ -360,6 +389,9 @@ const createStyles = (theme: Theme) =>
       paddingHorizontal: 20,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    loginButtonDisabled: {
+      backgroundColor: '#cccccc',
     },
     cancelButton: {
       backgroundColor: '#6c757d',

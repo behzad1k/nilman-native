@@ -23,7 +23,7 @@ const CartPage = () => {
     if (items.length > 0) {
       switch (tab) {
         case(CartPageTabEnum.Created):
-          return <CartTab items={items}/>;
+          return <CartTab />;
         default:
           return items.map(item => <OrderCard key={item.id} item={item}/>);
         // return <OrderTab items={items} />
@@ -94,7 +94,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   contentContainer: {
     paddingTop: 20,
-    paddingBottom: 70,
+    paddingBottom: 50,
     paddingHorizontal: 8,
     gap: 20,
     backgroundColor: theme.background,

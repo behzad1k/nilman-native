@@ -1,3 +1,4 @@
+import TextInputView from '@/src/components/ui/TextInputView';
 import TextView from '@/src/components/ui/TextView';
 import { serviceDrawerStyles } from '@/src/features/order/styles/serviceDrawer';
 import { Form } from '@/src/features/order/types';
@@ -67,7 +68,6 @@ const ServiceDrawer = ({
           const isSelected = isAttributeSelected(secAttr);
           const count = selected?.options[secAttr.id]?.count || 1;
           const price = secAttr.price * (selected.isUrgent ? 1.5 : 1);
-
           return (
             <TouchableOpacity
               key={secAttr.slug}
@@ -88,6 +88,7 @@ const ServiceDrawer = ({
                     <View style={serviceDrawerStyles.quantityContainer}>
                       <TouchableOpacity
                         style={serviceDrawerStyles.quantityButton}
+                        disabled={selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) > 0 : true}
                         onPress={(e) => {
                           e.stopPropagation();
                           handleQuantityChange(secAttr, count - 1);
@@ -100,12 +101,15 @@ const ServiceDrawer = ({
                         )}
                       </TouchableOpacity>
 
-                      <TextInput
+                      <TextInputView
                         style={serviceDrawerStyles.quantityInput}
                         value={count.toString()}
+                        // editable={selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns).reduce((acc, curr) => acc + curr.count, 0) == 0 : true}
                         onChangeText={(text) => {
-                          const newCount = parseInt(text) || 0;
-                          handleQuantityChange(secAttr, newCount);
+                          if (selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) == 0 : true) {
+                            const newCount = parseInt(text) || 0;
+                            handleQuantityChange(secAttr, newCount);
+                          }
                         }}
                         keyboardType="numeric"
                         textAlign="center"
@@ -114,6 +118,7 @@ const ServiceDrawer = ({
 
                       <TouchableOpacity
                         style={serviceDrawerStyles.quantityButton}
+                        disabled={selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) > 0 : true}
                         onPress={(e) => {
                           e.stopPropagation();
                           handleQuantityChange(secAttr, count + 1);

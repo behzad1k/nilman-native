@@ -27,21 +27,22 @@ class CartService {
     }
   }
 
-  async sendPortal(data): Promise<ApiResponse> {
+  async checkDiscountCode(discount: string): Promise<ApiResponse> {
+    return await this.deps.apiClient.post(ENDPOINTS.ORDER.DISCOUNT, { discount })
+  }
+
+  async sendPortal(data: any): Promise<ApiResponse> {
     return await this.deps.apiClient.post(ENDPOINTS.ORDER.PAY, data)
   }
 
-  async portalCallback(data): Promise<any> {
-    return await this.deps.apiClient.post(ENDPOINTS.ORDER.PAYMENT_VERIFY, data)
-  }
-
   async processCreditPayment(): Promise<any> {
-    return await this.deps.apiClient.post(ENDPOINTS.ORDER.PAYMENT_VERIFY, data)
+    const res: ApiResponse = await this.deps.apiClient.post(ENDPOINTS.ORDER.PAY, { isCredit: true, method: 'credit' })
+    return await this.deps.apiClient.post(ENDPOINTS.ORDER.PAYMENT_VERIFY, { authority: res.data?.authority })
   }
 
   async reOrder(data: Form): Promise<void> {
     try {
-      await this.deps.storage.setItem(STORAGE_KEYS.NEW_ORDER, JSON.stringify(data))
+      await this.deps.storage.setItem(STORAGE_KEYS.NEW_ORDER, JSON.stringify({ ...data, timestamp: new Date().toISOString() }));
       await this.deps.storage.setItem(STORAGE_KEYS.ORDER_STEP, JSON.stringify({
         name: 'address',
         index: 2

@@ -8,7 +8,9 @@ import Typography from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
 import { getServiceIcon } from '@/src/utils/funs';
 import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 interface Props {
   selected: Form;
@@ -20,6 +22,7 @@ const ServiceStep = ({ selected, setSelected, setStep }: Props) => {
   const services = useAppSelector(state => state.service.services);
   const cart = useAppSelector(state => state.order.cart);
   const styles = useThemedStyles(createStyles);
+  const { t } = useTranslation();
 
   const filteredServices = useMemo(() => {
     return services
@@ -29,7 +32,10 @@ const ServiceStep = ({ selected, setSelected, setStep }: Props) => {
 
   const handleSelectService = useCallback((service: Service) => {
     if (cart.find(e => e.serviceId === service.id)) {
-      // Could show toast message here about existing order
+      Toast.show({
+        type: 'warn',
+        text1: t('error.duplicateCart')
+      })
       return;
     }
 

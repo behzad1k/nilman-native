@@ -1,6 +1,6 @@
 import { AuthProvider } from '@/src/components/contexts/AuthContext';
 import { DrawerProvider } from '@/src/components/contexts/DrawerContext';
-import { LanguageProvider } from '@/src/components/contexts/LanguageContext';
+import { LanguageProvider, useI18nContext } from '@/src/components/contexts/LanguageContext';
 import { LoadingProvider } from '@/src/components/contexts/LoadingContext';
 import { SplashProvider, useSplash } from '@/src/components/contexts/SplashContext';
 import { ThemeProvider, useTheme } from '@/src/components/contexts/ThemeContext';
@@ -9,15 +9,18 @@ import { Drawer } from '@/src/components/ui/Drawer';
 import { LoadingGlobal } from '@/src/components/ui/LoadingGlobal';
 import { store } from '@/src/configs/redux/store';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
+import { FontFamilies } from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
-import { KeyboardProvider } from "react-native-keyboard-controller";
+import ToastManager from 'toastify-react-native';
+import { ToastManagerProps } from 'toastify-react-native/utils/interfaces';
 
 function AppContent() {
   const {
@@ -29,7 +32,13 @@ function AppContent() {
     isDark
   } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const { isRTL } = useI18nContext()
 
+  const toastConfig: ToastManagerProps = {
+    isRTL: isRTL,
+    theme: isDark? 'dark' : 'light',
+    topOffset: 60
+  }
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -46,6 +55,7 @@ function AppContent() {
               backgroundColor={theme.background}
             />
             {showSplash && <Splash textValue={textValue}/>}
+            <ToastManager {...toastConfig} />
           </Drawer>
         </DrawerProvider>
       </GestureHandlerRootView>
@@ -70,14 +80,14 @@ export default function RootLayout() {
       <LoadingProvider>
         <LanguageProvider>
           <AuthProvider>
-            <SplashProvider>
-              <KeyboardProvider>
-              <ThemeProvider>
-                <AppContent/>
-                <LoadingGlobal/>
-              </ThemeProvider>
-              </KeyboardProvider>
-            </SplashProvider>
+              <SplashProvider>
+                <KeyboardProvider>
+                  <ThemeProvider>
+                    <AppContent/>
+                    <LoadingGlobal/>
+                  </ThemeProvider>
+                </KeyboardProvider>
+              </SplashProvider>
           </AuthProvider>
         </LanguageProvider>
       </LoadingProvider>

@@ -1,3 +1,4 @@
+import TextView from '@/src/components/ui/TextView';
 import { mediaDrawerStyles } from '@/src/features/order/styles/mediaDrawer';
 import { Form } from '@/src/features/order/types';
 import { Service } from '@/src/features/service/types';
@@ -103,12 +104,12 @@ const MediaDrawer = ({
       <View style={mediaDrawerStyles.modalOverlay}>
         <View style={mediaDrawerStyles.mediaModal}>
           <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={mediaDrawerStyles.description}>
+            <TextView style={mediaDrawerStyles.description}>
               اگر طرح خاصی برای خدمت انتخابی خود در نظر دارید عکس آن را در اینجا بارگزاری نمایید و یا لینک پینترست آن را وارد کنید
-            </Text>
+            </TextView>
 
             <View style={mediaDrawerStyles.inputContainer}>
-              <Text style={mediaDrawerStyles.inputLabel}>لینک Pinterest</Text>
+              <TextView style={mediaDrawerStyles.inputLabel}>لینک Pinterest</TextView>
               <TextInput
                 style={mediaDrawerStyles.textInput}
                 value={currentMediaData?.pinterest || ''}
@@ -142,14 +143,14 @@ const MediaDrawer = ({
                 style={mediaDrawerStyles.confirmButton}
                 onPress={handleClose}
               >
-                <Text style={mediaDrawerStyles.confirmButtonText}>تایید</Text>
+                <TextView style={mediaDrawerStyles.confirmButtonText}>تایید</TextView>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={mediaDrawerStyles.cancelButton}
                 onPress={handleClose}
               >
-                <Text style={mediaDrawerStyles.cancelButtonText}>بازگشت</Text>
+                <TextView style={mediaDrawerStyles.cancelButtonText}>بازگشت</TextView>
               </TouchableOpacity>
             </View>
           </ScrollView>

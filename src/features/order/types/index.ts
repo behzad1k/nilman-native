@@ -46,10 +46,15 @@ export interface Form {
   options: FormOptions;
 }
 
+export interface OrderStorage extends Form{
+  step: Step,
+  timestamp: Date,
+}
+
 export interface OrderRequest {
   service?: string;
   attributes: FormOptions;
-  addressId: number;
+  addressId?: number;
   workerId?: number;
   date: string | null;
   time: number | null;

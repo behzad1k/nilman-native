@@ -13,11 +13,11 @@ type AddressManageRouteProp = RouteProp<RootStackParamList, 'address/manage'>;
 type AddressManageNavigationProp = StackNavigationProp<RootStackParamList, 'address/manage'>;
 
 const AddAddress = () => {
-  const navigation = useNavigation<AddressManageNavigationProp>();
   const route = useRoute<AddressManageRouteProp>();
   const styles = useThemedStyles(createStyles);
 
   route.params?.id;
+
   return (
     <SafeAreaView style={styles.container}>
       <Header onBackPress={() => router.push('/')} />

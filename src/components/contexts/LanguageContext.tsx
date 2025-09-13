@@ -7,6 +7,7 @@ interface I18nContextType {
   currentLanguage: string;
   changeLanguage: (language: string) => Promise<void>;
   t: (key: string, options?: any) => string;
+  isRTL: boolean;
 }
 
 const LanguageContext = createContext<I18nContextType>({
@@ -14,7 +15,10 @@ const LanguageContext = createContext<I18nContextType>({
   currentLanguage: 'fa',
   changeLanguage: async () => {},
   t: () => '',
+  isRTL: true,
 });
+
+const RTL_LANGUAGES = ['fa']
 
 export const useI18nContext = () => {
   const context = useContext(LanguageContext);
@@ -31,6 +35,7 @@ interface I18nProviderProps {
 export const LanguageProvider: React.FC<I18nProviderProps> = ({ children }) => {
   const [isLanguageInitialized, setIsLanguageInitialized] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('fa');
+  const [isRTL, setIsRTL] = useState(true);
 
   // Use react-i18next hook
   const { t: i18nT, i18n } = useTranslation();
@@ -54,7 +59,7 @@ export const LanguageProvider: React.FC<I18nProviderProps> = ({ children }) => {
     try {
       await i18n.changeLanguage(language);
       setCurrentLanguage(language);
-
+      setIsRTL(RTL_LANGUAGES.includes(language));
       // Update service i18n
       updateServiceI18nLocale(language);
     } catch (error) {
@@ -72,7 +77,8 @@ export const LanguageProvider: React.FC<I18nProviderProps> = ({ children }) => {
         isLanguageInitialized,
         currentLanguage,
         changeLanguage,
-        t
+        t,
+        isRTL
       }}
     >
       {children}

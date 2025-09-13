@@ -51,7 +51,7 @@ export default {
             API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL,
             API_TIMEOUT: process.env.EXPO_PUBLIC_API_TIMEOUT,
             APP_ENV: process.env.EXPO_PUBLIC_APP_ENV,
-        }
+        },
     },
     plugins: [
         "expo-router",

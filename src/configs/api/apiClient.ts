@@ -49,12 +49,12 @@ class ApiClient {
 
   private async handleResponse<T>(response: Response): Promise<T> {
     const contentType = response.headers.get('content-type');
-
     if (!response.ok) {
       let errorData: any;
 
       if (contentType?.includes('application/json')) {
         errorData = await response.json();
+        return errorData;
       } else {
         errorData = { message: await response.text() };
       }
@@ -96,6 +96,7 @@ class ApiClient {
       return await this.handleResponse<T>(response);
     } catch (error) {
       if (error instanceof Error && !(error as any).code) {
+
         // Network or other errors
         const apiError: ApiError = {
           code: 0,

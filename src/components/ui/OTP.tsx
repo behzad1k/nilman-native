@@ -1,11 +1,11 @@
 import React, { ReactElement, useEffect, useRef, useState, useCallback } from 'react';
-import { View, TextInput, StyleSheet, Clipboard } from 'react-native';
+import { View, TextInput, StyleSheet, Clipboard, Platform } from 'react-native';
 
 interface OTPProps {
   code: string[];
   setCode: React.Dispatch<React.SetStateAction<string[]>>;
   onComplete: () => void;
-  disabled?: boolean; // Add this to prevent input during verification
+  disabled?: boolean;
 }
 
 export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
@@ -13,23 +13,36 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
   const hasTriggeredComplete = useRef<boolean>(false);
   const lastCompleteCode = useRef<string>('');
+  const isAutoFilling = useRef<boolean>(false);
 
   const setCodeData = (value: string, index: number) => {
     if (disabled) return;
 
-    // Handle multiple characters (paste scenario)
+    // Handle multiple characters (paste scenario or auto-fill)
     if (value.length > 1) {
       const newCode = [...code];
       const chars = value.slice(0, 6).split('');
+
+      // Clear existing code first
+      for (let i = 0; i < 6; i++) {
+        newCode[i] = '';
+      }
+
+      // Fill with new characters
       chars.forEach((char, i) => {
-        if (index + i < 6) {
-          newCode[index + i] = char;
+        if (i < 6) {
+          newCode[i] = char;
         }
       });
+
       setCode(newCode);
-      // Focus on the next empty input or last input
-      const nextIndex = Math.min(index + chars.length, 5);
-      inputRefs.current[nextIndex]?.focus();
+      hasTriggeredComplete.current = false;
+
+      // Focus on the last filled input
+      const nextIndex = Math.min(chars.length - 1, 5);
+      setTimeout(() => {
+        inputRefs.current[nextIndex]?.focus();
+      }, 100);
       return;
     }
 
@@ -54,7 +67,6 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
         // Clear current input
         newCode[index] = '';
         setCode(newCode);
-        // Reset completion flag when user modifies code
         hasTriggeredComplete.current = false;
       } else if (index > 0) {
         // Move to previous input and clear it
@@ -78,8 +90,8 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
           if (i < 6) newCode[i] = char;
         });
         setCode(newCode);
-        hasTriggeredComplete.current = false; // Reset flag
-        // Focus on the next empty input or last filled input
+        hasTriggeredComplete.current = false;
+
         const nextIndex = Math.min(pastedCode.length, 5);
         inputRefs.current[nextIndex]?.focus();
       }
@@ -88,15 +100,10 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
     }
   };
 
-  // Debounced completion handler
+  // Enhanced completion handler
   const handleComplete = useCallback(() => {
     const currentCode = code.join('');
 
-    // Only trigger if:
-    // 1. We have 6 digits
-    // 2. All digits are filled
-    // 3. We haven't already triggered for this code
-    // 4. The code is different from the last completed code
     if (
       code.length === 6 &&
       code.every(digit => digit !== '') &&
@@ -106,16 +113,47 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
       hasTriggeredComplete.current = true;
       lastCompleteCode.current = currentCode;
 
-      // Add a small delay to prevent rapid-fire calls
       setTimeout(() => {
         onComplete();
       }, 100);
     }
   }, [code, onComplete]);
 
+  // Handle auto-fill from SMS (iOS/Android)
+  const handleAutoFill = useCallback((value: string, index: number) => {
+    if (disabled) return;
+
+    // Check if this is an auto-fill event (typically longer strings)
+    if (value.length >= 6) {
+      isAutoFilling.current = true;
+      const digits = value.replace(/\D/g, '').slice(0, 6);
+      const newCode = digits.split('');
+
+      // Pad with empty strings if needed
+      while (newCode.length < 6) {
+        newCode.push('');
+      }
+
+      setCode(newCode);
+      hasTriggeredComplete.current = false;
+
+      // Focus on the last input
+      setTimeout(() => {
+        inputRefs.current[5]?.focus();
+        isAutoFilling.current = false;
+      }, 100);
+    } else {
+      // Handle normal single character input
+      setCodeData(value, index);
+    }
+  }, [disabled, setCode]);
+
   const renderInputs = (): ReactElement[] => {
     const inputs: ReactElement[] = [];
+
     for (let index = 0; index < 6; index++) {
+      const isFirstInput = index === 0;
+
       inputs.push(
         <TextInput
           key={index}
@@ -128,18 +166,41 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
             disabled && styles.otpInputDisabled
           ]}
           value={code[index] || ''}
-          onChangeText={(value) => setCodeData(value, index)}
+          onChangeText={(value) => {
+            if (isFirstInput && value.length >= 6) {
+              // This is likely auto-fill
+              handleAutoFill(value, index);
+            } else {
+              setCodeData(value, index);
+            }
+          }}
           onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
           onFocus={() => setFocusedIndex(index)}
           onBlur={() => setFocusedIndex(-1)}
           keyboardType="number-pad"
-          maxLength={6}
-          autoFocus={index === 0}
+          maxLength={isFirstInput ? 6 : 1} // Allow longer input on first field for auto-fill
+          autoFocus={isFirstInput}
           selectTextOnFocus
           textAlign="center"
-          textContentType="oneTimeCode"
-          autoComplete={index === 0 ? 'sms-otp' : 'off'}
+          // Enhanced auto-fill properties
+          textContentType={isFirstInput ? "oneTimeCode" : undefined}
+          autoComplete={isFirstInput ? "sms-otp" : "off"}
+          // iOS specific properties
+          {...(Platform.OS === 'ios' && {
+            textContentType: isFirstInput ? 'oneTimeCode' : undefined,
+            autoComplete: isFirstInput ? 'sms-otp' : 'off',
+          })}
+          // Android specific properties
+          {...(Platform.OS === 'android' && {
+            autoComplete: isFirstInput ? 'sms-otp' : 'off',
+            textContentType: isFirstInput ? 'oneTimeCode' : undefined,
+          })}
           editable={!disabled}
+          // Additional properties for better auto-fill support
+          importantForAutofill={isFirstInput ? 'yes' : 'no'}
+          autoCorrect={false}
+          spellCheck={false}
+          contextMenuHidden={true}
         />
       );
     }
@@ -158,6 +219,36 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
       hasTriggeredComplete.current = false;
     }
   }, [code]);
+
+  // Web-specific auto-fill handling
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const handleWebAutoFill = () => {
+        // Add event listener for web auto-fill
+        const firstInput = inputRefs.current[0];
+        if (firstInput) {
+          const handleInput = (event: any) => {
+            const value = event.target.value;
+            if (value.length >= 6) {
+              handleAutoFill(value, 0);
+            }
+          };
+
+          // Type assertion for web
+          const webInput = firstInput as any;
+          if (webInput.addEventListener) {
+            webInput.addEventListener('input', handleInput);
+
+            return () => {
+              webInput.removeEventListener('input', handleInput);
+            };
+          }
+        }
+      };
+
+      return handleWebAutoFill();
+    }
+  }, [handleAutoFill]);
 
   return (
     <View style={styles.otpContainer}>

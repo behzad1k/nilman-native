@@ -75,11 +75,6 @@ const SecAttrDrawer = ({
   const handleClickCard = useCallback((secAttr: Service) => {
     setCurrentAttribute(secAttr);
 
-    if (secAttr.hasMedia) {
-      setPickMedia(true);
-      return;
-    }
-
     if (secAttr.hasColor) {
       setPickingColor({ attr: secAttr, open: true });
       return;
@@ -92,6 +87,11 @@ const SecAttrDrawer = ({
       setShouldPickAddOns(true);
     } else {
       handleAddAttribute(secAttr);
+    }
+
+    if (secAttr.hasMedia) {
+      setPickMedia(true);
+      return;
     }
   }, []);
 

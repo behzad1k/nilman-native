@@ -5,7 +5,7 @@ const { width } = Dimensions.get('window');
 export const orderStyles = StyleSheet.create({
   main: {
     flex: 1,
-    paddingBottom: 65,
+    paddingBottom: 55,
   },
   progressBackground: {
     height: 4,

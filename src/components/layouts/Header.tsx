@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
         <TextView style={styles.title}>{currentLanguage == 'fa' ? 'نیلمان' : 'nilman'}</TextView>
       </View>
       <View style={styles.rightContainer}>
-        <LanguageSwitchButton/>
+        {/* <LanguageSwitchButton/> */}
         <ThemeSwitchButton/>
       </View>
     </View>

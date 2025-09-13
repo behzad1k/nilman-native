@@ -16,7 +16,7 @@ import {
   Alert,
   Linking
 } from 'react-native';
-import Toast from 'react-native-toast-message';
+import { Toast } from 'toastify-react-native';
 
 // Conditional import for WebView (only on native)
 let WebView: any = null;

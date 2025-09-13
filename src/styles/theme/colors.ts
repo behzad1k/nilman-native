@@ -49,6 +49,7 @@ export const darkTheme = {
   third: '#626263',
   text: '#e8e8e8',
   textSecondary: '#282828',
+  surface: '#939393',
   border: '#939393',
   card: '#1C1C1E',
   notification: '#FF453A',
@@ -56,6 +57,5 @@ export const darkTheme = {
   warning: '#FF9F0A',
   error: '#FF453A',
   pink: '#c89dc7',
-  surface: '#e3e3e3',
 };
 

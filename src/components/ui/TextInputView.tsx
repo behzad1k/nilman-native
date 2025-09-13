@@ -12,6 +12,7 @@ const TextInputView = forwardRef<TextInput, TextInputViewProps>(
       <View>
         <TextInput
           ref={ref}
+
           style={[
             {
               fontFamily: FontFamilies.vazir.medium,

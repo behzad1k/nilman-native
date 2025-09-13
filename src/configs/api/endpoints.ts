@@ -15,7 +15,8 @@ const ENDPOINTS = {
     INDEX: formatUrl('order'),
     PAY: formatUrl('order/pay'),
     PAYMENT_VERIFY: formatUrl('order/pay/verify'),
-    CART: formatUrl('order/cart')
+    CART: formatUrl('order/cart'),
+    DISCOUNT: formatUrl('order/discount'),
   },
   ADDRESS: {
     INDEX: formatUrl('address'),
