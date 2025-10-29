@@ -20,8 +20,6 @@ import { OrderNavigationProp, OrderRouteProp } from '@/src/types/navigation';
 import { Theme } from '@/src/types/theme';
 import { DEFAULT_FORM, STEPS } from '@/src/utils/constants';
 import API_ERRORS from '@/src/utils/errors';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -54,18 +52,19 @@ const OrderPage = () => {
   });
   const [isNextStepAllowed, setIsNextStepAllowed] = useState(false);
   const [step, setStep] = useState<Step>(STEPS[0]);
-
   const totalPrice = useMemo(() => {
     return selected.attributes?.reduce((total, attr) => total + attr.price, 0) || 0;
   }, [selected.attributes]);
+
   const loadSavedData = useCallback(async () => {
     try {
 
       const savedOrder = await services.order.getSavedOrder();
-      console.log(savedOrder);
       if (savedOrder) {
         setSelected(savedOrder);
-        setStep(savedOrder.step);
+        if (savedOrder.step) {
+          setStep(savedOrder.step);
+        }
       };
     } catch (error) {
       console.error('Error loading saved data:', error);
@@ -84,7 +83,7 @@ const OrderPage = () => {
 
   const handleChangeStep = useCallback(async (action: 'next' | 'prev') => {
     if (action === 'next') {
-      if (step.index === 1) {
+      if (step?.index === 1) {
         await saveOrderData();
       }
 
@@ -93,8 +92,8 @@ const OrderPage = () => {
         return;
       }
 
-      if (step.index < STEPS.length - 1) {
-        setStep(STEPS[step.index + 1]);
+      if (step?.index < STEPS.length - 1) {
+        setStep(STEPS[step?.index + 1]);
         setIsNextStepAllowed(false);
       }
     } else {
@@ -102,7 +101,7 @@ const OrderPage = () => {
         await services.order.removeSavedOrder();
       }
 
-      if (step.index === 1) {
+      if (step?.index === 1) {
         const newParent = allServices.find(e => e.id === selected.attributeStep?.parent?.id);
         if (!newParent) {
           setStep(STEPS[0]);
@@ -118,19 +117,19 @@ const OrderPage = () => {
             attributeStep: allServices?.find(e => e.id === prev.attributeStep?.parent?.id)
           }));
         }
-      } else if (step.index > 0) {
-        setStep(STEPS[step.index - 1]);
+      } else if (step?.index > 0) {
+        setStep(STEPS[step?.index - 1]);
       }
     }
   }, [step, selected, isAuthenticated, allServices, openDrawer, saveOrderData]);
 
   const handleBackPress = useCallback(() => {
-    if (step.index > 0) {
+    if (step?.index > 0) {
       handleChangeStep('prev');
     } else {
       navigation.goBack();
     }
-  }, [step.index, handleChangeStep, navigation]);
+  }, [step?.index, handleChangeStep, navigation]);
 
   const handleSubmitOrder = useCallback(async () => {
     try {
@@ -207,14 +206,14 @@ const OrderPage = () => {
 
   return (
     <View style={[orderStyles.main, Platform.OS == 'web' && orderStyles.paddingBottom84]}>
-      <Header onBackPress={step.index > 0 ? handleBackPress : undefined}/>
+      <Header onBackPress={step?.index > 0 ? handleBackPress : undefined}/>
 
       <View style={styles.progressContainer}>
         <View style={orderStyles.progressBackground}>
           <View
             style={[
               orderStyles.progressActive,
-              { width: `${((step.index + 1) / 4) * 100}%` }
+              { width: `${((step?.index + 1) / 4) * 100}%` }
             ]}
           />
         </View>
@@ -224,7 +223,7 @@ const OrderPage = () => {
         {renderStepContent()}
       </View>
 
-      {step.index > 0 && (
+      {step?.index > 0 && (
         <View style={styles.bottomSection}>
           {/* {selected.isUrgent && ( */}
           {/*   <View style={orderStyles.urgentWarning}> */}
@@ -249,7 +248,7 @@ const OrderPage = () => {
               <TextView style={styles.switchLabel}>سفارش فوری</TextView>
             </View>
 
-            {step.index < 2 && (
+            {step?.index < 2 && (
               <View style={styles.switchRow}>
                 <Switch
                   value={selected.isMulti}
@@ -266,7 +265,7 @@ const OrderPage = () => {
           </View>
 
           <View style={orderStyles.buttonSection}>
-            {step.index === STEPS.length - 1 ? (
+            {step?.index === STEPS.length - 1 ? (
               <TouchableOpacity
                 style={orderStyles.submitButton}
                 onPress={handleSubmitOrder}

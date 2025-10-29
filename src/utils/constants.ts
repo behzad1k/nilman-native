@@ -45,4 +45,4 @@ export const STEPS: Step[] = [
     index: 3,
     name: 'worker',
   },
-];
+] as const;
