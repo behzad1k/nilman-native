@@ -1,5 +1,5 @@
-import NativeMap from '@/src/components/layouts/NativeMap';
-import WebMap from '@/src/components/layouts/WebMap';
+import NativeMap from '@/src/features/address/views/layouts/NativeMap';
+import WebMap from '@/src/features/address/views/layouts/WebMap';
 import React from 'react';
 import { Platform } from 'react-native';
 

@@ -58,14 +58,13 @@ const OrderPage = () => {
 
   const loadSavedData = useCallback(async () => {
     try {
-
       const savedOrder = await services.order.getSavedOrder();
       if (savedOrder) {
         setSelected(savedOrder);
         if (savedOrder.step) {
           setStep(savedOrder.step);
         }
-      };
+      }
     } catch (error) {
       console.error('Error loading saved data:', error);
     }

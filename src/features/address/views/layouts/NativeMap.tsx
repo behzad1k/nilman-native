@@ -1,15 +1,11 @@
 import { useTheme } from '@/src/components/contexts/ThemeContext';
-import TextInputView from '@/src/components/ui/TextInputView';
 import TextView from '@/src/components/ui/TextView';
-import { services } from '@/src/configs/services';
-import { AddressSearchResult } from '@/src/features/address/types';
+import { CenterButton, MapSearch } from '@/src/features/address/views/layouts/MapControls';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { FontFamilies } from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
-import * as Location from 'expo-location';
-import { Crosshair, MagnifyingGlass } from 'phosphor-react-native';
-import React, { useEffect, useRef, useState } from 'react';
-import { Image, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Image, Platform, StyleSheet, View } from 'react-native';
 
 interface NativeMapProps {
   position: number[];
@@ -33,41 +29,18 @@ if (Platform.OS !== 'web') {
 
 const NativeMap = ({ position, setPosition }: NativeMapProps) => {
   const { isDark } = useTheme();
-  const [searchResult, setSearchResult] = useState<AddressSearchResult[]>([]);
-  const [status, requestPermission] = Location.useForegroundPermissions();
   const styles = useThemedStyles(createStyles);
-  const { theme } = useTheme();
 
   const mapRef = useRef<any>(null);
   const cameraRef = useRef<any>(null);
 
-  const search = async (query: string) => {
-    const res = await services.address.searchByQuery({
-      search_text: query,
-      district: `${position[0].toString()},${position[1].toString()}`
-    });
-    if (res.code == 200) {
-      setSearchResult(res.data);
-    }
-  };
-
-  const centerTarget = async () => {
-    if(status?.status != 'granted'){
-      requestPermission();
-    } else {
-      const userPosition = await Location.getCurrentPositionAsync()
-      setPosition([userPosition?.coords?.longitude, userPosition?.coords?.latitude]);
-    }
-  };
 
   useEffect(() => {
     if (cameraRef.current) {
       cameraRef.current.flyTo([position[0], position[1]]);
     }
-    setSearchResult([]);
   }, [position]);
 
-  // Return web fallback
   if (Platform.OS === 'web') {
     return (
       <View style={styles.container}>
@@ -107,42 +80,9 @@ const NativeMap = ({ position, setPosition }: NativeMapProps) => {
         </PointAnnotation>
       </MapView>
 
-      {/* Search components outside MapView */}
-      <View style={styles.searchContainer}>
-        <MagnifyingGlass style={styles.searchIcon} color={theme.secondary} size={30}/>
-        <TextInputView
-          onChangeText={async (input) => {
-            if (input.length > 3) {
-              await search(input);
-            } else {
-              setSearchResult([]);
-            }
-          }}
-          style={styles.searchInput}
-        />
-      </View>
+      <MapSearch position={position} setPosition={setPosition} />
 
-      {searchResult.length > 0 && (
-        <ScrollView style={styles.searchResultContainer}>
-          {searchResult.slice(0, 10).map((e, index) => (
-            <View key={index}>
-              <TextView
-                style={styles.searchResultTitle}
-                onPress={() => setPosition([e.geo_location.center.lng, e.geo_location.center.lat])}
-              >
-                {e.geo_location?.title}
-              </TextView>
-              <TextView style={styles.searchResultSubtitle}>
-                {e.description?.substring(0, 50)}
-              </TextView>
-            </View>
-          ))}
-        </ScrollView>
-      )}
-
-      <TouchableOpacity style={styles.centerAddress} onPress={centerTarget}>
-        <Crosshair size={40} color={theme.text}/>
-      </TouchableOpacity>
+      <CenterButton position={position} setPosition={setPosition} />
     </View>
   );
 };

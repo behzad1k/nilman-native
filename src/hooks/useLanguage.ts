@@ -6,7 +6,7 @@ import { useI18nContext } from '@/src/components/contexts/LanguageContext';
 export const useLanguage = () => {
   const { t, i18n } = useTranslation();
   const { isLanguageInitialized } = useI18nContext();
-
+  const rtlLanguages = ['fa']
   const currentLanguage = i18n.language as Language;
 
   const languageOptions: LanguageOption[] = useMemo(
@@ -37,12 +37,17 @@ export const useLanguage = () => {
     return languageOptions.find(lang => lang.code === currentLanguage);
   }, [currentLanguage, languageOptions]);
 
+  const isRTL = (): boolean => {
+    return rtlLanguages.includes(currentLanguage);
+  }
+
   return {
     t,
     currentLanguage,
     languageOptions,
     changeLanguage,
     getCurrentLanguageOption,
+    isRTL,
     isLanguageLoaded: isLanguageInitialized && i18n.isInitialized,
   };
 };

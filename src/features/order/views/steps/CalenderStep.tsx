@@ -1,11 +1,11 @@
 import TextView from '@/src/components/ui/TextView';
 import { calenderStepStyles } from '@/src/features/order/styles/calenderStep';
 import { Form, Step } from '@/src/features/order/types';
+import { useLanguage } from '@/src/hooks/useLanguage';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   View,
   ScrollView,
@@ -23,11 +23,11 @@ interface Props {
 
 const CalendarStep = ({ setSelected, selected }: Props) => {
   const [calTab, setCalTab] = useState(0);
-  const { t } = useTranslation();
+  const { t,isRTL } = useLanguage();
   const styles = useThemedStyles(createStyles);
 
   const calendarTabs = useMemo(() => {
-    return Array.from({ length: 37 }, (_, i) => {
+    const calTabs = Array.from({ length: 37 }, (_, i) => {
       const day = moment().add(i, 'd').locale('fa');
       return {
         index: i,
@@ -37,6 +37,8 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
         month: day.format('MMMM')
       };
     });
+    if (isRTL()) return calTabs.reverse()
+    else return calTabs;
   }, []);
 
   const timeSlots = useMemo(() => {
@@ -144,7 +146,7 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={true}
-            style={calenderStepStyles.calTabsContainer}
+            style={[calenderStepStyles.calTabsContainer, isRTL() ? styles.rtlDir : {}]}
             contentContainerStyle={calenderStepStyles.calTabsContent}
           >
             {renderCalendarTabs()}
@@ -277,6 +279,14 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     color: '#856404',
     textAlign: 'center',
   },
+  calTabsContent: {
+    flexDirection: 'row',
+    paddingRight: 16,
+    paddingBottom: 10
+  },
+  rtlDir: {
+    direction: 'rtl'
+  }
 });
 
 export default CalendarStep;

@@ -7,14 +7,13 @@ export const calenderStepStyles = StyleSheet.create({
   discountContainer: {
     marginBottom: 24,
   },
-
   calTabsContainer: {
     marginBottom: 20,
   },
   calTabsContent: {
     flexDirection: 'row',
     paddingRight: 16,
-    paddingBottom: 10
+    paddingBottom: 10,
   },
   timeSlotGrid: {
     flexDirection: 'row',

@@ -1,4 +1,4 @@
-import { AuthProvider } from '@/src/components/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/src/components/contexts/AuthContext';
 import { DrawerProvider } from '@/src/components/contexts/DrawerContext';
 import { LanguageProvider, useI18nContext } from '@/src/components/contexts/LanguageContext';
 import { LoadingProvider } from '@/src/components/contexts/LoadingContext';
@@ -7,12 +7,20 @@ import { ThemeProvider, useTheme } from '@/src/components/contexts/ThemeContext'
 import Splash from '@/src/components/layouts/Splash';
 import { Drawer } from '@/src/components/ui/Drawer';
 import { LoadingGlobal } from '@/src/components/ui/LoadingGlobal';
+import { useAppDispatch, useAppSelector } from '@/src/configs/redux/hooks';
+import { fetchColors } from '@/src/configs/redux/slices/globalSlice';
+import { cart, order } from '@/src/configs/redux/slices/orderSlice';
+import { fetchServices } from '@/src/configs/redux/slices/serviceSlice';
+import { addresses, fetchUser, getWorkers } from '@/src/configs/redux/slices/userSlice';
 import { store } from '@/src/configs/redux/store';
+import { useLanguage } from '@/src/hooks/useLanguage';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { FontFamilies } from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
+import { useEffect } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
@@ -31,22 +39,67 @@ function AppContent() {
     theme,
     isDark
   } = useTheme();
-  const styles = useThemedStyles(createStyles);
   const { isRTL } = useI18nContext()
-
   const toastConfig: ToastManagerProps = {
     isRTL: isRTL,
     theme: isDark? 'dark' : 'light',
     topOffset: 60
   }
+  const {
+    t,
+    isLanguageLoaded,
+  } = useLanguage();
+  const dispatch = useAppDispatch();
+  const {
+    loading: serviceLoading,
+    error: serviceError
+  } = useAppSelector((state) => state.service);
+  const { hideSplash } = useSplash();
+  const {
+    checkAuthStatus
+  } = useAuth();
+  const initializeApp = async () => {
+    dispatch(fetchServices());
+    dispatch(fetchColors());
+
+    if (await checkAuthStatus()) {
+      await Promise.all([
+        dispatch(fetchUser()),
+        dispatch(order()),
+        dispatch(cart()),
+        dispatch(getWorkers()),
+        dispatch(addresses()),
+      ]);
+    } else {
+      AsyncStorage.removeItem('token')
+    }
+  };
+
+  useEffect(() => {
+    initializeApp();
+
+  }, [dispatch, t]);
+
+  useEffect(() => {
+    if (!serviceLoading && !serviceError && isLanguageLoaded) {
+      const timer = setTimeout(() => {
+        hideSplash();
+      }, 600);
+
+      return () => clearTimeout(timer);
+    }
+  }, [serviceLoading, hideSplash, isLanguageLoaded]);
+
+  if (serviceError && !serviceLoading) {
+    console.error('Service fetch error:', serviceError);
+  }
+
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <DrawerProvider>
           <Drawer>
             <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="address"/>
-              <Stack.Screen name="privacy"/>
               <Stack.Screen name="(tabs)"/>
               <Stack.Screen name="+not-found"/>
             </Stack>

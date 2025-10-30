@@ -21,60 +21,15 @@ import { Dimensions, StyleSheet } from 'react-native';
 import { useTheme } from '@/src/components/contexts/ThemeContext'
 
 export default function TabLayout() {
-  const dispatch = useAppDispatch();
-  const {
-    loading: serviceLoading,
-    error: serviceError
-  } = useAppSelector((state) => state.service);
-  const { hideSplash } = useSplash();
-  const { openDrawer } = useDrawer();
-  const {} = useRouter()
   const {
     t,
-    isLanguageLoaded,
   } = useLanguage();
   const styles = useThemedStyles(createStyles)
   const { theme } = useTheme()
-
+  const { openDrawer } = useDrawer();
   const {
     isAuthenticated,
-    checkAuthStatus
   } = useAuth();
-  const initializeApp = async () => {
-    dispatch(fetchServices());
-    dispatch(fetchColors());
-
-    if (await checkAuthStatus()) {
-      await Promise.all([
-        dispatch(fetchUser()),
-        dispatch(order()),
-        dispatch(cart()),
-        dispatch(getWorkers()),
-        dispatch(addresses()),
-      ]);
-    } else {
-      AsyncStorage.removeItem('token')
-    }
-  };
-
-  useEffect(() => {
-    initializeApp();
-
-  }, [dispatch, t]);
-
-  useEffect(() => {
-    if (!serviceLoading && !serviceError && isLanguageLoaded) {
-      const timer = setTimeout(() => {
-        hideSplash();
-      }, 600);
-
-      return () => clearTimeout(timer);
-    }
-  }, [serviceLoading, hideSplash, isLanguageLoaded]);
-
-  if (serviceError && !serviceLoading) {
-    console.error('Service fetch error:', serviceError);
-  }
 
   return (
     <Tabs

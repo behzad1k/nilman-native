@@ -43,13 +43,8 @@ class OrderService {
   }
   async getSavedOrder(): Promise<OrderStorage | undefined> {
     const newOrderObject = await this.deps.storage.getItem(STORAGE_KEYS.NEW_ORDER)
-    console.log('past', newOrderObject);
     if (newOrderObject) {
       const newOrderObjectParsed = JSON.parse(newOrderObject);
-      console.log('heee');
-      console.log(newOrderObjectParsed);
-      console.log(newOrderObjectParsed.timestamp);
-      console.log(moment().diff(newOrderObjectParsed.timestamp, 'minutes'));
       if (moment().diff(newOrderObjectParsed.timestamp, 'minutes') < 60) {
         return JSON.parse(newOrderObject)
       }

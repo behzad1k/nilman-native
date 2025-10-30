@@ -1,4 +1,5 @@
-import Map from '@/src/components/layouts/Map';
+import Address from '@/app/address';
+import { Header } from '@/src/components/layouts/Header';
 import TextInputView from '@/src/components/ui/TextInputView';
 import TextView from '@/src/components/ui/TextView';
 import { useAppDispatch, useAppSelector } from '@/src/configs/redux/hooks';
@@ -8,8 +9,9 @@ import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Keyboard, KeyboardAvoidingView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import Map from '@/src/features/address/views/layouts/Map';
 
 const defaultPosition = [
   52.4319429449887,
@@ -24,9 +26,8 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
   const dispatch = useAppDispatch();
   const styles = useThemedStyles(createStyles);
   const userReducer = useAppSelector(state => state.user);
-  const address = userReducer.addresses.find(e => e.id == Number(paramId));
-
   const [step, setStep] = useState(1);
+  const [address, setAddress] = useState<Address>();
   const [position, setPosition] = useState<number[]>(
     address?.longitude && address?.latitude ? [
       address?.longitude,
@@ -114,10 +115,23 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
       // });
     }
   };
+
+  useEffect(() => {
+    const userAddress = userReducer.addresses.find(e => e.id == paramId)
+    setAddress(userAddress)
+    if (userAddress?.longitude && userAddress?.latitude)
+      setPosition([
+        userAddress.longitude,
+        userAddress.latitude,
+      ])
+  }, [userReducer.addresses])
   return (
 
-    <KeyboardAvoidingView style={styles.container}>
-      <TouchableWithoutFeedback style={styles.container} onPress={Keyboard.dismiss}>
+    <View style={styles.container}>
+      <Header onBackPress={() => step == 1 ? router.back() : setStep(1)} />
+      <View style={styles.container}
+            // onPress={Keyboard.dismiss}
+      >
         <View style={styles.addressManage}>
           <TextView style={styles.title}>
             {paramId ? 'ویرایش' : 'افزودن'} آدرس
@@ -209,7 +223,7 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
             </View>
           )}
         </View>
-      </TouchableWithoutFeedback>
+      </View>
       <TouchableOpacity
         style={styles.confirmButton}
         onPress={submit}
@@ -217,7 +231,7 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
       >
         <TextView style={styles.confirmButtonText}>ثبت</TextView>
       </TouchableOpacity>
-    </KeyboardAvoidingView>
+    </View>
 
   );
 };

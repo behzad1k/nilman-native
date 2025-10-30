@@ -7,7 +7,7 @@ import React from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
 import { Theme } from '@/src/types/theme';
 
-const Address = () => {
+const AddressPage = () => {
   const styles = useThemedStyles(createStyles);
   return (
     <SafeAreaView style={styles.container}>
@@ -31,4 +31,4 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   }
 })
 
-export default Address;
+export default AddressPage;
