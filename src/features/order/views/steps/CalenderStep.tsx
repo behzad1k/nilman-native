@@ -158,7 +158,7 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
             ref={scrollViewRef}
             horizontal
             showsHorizontalScrollIndicator={true}
-            style={[calenderStepStyles.calTabsContainer, isRTL() ? styles.rtlDir : {}]}
+            style={[calenderStepStyles.calTabsContainer]}
             contentContainerStyle={calenderStepStyles.calTabsContent}
           >
             {renderCalendarTabs()}
@@ -296,9 +296,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     paddingRight: 16,
     paddingBottom: 10
   },
-  rtlDir: {
-    direction: 'rtl'
-  }
 });
 
 export default CalendarStep;
