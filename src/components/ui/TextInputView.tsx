@@ -1,15 +1,16 @@
 import { FontFamilies } from '@/src/styles/theme/typography';
 import React, { forwardRef } from 'react';
-import { TextInput, TextInputProps, View, Text } from 'react-native';
+import { TextInput, TextInputProps, View, Text, ViewStyle } from 'react-native';
 
 interface TextInputViewProps extends TextInputProps {
   error?: string;
+  containerStyle?: ViewStyle;
 }
 
 const TextInputView = forwardRef<TextInput, TextInputViewProps>(
-  ({ style, error, ...props }, ref) => {
+  ({ containerStyle = {}, style, error, ...props }, ref) => {
     return (
-      <View>
+      <View style={containerStyle}>
         <TextInput
           ref={ref}
 

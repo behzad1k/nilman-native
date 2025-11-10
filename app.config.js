@@ -37,7 +37,10 @@ export default {
             title: "Nilman",
             name: "Nilman",
             description: "Online beauty service provider",
-            favicon: "./src/assets/images/favicon.png"
+            favicon: "./src/assets/images/favicon.png",
+            meta: {
+                "viewport": "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+            }
         },
         experiments: {
             typedRoutes: true,

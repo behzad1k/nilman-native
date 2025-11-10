@@ -7,15 +7,16 @@ import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
 import { formatPrice } from '@/src/utils/funs';
+import { OnPressEvent } from '@maplibre/maplibre-react-native';
 import React, { useCallback, useMemo } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { GestureResponderEvent, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { Minus, Plus, Trash2 } from 'react-native-feather';
 
 interface IServiceDrawerProps {
   currentParent: Service;
   selected: Form;
   setSelected: React.Dispatch<React.SetStateAction<Form>>;
-  handleClickCard: (secAttr: Service) => void;
+  handleClickCard: (secAttr: Service, e?: GestureResponderEvent) => void;
   deleteAttribute: (attrId: number) => void;
   onClose: () => void;
 }
@@ -72,7 +73,10 @@ const ServiceDrawer = ({
             <TouchableOpacity
               key={secAttr.slug}
               style={[styles.attrBox, isSelected && styles.selectedAttrBox]}
-              onPress={() => handleClickCard(secAttr)}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleClickCard(secAttr);
+              }}
               activeOpacity={0.7}
             >
               {secAttr.price > 0 && (
@@ -88,7 +92,7 @@ const ServiceDrawer = ({
                     <View style={serviceDrawerStyles.quantityContainer}>
                       <TouchableOpacity
                         style={serviceDrawerStyles.quantityButton}
-                        disabled={selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) > 0 : true}
+                        disabled={secAttr.addOns.length > 0 ? (selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) > 0 : true) : false}
                         onPress={(e) => {
                           e.stopPropagation();
                           handleQuantityChange(secAttr, count - 1);
@@ -104,7 +108,7 @@ const ServiceDrawer = ({
                       <TextInputView
                         style={serviceDrawerStyles.quantityInput}
                         value={count.toString()}
-                        // editable={selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns).reduce((acc, curr) => acc + curr.count, 0) == 0 : true}
+                        editable={!(secAttr.addOns.length > 0 ? (selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) > 0 : true) : false)}
                         onChangeText={(text) => {
                           if (selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) == 0 : true) {
                             const newCount = parseInt(text) || 0;
@@ -118,7 +122,7 @@ const ServiceDrawer = ({
 
                       <TouchableOpacity
                         style={serviceDrawerStyles.quantityButton}
-                        disabled={selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) > 0 : true}
+                        disabled={secAttr.addOns.length > 0 ? (selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) > 0 : true) : false}
                         onPress={(e) => {
                           e.stopPropagation();
                           handleQuantityChange(secAttr, count + 1);

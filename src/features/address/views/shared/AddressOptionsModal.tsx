@@ -68,7 +68,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme.textSecondary
+    color: theme.third
   },
 });
 

@@ -48,14 +48,15 @@ export const MapSearch = <T extends Position | number[]>({
     <View style={styles.searchContainer}>
       <MagnifyingGlass style={styles.searchIcon} color={theme.secondary} size={30}/>
       <TextInputView
+        containerStyle={styles.searchInputContainer}
         onChangeText={(input) => {
-          console.log(input);
           if (input.length > 3) {
             search(input);
           } else {
             setSearchResult([]);
           }
         }}
+
         style={styles.searchInput}
       />
     </View>
@@ -118,6 +119,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     paddingHorizontal: 8,
     zIndex: 1000,
   },
+  searchInputContainer: { flex: 1 },
   searchInput: {
     color: theme.text,
     borderWidth: 0,

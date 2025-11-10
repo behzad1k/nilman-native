@@ -5,6 +5,7 @@ import { orderStyles } from '@/src/features/cart/styles';
 import { CartPageTabKey } from '@/src/features/cart/types';
 import CartPageTabs from '@/src/features/cart/views/cart/CartPageTabs';
 import CartTab from '@/src/features/cart/views/cart/CartTab';
+import OrderTab from '@/src/features/cart/views/cart/OrderTab';
 import OrderCard from '@/src/features/cart/views/shared/OrderCard';
 import type { Order } from '@/src/features/order/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
@@ -25,8 +26,8 @@ const CartPage = () => {
         case(CartPageTabEnum.Created):
           return <CartTab />;
         default:
-          return items.map(item => <OrderCard key={item.id} item={item}/>);
-        // return <OrderTab items={items} />
+          // return items.map(item => <OrderCard key={item.id} item={item}/>);
+        return <OrderTab items={items} />
       }
     } else {
       return (

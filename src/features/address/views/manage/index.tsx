@@ -1,4 +1,3 @@
-import Address from '@/app/address';
 import { Header } from '@/src/components/layouts/Header';
 import TextInputView from '@/src/components/ui/TextInputView';
 import TextView from '@/src/components/ui/TextView';
@@ -12,10 +11,11 @@ import { router } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Keyboard, KeyboardAvoidingView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import Map from '@/src/features/address/views/layouts/Map';
+import { Address } from '../../types';
 
 const defaultPosition = [
-  52.4319429449887,
-  35.80761631591913,
+  51.42929855649689,
+  35.806494532492124,
 ];
 
 interface AddressManageProps {
@@ -43,7 +43,7 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
     districtId: address?.districtId || '',
     floor: address?.floor || ''
   });
-
+  console.log(position);
   const submit = async () => {
     if (step == 1) {
       if (position[0] != defaultPosition[0] && position[1] != defaultPosition[1]) {
@@ -173,6 +173,7 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
 
               <View style={styles.addressManageRow}>
                 <TextInputView
+                  containerStyle={{ flex: 1}}
                   style={[styles.textInput, styles.halfInput]}
                   value={form?.pelak}
                   onChangeText={(text) => setForm(prev => ({
@@ -184,6 +185,8 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
                 />
 
                 <TextInputView
+                  containerStyle={{ flex: 1}}
+
                   style={[styles.textInput, styles.halfInput]}
                   value={form?.vahed}
                   onChangeText={(text) => setForm(prev => ({
@@ -195,6 +198,7 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
                 />
 
                 <TextInputView
+                  containerStyle={{ flex: 1}}
                   style={[styles.textInput, styles.halfInput]}
                   value={form?.floor}
                   onChangeText={(text) => setForm(prev => ({
@@ -267,7 +271,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   editProfile: {
     flex: 1,
     padding: 20,
-    gap: 16,
+    gap: 8,
   },
   textInput: {
     width: '100%',
@@ -285,6 +289,8 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   addressManageRow: {
     flexDirection: 'row',
+    maxWidth: '100%',
+    gap: 8,
     justifyContent: 'space-between',
 
   },

@@ -23,9 +23,9 @@ interface Props {
 }
 
 const tabTitles: Record<CartPageTabKey, string> = {
-  Created: 'سبد خرید',
-  InProgress: 'در حال انجام',
   Done: 'تکمیل شده',
+  InProgress: 'در حال انجام',
+  Created: 'سبد خرید',
 };
 
 const initCounts: Record<CartPageTabKey, number> = {

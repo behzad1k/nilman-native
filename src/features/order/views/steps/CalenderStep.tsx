@@ -5,7 +5,7 @@ import { useLanguage } from '@/src/hooks/useLanguage';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -23,8 +23,9 @@ interface Props {
 
 const CalendarStep = ({ setSelected, selected }: Props) => {
   const [calTab, setCalTab] = useState(0);
-  const { t,isRTL } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const styles = useThemedStyles(createStyles);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const calendarTabs = useMemo(() => {
     const calTabs = Array.from({ length: 37 }, (_, i) => {
@@ -40,6 +41,16 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
     if (isRTL()) return calTabs.reverse()
     else return calTabs;
   }, []);
+
+  // Scroll to the right (end) when component mounts
+  useEffect(() => {
+    if (scrollViewRef.current && isRTL()) {
+      // Use a small timeout to ensure the ScrollView has rendered
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 300);
+    }
+  }, [isRTL]);
 
   const timeSlots = useMemo(() => {
     const slots = [];
@@ -144,6 +155,7 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
 
         <View style={styles.calendarContainer}>
           <ScrollView
+            ref={scrollViewRef}
             horizontal
             showsHorizontalScrollIndicator={true}
             style={[calenderStepStyles.calTabsContainer, isRTL() ? styles.rtlDir : {}]}

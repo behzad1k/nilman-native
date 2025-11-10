@@ -70,6 +70,8 @@ const createStyles = (theme: Theme) =>
 
     iconInput: {
       backgroundColor: theme.background,
+      display: 'flex',
+      alignItems: 'center',
       borderRadius: 8,
       padding: 8,
       borderColor: '#e9ecef',

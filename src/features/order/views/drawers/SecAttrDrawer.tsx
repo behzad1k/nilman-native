@@ -8,7 +8,7 @@ import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { Theme } from '@/src/types/theme';
 import { useTheme } from '@/src/components/contexts/ThemeContext';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { GestureResponderEvent, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ArrowLeft, Info, X } from 'react-native-feather';
 import AddOnDrawer from './AddOnDrawer';
 import InfoDrawer from './InfoDrawer';

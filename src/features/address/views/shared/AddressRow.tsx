@@ -102,7 +102,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   addressTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 500,
     color: theme.text,
   },
   selected: {
