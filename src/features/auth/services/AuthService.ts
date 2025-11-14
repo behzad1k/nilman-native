@@ -208,7 +208,7 @@ export class AuthService {
       return false;
     }
   }
-  async completeProfile(data: LoginForm): Promise<ApiResponse<VerifyResponse>> {
+  async completeProfile(data: LoginForm): Promise<VerifyResponse> {
     if (!data.name || data.name.length < 3) {
       Toast.show({
         type: 'warn',
@@ -236,32 +236,33 @@ export class AuthService {
       throw new AuthServiceError(t('validation.nationalCodeInvalid'));
     }
     try{
-      const res: ApiResponse<VerifyResponse> = await this.deps.apiClient.put(ENDPOINTS.USER.INDEX, data);
+      const res: VerifyResponse = await this.deps.apiClient.put(ENDPOINTS.USER.INDEX, data);
       if (res.code == 200){
         await Promise.all([
-          this.deps.storage.setToken(res.data.token),
+          this.deps.storage.setToken(res.token),
           this.deps.storage.removeItem('login-step'),
           this.deps.storage.removeItem('login-step-token')
         ]);
         Toast.show({
           type: 'success',
-          text1: 'اطلاعات شما با موفقیت ثبت شد، خوش آمدید',
-          position: 'bottom',
+          text1: t('general.welcome'),
+          position: 'top',
         });
 
         return res;
       } else if (res.code === 1005) {
         Toast.show({
           type: 'error',
-          text1: 'کد ملی با شماره تلفن تطابق ندارد',
-          position: 'bottom',
+          text1: t('api_error.nationalCodeAndPhoneNotMatched'),
+          position: 'top',
         });
-        throw new AuthServiceError(t('error.NationalCodeNotMatched'));
+        throw new AuthServiceError(t('api_error.nationalCodeAndPhoneNotMatched'));
       } else {
-        throw new AuthServiceError(t('error.invalidRequest'));
+        throw new AuthServiceError(t('api_error.invalidRequest'));
       }
     }catch (e){
-      throw new AuthServiceError(t('error.invalidResponse'));
+      console.log(e);
+      throw new AuthServiceError(t('api_error.invalidResponse'));
     }
   }
   async getLoginStep(): Promise<string | null> {

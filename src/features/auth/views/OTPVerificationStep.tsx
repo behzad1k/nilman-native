@@ -123,7 +123,6 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
 
     try {
       const tempToken = await services.auth.getTempToken();
-      console.log(tempToken);
 
       if (!tempToken) {
         Toast.show({
@@ -142,21 +141,16 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
       // Check if user profile is complete
       if (!res.data?.user?.isVerified) {
         await StorageService.setItem(STORAGE_KEYS.LOGIN_STEP, 'complete-profile');
-        console.log(res.data.user, 'bez');
         setLoginState('complete-profile');
         return;
       }
 
-      // Update user in Redux store
       dispatch(setUser(res.data?.user));
 
-      // Login successful - load user data
       await loadUserData();
 
-      // Update auth context state
       await checkAuthStatus();
 
-      // Call success callback if provided
       if (onLoginSuccess) {
         await onLoginSuccess();
       }

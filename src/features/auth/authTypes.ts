@@ -24,6 +24,7 @@ export interface LoginResponse {
 }
 
 export interface VerifyResponse {
+  code?: number;
   user: User,
   token: string
 }

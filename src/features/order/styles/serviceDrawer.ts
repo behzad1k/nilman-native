@@ -48,6 +48,7 @@ export const serviceDrawerStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   quantityInput: {
+    writingDirection: 'rtl',
     width: 40,
     textAlign: 'center',
     fontSize: 14,

@@ -1,17 +1,23 @@
+import { useAuth } from '@/src/components/contexts/AuthContext';
 import LogoIcon from '@/src/components/icons/LogoIcon';
 import TextInputView from '@/src/components/ui/TextInputView';
 import TextView from '@/src/components/ui/TextView';
+import { useAppDispatch } from '@/src/configs/redux/hooks';
+import { cart, order } from '@/src/configs/redux/slices/orderSlice';
+import { addresses, fetchUser, getWorkers, setUser } from '@/src/configs/redux/slices/userSlice';
 import { services } from '@/src/configs/services';
 import { LoginForm } from '@/src/features/auth/authTypes';
 import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
+import { useLanguage } from '@/src/hooks/useLanguage';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
 import { spacing } from '@/src/styles/theme/spacing';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { UseFormReturn } from 'react-hook-form';
 import { useDrawer } from '@/src/components/contexts/DrawerContext';
 import { Theme } from '@/src/types/theme';
+import { Toast } from 'toastify-react-native';
 
 interface CompleteProfileStepProps {
   formMethods: UseFormReturn<LoginForm>;
@@ -20,8 +26,11 @@ interface CompleteProfileStepProps {
 export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMethods }) => {
   const { register, setValue, handleSubmit } = formMethods;
   const { closeDrawer } = useDrawer();
+  const dispatch = useAppDispatch();
   const styles = useThemedStyles(createStyles);
+  const { checkAuthStatus } = useAuth();
   const { execute: submit, loading: loading } = useAsyncOperation();
+  const { t } = useLanguage();
 
   React.useEffect(() => {
     register('name');
@@ -29,14 +38,43 @@ export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMe
     register('nationalCode');
   }, [register]);
 
+  const {
+    execute: initialApis,
+    loading: initialApisLoading
+  } = useAsyncOperation();
+
+  const loadUserData = useCallback(async () => {
+    try {
+      await initialApis(() =>
+        Promise.all([
+          dispatch(fetchUser()),
+          dispatch(order()),
+          dispatch(cart()),
+          dispatch(getWorkers()),
+          dispatch(addresses()),
+        ])
+      );
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  }, [dispatch]);
+
+
   const onSubmit = async (data: LoginForm) => {
     try {
       const res = await submit(() => services.auth.completeProfile(data));
-      if (res.code == 200) {
-        closeDrawer();
-      }
+      dispatch(setUser(res.data?.user));
+
+      await loadUserData();
+
+      await checkAuthStatus();
+
+      // if (onLoginSuccess) {
+      //   await onLoginSuccess();
+      // }
+      closeDrawer('login');
     } catch (error) {
-      // Error already handled by the hook
+      console.error('Verification error:', error);
     }
   };
 
@@ -86,7 +124,7 @@ export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMe
         </TouchableOpacity>
       </View>
     </View>
-  );
+  )
 };
 
 const createStyles = (theme: Theme) => StyleSheet.create({

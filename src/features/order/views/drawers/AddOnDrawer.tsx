@@ -8,7 +8,7 @@ import { Service } from '@/src/features/service/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
-import { formatPrice } from '@/src/utils/funs';
+import { engNumToPersian, formatPrice } from '@/src/utils/funs';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -149,6 +149,10 @@ const AddOnDrawer = ({
             const count = currentOption?.addOns?.[secAttr.id]?.count || 1;
             const price = count * secAttr.price * (selected.isUrgent ? 1.5 : 1);
 
+            function faNumToEng(text: string): string {
+                  throw new Error('Function not implemented.');
+              }
+
             return (
               <TouchableOpacity
                 key={secAttr.id}
@@ -182,9 +186,9 @@ const AddOnDrawer = ({
 
                       <TextInputView
                         style={sharedOrderStyles.quantityInput}
-                        value={count.toString()}
+                        value={engNumToPersian(count.toString())}
                         onChangeText={(text) => {
-                          const newCount = Math.max(1, parseInt(text) || 1);
+                          const newCount = Math.max(1, parseInt(faNumToEng(text)) || 1);
                           handleQuantityChange(secAttr, newCount);
                         }}
                         keyboardType="numeric"

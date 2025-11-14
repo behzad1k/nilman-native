@@ -11,13 +11,13 @@ export const orderStyles = StyleSheet.create({
     height: 4,
     backgroundColor: '#E5E5EA',
     borderRadius: 2,
+    alignItems: 'flex-end',
     overflow: 'hidden',
   },
   progressActive: {
     height: '100%',
     backgroundColor: colors.pink,
     borderRadius: 2,
-    // transition: 'width 0.3s ease',
   },
 
   urgentWarning: {

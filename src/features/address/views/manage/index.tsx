@@ -43,7 +43,6 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
     districtId: address?.districtId || '',
     floor: address?.floor || ''
   });
-  console.log(position);
   const submit = async () => {
     if (step == 1) {
       if (position[0] != defaultPosition[0] && position[1] != defaultPosition[1]) {

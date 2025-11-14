@@ -49,7 +49,6 @@ const SecAttrDrawer = ({
     attr: null,
     open: false,
   });
-
   const activeParent = useMemo(() => currentParent || parent, [currentParent, parent]);
 
   const handleCloseDrawer = useCallback(() => {

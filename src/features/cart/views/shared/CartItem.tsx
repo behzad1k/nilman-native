@@ -4,7 +4,7 @@ import { cartItemStyle } from '@/src/features/cart/styles';
 import useNumerals from '@/src/hooks/useNumerals';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { Theme } from '@/src/types/theme';
-import { findAncestors } from '@/src/utils/funs';
+import { engNumToPersian, findAncestors } from '@/src/utils/funs';
 import moment from 'jalali-moment';
 import { Calendar, MapPin, Timer, Trash } from 'phosphor-react-native';
 import React from 'react';
@@ -68,7 +68,7 @@ const CartItem = ({ item, deleteCartItem }: ICartItemProps) => {
             </TextView>
             {attribute.addOns?.map((e, addOnIndex) => (
               <TextView key={addOnIndex} style={cartItemStyle.addOnText}>
-                -{e.addOn?.title + ' ' + e.count + 'x'}
+                -{e.addOn?.title + ' ' + engNumToPersian(e.count) + 'x'}
               </TextView>
             ))}
           </View>

@@ -11,7 +11,7 @@ interface Props {
 const OrderTab = ({ items }: Props) => {
   return (
     <>
-      {items.sort((a, b) => moment(`${b.date} ${b.time}`, 'jYYYY/jMM/jDD HH').unix() - moment(`${a.date} ${a.time}`, 'jYYYY/jMM/jDD HH').unix()).map(item => <OrderCard key={item.id} item={item} />)}
+      {items?.sort((a, b) => moment(`${b.date} ${b.time}`, 'jYYYY/jMM/jDD HH').unix() - moment(`${a.date} ${a.time}`, 'jYYYY/jMM/jDD HH').unix()).map(item => <OrderCard key={item.id} item={item} />)}
     </>
   )
 }

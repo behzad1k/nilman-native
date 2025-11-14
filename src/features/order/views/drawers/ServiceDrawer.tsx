@@ -6,7 +6,7 @@ import { Service } from '@/src/features/service/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
-import { formatPrice } from '@/src/utils/funs';
+import { engNumToPersian, formatPrice } from '@/src/utils/funs';
 import { OnPressEvent } from '@maplibre/maplibre-react-native';
 import React, { useCallback, useMemo } from 'react';
 import { GestureResponderEvent, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
@@ -69,6 +69,11 @@ const ServiceDrawer = ({
           const isSelected = isAttributeSelected(secAttr);
           const count = selected?.options[secAttr.id]?.count || 1;
           const price = secAttr.price * (selected.isUrgent ? 1.5 : 1);
+
+          function faNumToEng(text: string): string {
+                throw new Error('Function not implemented.');
+            }
+
           return (
             <TouchableOpacity
               key={secAttr.slug}
@@ -107,15 +112,15 @@ const ServiceDrawer = ({
 
                       <TextInputView
                         style={serviceDrawerStyles.quantityInput}
-                        value={count.toString()}
+                        value={engNumToPersian(count.toString())}
                         editable={!(secAttr.addOns.length > 0 ? (selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) > 0 : true) : false)}
                         onChangeText={(text) => {
                           if (selected.options[secAttr.id?.toString()]?.addOns ? Object.values(selected.options[secAttr.id?.toString()].addOns || {}).reduce((acc, curr) => acc + curr.count, 0) == 0 : true) {
-                            const newCount = parseInt(text) || 0;
+                            const newCount = parseInt(faNumToEng(text)) || 0;
                             handleQuantityChange(secAttr, newCount);
                           }
                         }}
-                        keyboardType="numeric"
+                        // keyboardType="numeric"
                         textAlign="center"
                         onFocus={(e) => e.stopPropagation()}
                       />

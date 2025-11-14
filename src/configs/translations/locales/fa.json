@@ -24,6 +24,8 @@
     "noAvailableStylistInDateTime": "تمامی استایلیست ها در این زمان مشغول می باشند"
   },
   "api_error": {
+    "invalidRequest": "مشکل در ارسال اطلاعات",
+    "invalidResponse": "مشکل در دریافت اطلاعات",
     "wrongDiscountCode": "کد تخفیف اشتباه است",
     "discountCodeInactive": "کد تخفیف فعال نیست",
     "discountCodeMaxedOut": "دفعات مجاز کد تخفیف به اتمام رسیده است",
@@ -34,6 +36,7 @@
     "invalidDateTimeOrder": "زمان انتخاب شده مجاز نمی باشد. سفارش را دوباره ثبت کنید",
     "minimumCartNotReached": "حداقل سبد خرید مبلغ ۵۰۰,۰۰۰ تومان می باشد",
     "unableToDeletePaidOrder": "امکان حذف سفارش پرداخت شده نیست",
-    "unableToSubmitDifferentOrderServices": "ثبت سفارش از دو لاین مختلف در یک سفارش امکان پذیر نمی باشد"
+    "unableToSubmitDifferentOrderServices": "ثبت سفارش از دو لاین مختلف در یک سفارش امکان پذیر نمی باشد",
+    "nationalCodeAndPhoneNotMatched": "کد ملی و شماره تلفن تطابق ندارند"
   }
 }

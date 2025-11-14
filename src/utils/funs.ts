@@ -57,9 +57,9 @@ export const isEmpty = (obj: any) => {
   return Object.keys(obj)?.length == 0;
 }
 
-export const persianNumToEn = (str: any) => str.replace(/[۰-۹]/g, (d: any) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+export const persianNumToEn = (str: any) => str.toString().replace(/[۰-۹]/g, (d: any) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
 
-export const engNumToPersian = (str: any) => str.replace(/[0-9]/g, (d: any) => '۰۱۲۳۴۵۶۷۸۹'.charAt(d))
+export const engNumToPersian = (str: any) => str.toString().replace(/[0-9]/g, (d: any) => '۰۱۲۳۴۵۶۷۸۹'.charAt(d))
 
 
 

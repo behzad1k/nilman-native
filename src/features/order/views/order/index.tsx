@@ -235,10 +235,10 @@ const OrderPage = () => {
 
           <View style={orderStyles.switchContainer}>
             <View style={styles.switchRow}>
-              <Switch
+              {/* @ts-ignore */}
+              <Switch activeThumbColor={'white'}
                 value={selected.isUrgent}
                 onValueChange={toggleUrgentMode}
-
                 trackColor={{
                   false: theme.textSecondary,
                   true: colors.pink
@@ -249,10 +249,10 @@ const OrderPage = () => {
 
             {step?.index < 2 && (
               <View style={styles.switchRow}>
-                <Switch
+                {/* @ts-ignore */}
+                <Switch activeThumbColor={'white'}
                   value={selected.isMulti}
                   onValueChange={toggleMultiMode}
-
                   trackColor={{
                     false: theme.textSecondary,
                     true: colors.pink
@@ -306,7 +306,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     backgroundColor: theme.background,
   },
   switchLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     textAlign: 'right',
   },
