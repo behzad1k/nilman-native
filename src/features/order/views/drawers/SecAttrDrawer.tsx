@@ -15,6 +15,7 @@ import InfoDrawer from './InfoDrawer';
 import MediaDrawer from './MediaDrawer';
 import PickColorDrawer from './PickColorDrawer';
 import ServiceDrawer from './ServiceDrawer';
+import { Toast } from 'toastify-react-native';
 
 interface ISecAttrDrawerProps {
   visible: boolean;
@@ -51,16 +52,65 @@ const SecAttrDrawer = ({
   });
   const activeParent = useMemo(() => currentParent || parent, [currentParent, parent]);
 
+  // Validation helper to check if all services with hasColor have colors selected
+  const validateColorSelection = useCallback(() => {
+    const optionIds = Object.keys(selected.options);
+
+    for (const optionId of optionIds) {
+      const service = services.allServices.find(s => s.id.toString() === optionId);
+
+      if (service?.hasColor) {
+        const colors = selected.options[optionId]?.colors;
+        if (!colors || colors.length === 0) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }, [selected.options, services.allServices]);
+
   const handleCloseDrawer = useCallback(() => {
+    // Validate color selection before closing
+    if (!validateColorSelection()) {
+      Toast.show({
+        type: 'error',
+        text1: 'لطفا رنگ مورد نظر را انتخاب کنید'
+      });
+      return;
+    }
+
     setCurrentParent(undefined);
     setPage(1);
     setShouldPickAddOns(false);
     setPickingColor({ attr: null, open: false });
     setPickMedia(false);
     onClose();
-  }, [onClose]);
+  }, [onClose, validateColorSelection]);
 
   const handleGoBack = useCallback(() => {
+    if (pickingColor.open) {
+      // Don't allow going back from color selection if it's mandatory
+      const service = services.allServices.find(s => s.id === currentAttribute?.id);
+      if (service?.hasColor) {
+        const colors = selected.options[currentAttribute?.id]?.colors;
+        if (!colors || colors.length === 0) {
+          Toast.show({
+            type: 'warn',
+            text1: 'انتخاب رنگ الزامی است'
+          });
+          // Remove the service from options
+          setSelected(prev => {
+            const newOptions = { ...prev.options };
+            delete newOptions[currentAttribute?.id];
+            return { ...prev, options: newOptions };
+          });
+        }
+        setPickingColor({ attr: null, open: false });
+        return;
+      }
+    }
+
     if (shouldPickAddOns) {
       setShouldPickAddOns(false);
     } else if (page > 1) {
@@ -69,7 +119,7 @@ const SecAttrDrawer = ({
         services.allServices.find(e => e.id === prev?.parent?.id)
       );
     }
-  }, [shouldPickAddOns, page, services.allServices]);
+  }, [shouldPickAddOns, page, services.allServices, pickingColor.open, currentAttribute, selected.options]);
 
   const handleClickCard = useCallback((secAttr: Service) => {
     setCurrentAttribute(secAttr);
@@ -117,6 +167,10 @@ const SecAttrDrawer = ({
         services.allServices?.find(j => e === j.id.toString())?.parent?.id === activeParent.id
       )) {
       // Show error toast
+      Toast.show({
+        type: 'warn',
+        text1: 'امکان انتخاب چند خدمت وجود ندارد'
+      });
       return;
     }
 
@@ -203,7 +257,7 @@ const SecAttrDrawer = ({
               <X width={20} color={theme.text} />
             </TouchableOpacity>
 
-            {(page > 1 || shouldPickAddOns) && (
+            {(page > 1 || shouldPickAddOns || pickingColor.open) && (
               <TouchableOpacity
                 style={styles.headerButton}
                 onPress={handleGoBack}

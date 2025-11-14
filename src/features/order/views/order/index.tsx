@@ -56,6 +56,40 @@ const OrderPage = () => {
     return selected.attributes?.reduce((total, attr) => total + attr.price, 0) || 0;
   }, [selected.attributes]);
 
+  // Validation function to check if all services with hasColor have colors
+  const validateColorSelection = useCallback(() => {
+    for (const [serviceId, options] of Object.entries(selected.options)) {
+      const service = allServices.find(s => s.id.toString() === serviceId);
+
+      if (service?.hasColor) {
+        if (!options.colors || options.colors.length === 0) {
+          Toast.show({
+            type: 'error',
+            text1: `لطفا رنگ برای ${service.title} را انتخاب کنید`
+          });
+          return false;
+        }
+      }
+
+      // Check addOns for hasColor
+      if (options.addOns) {
+        for (const addOnId of Object.keys(options.addOns)) {
+          const addOnService = allServices.find(s => s.id.toString() === addOnId);
+          if (addOnService?.hasColor) {
+            if (!options.colors || options.colors.length === 0) {
+              Toast.show({
+                type: 'error',
+                text1: `لطفا رنگ برای ${addOnService.title} را انتخاب کنید`
+              });
+              return false;
+            }
+          }
+        }
+      }
+    }
+    return true;
+  }, [selected.options, allServices]);
+
   const loadSavedData = useCallback(async () => {
     try {
       const savedOrder = await services.order.getSavedOrder();
@@ -82,7 +116,11 @@ const OrderPage = () => {
 
   const handleChangeStep = useCallback(async (action: 'next' | 'prev') => {
     if (action === 'next') {
+      // Validate color selection before moving to next step from attribute step
       if (step?.index === 1) {
+        if (!validateColorSelection()) {
+          return; // Don't proceed if validation fails
+        }
         await saveOrderData();
       }
 
@@ -120,7 +158,7 @@ const OrderPage = () => {
         setStep(STEPS[step?.index - 1]);
       }
     }
-  }, [step, selected, isAuthenticated, allServices, openDrawer, saveOrderData]);
+  }, [step, selected, isAuthenticated, allServices, openDrawer, saveOrderData, validateColorSelection]);
 
   const handleBackPress = useCallback(() => {
     if (step?.index > 0) {
@@ -131,8 +169,13 @@ const OrderPage = () => {
   }, [step?.index, handleChangeStep, navigation]);
 
   const handleSubmitOrder = useCallback(async () => {
+    // Final validation before submission
+    if (!validateColorSelection()) {
+      return;
+    }
+
     try {
-      const res = await submitOrder(() => services.order.submitOrder(selected));
+      const res = await submitOrder(() => services.order.submitOrder(selected, allServices));
 
       if (res.code === 201) {
         await services.order.removeSavedOrder();
@@ -150,13 +193,20 @@ const OrderPage = () => {
       } else{
         Toast.error(t(API_ERRORS[res.code] ? `api_error.${API_ERRORS[res.code]}` : 'error.general'));
       }
-    } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'خطا در ثبت سفارش',
-      });
+    } catch (error: any) {
+      if (error?.code === 'COLOR_REQUIRED') {
+        Toast.show({
+          type: 'error',
+          text1: 'لطفا رنگ های مورد نیاز را انتخاب کنید',
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'خطا در ثبت سفارش',
+        });
+      }
     }
-  }, [selected, submitOrder, dispatch, navigation]);
+  }, [selected, submitOrder, dispatch, navigation, validateColorSelection, allServices]);
 
   const toggleUrgentMode = useCallback((value: boolean) => {
     setSelected(prev => ({
@@ -224,25 +274,16 @@ const OrderPage = () => {
 
       {step?.index > 0 && (
         <View style={styles.bottomSection}>
-          {/* {selected.isUrgent && ( */}
-          {/*   <View style={orderStyles.urgentWarning}> */}
-          {/*     <Ionicons name="warning" size={25} color="#FF9500"/> */}
-          {/*     <TextView style={orderStyles.urgentWarningText}> */}
-          {/*       سفارش شما در حالت فوری قرار دارد و با افزایش قیمت همراه است */}
-          {/*     </TextView> */}
-          {/*   </View> */}
-          {/* )} */}
-
           <View style={orderStyles.switchContainer}>
             <View style={styles.switchRow}>
               {/* @ts-ignore */}
               <Switch activeThumbColor={'white'}
-                value={selected.isUrgent}
-                onValueChange={toggleUrgentMode}
-                trackColor={{
-                  false: theme.textSecondary,
-                  true: colors.pink
-                }}
+                      value={selected.isUrgent}
+                      onValueChange={toggleUrgentMode}
+                      trackColor={{
+                        false: theme.textSecondary,
+                        true: colors.pink
+                      }}
               />
               <TextView style={styles.switchLabel}>سفارش فوری</TextView>
             </View>
@@ -251,12 +292,12 @@ const OrderPage = () => {
               <View style={styles.switchRow}>
                 {/* @ts-ignore */}
                 <Switch activeThumbColor={'white'}
-                  value={selected.isMulti}
-                  onValueChange={toggleMultiMode}
-                  trackColor={{
-                    false: theme.textSecondary,
-                    true: colors.pink
-                  }}
+                        value={selected.isMulti}
+                        onValueChange={toggleMultiMode}
+                        trackColor={{
+                          false: theme.textSecondary,
+                          true: colors.pink
+                        }}
                 />
                 <TextView style={styles.switchLabel}>سفارش گروهی</TextView>
               </View>

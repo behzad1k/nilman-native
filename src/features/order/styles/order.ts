@@ -102,7 +102,6 @@ export const orderStyles = StyleSheet.create({
   stepNumber: {
     fontSize: 14,
     color: '#666',
-    fontFamily: 'IRANSans',
   },
   // Additional styles for better UX
   loadingOverlay: {
@@ -120,7 +119,6 @@ export const orderStyles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     marginTop: 12,
-    fontFamily: 'IRANSans',
   },
   errorContainer: {
     backgroundColor: '#F8D7DA',
@@ -134,7 +132,7 @@ export const orderStyles = StyleSheet.create({
     color: '#721C24',
     fontSize: 14,
     textAlign: 'center',
-    fontFamily: 'IRANSans',
+
   },
   successContainer: {
     backgroundColor: '#D4EDDA',
@@ -148,7 +146,7 @@ export const orderStyles = StyleSheet.create({
     color: '#155724',
     fontSize: 14,
     textAlign: 'center',
-    fontFamily: 'IRANSans',
+
   },
   priceContainer: {
     backgroundColor: '#F8F9FA',
@@ -167,13 +165,13 @@ export const orderStyles = StyleSheet.create({
   priceLabel: {
     fontSize: 14,
     color: '#666',
-    fontFamily: 'IRANSans',
+
   },
   priceValue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    fontFamily: 'IRANSans',
+
   },
   totalPriceRow: {
     flexDirection: 'row',
@@ -187,13 +185,12 @@ export const orderStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    fontFamily: 'IRANSans',
+
   },
   totalPriceValue: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#007AFF',
-    fontFamily: 'IRANSans',
   },
   // Responsive styles
   tablet: {

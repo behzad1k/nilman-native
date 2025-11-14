@@ -9,6 +9,7 @@ import { ScrollView, StyleSheet, TouchableOpacity, View, } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/src/components/contexts/ThemeContext';
 import { colors } from '@/src/styles/theme/colors';
+import { Toast } from 'toastify-react-native';
 
 interface IPickColorDrawerProps {
   colors: Color[];
@@ -57,22 +58,44 @@ const PickColorDrawer = ({
   const handleConfirm = useCallback(() => {
     const selectedColors = selected.options[currentAttribute?.id]?.colors;
 
-    if (Array.isArray(selectedColors) && selectedColors.length > 0) {
-      setPickingColor({
-        attr: null,
-        open: false
+    if (!Array.isArray(selectedColors) || selectedColors.length === 0) {
+      // Show error toast
+      Toast.show({
+        type: 'error',
+        text1: 'لطفا حداقل یک رنگ را انتخاب کنید'
       });
-    } else {
-      // Show error toast: 'لطفا حداقل یک رنگ را انتخاب کنید'
+      return;
     }
-  }, [selected.options, currentAttribute?.id, setPickingColor]);
 
-  const handleCancel = useCallback(() => {
     setPickingColor({
       attr: null,
       open: false
     });
-  }, [setPickingColor]);
+  }, [selected.options, currentAttribute?.id, setPickingColor]);
+
+  const handleCancel = useCallback(() => {
+    const selectedColors = selected.options[currentAttribute?.id]?.colors;
+
+    // Check if colors are required and not selected
+    if (!Array.isArray(selectedColors) || selectedColors.length === 0) {
+      // Remove the service from options if no color is selected
+      setSelected(prev => {
+        const newOptions = { ...prev.options };
+        delete newOptions[currentAttribute?.id];
+        return { ...prev, options: newOptions };
+      });
+
+      Toast.show({
+        type: 'warn',
+        text1: 'انتخاب رنگ الزامی است'
+      });
+    }
+
+    setPickingColor({
+      attr: null,
+      open: false
+    });
+  }, [currentAttribute?.id, setPickingColor, setSelected]);
 
   const selectedColors = selected.options[currentAttribute?.id]?.colors || [];
 
@@ -90,13 +113,6 @@ const PickColorDrawer = ({
               onPress={() => handleColorSelect(colorItem)}
             >
               <LinearGradient dither={false} colors={[colorItem.code, theme.primary]} start={[.1, 1]} end={[.7, 0]} style={[styles.colorRow, isSelected && styles.selectedColorRow]} >
-                {/* <View */}
-                {/*   style={[ */}
-                {/*     PickColorDrawerStyles.colorSpan, */}
-                {/*     { backgroundColor: colorItem.code } */}
-                {/*   ]} */}
-                {/* /> */}
-
                 <View style={{ flexDirection: 'row', gap: 10}}>
                   <TextView style={styles.colorTitle}>
                     {colorItem.title}
@@ -122,7 +138,6 @@ const PickColorDrawer = ({
         <TouchableOpacity
           style={PickColorDrawerStyles.cancelButton}
           onPress={handleCancel}
-          disabled={selectedColors.length == 0}
         >
           <TextView style={PickColorDrawerStyles.cancelButtonText}>بازگشت</TextView>
         </TouchableOpacity>
@@ -142,27 +157,25 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     color: theme.text,
     marginBottom: 16,
     textAlign: 'right',
-  }
-  ,
+  },
   colorRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
     backgroundColor: theme.primary,
     borderRadius: 12,
-    paddingVertical: 4,
+    paddingVertical: 8,
     paddingRight: 16,
     marginBottom: 8,
     borderWidth: 2,
-    borderColor: 'transparent',
-    opacity: .9
+    borderColor: 'white',
+    opacity: 1
 
   },
   colorTitle: {
-    width: 'auto',
-    fontSize: 17,
+    fontSize: 16,
     color: theme.text,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   selectedColorRow: {
     borderColor: colors.pink,

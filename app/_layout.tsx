@@ -41,9 +41,11 @@ function AppContent() {
   } = useTheme();
   const { isRTL } = useI18nContext()
   const toastConfig: ToastManagerProps = {
+    useModal: false,
     isRTL: isRTL,
     theme: isDark? 'dark' : 'light',
-    topOffset: 60
+    topOffset: 60,
+
   }
   const {
     t,
@@ -108,9 +110,10 @@ function AppContent() {
               backgroundColor={theme.background}
             />
             {showSplash && <Splash textValue={textValue}/>}
-            <ToastManager {...toastConfig} />
           </Drawer>
         </DrawerProvider>
+        <ToastManager {...toastConfig} />
+
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

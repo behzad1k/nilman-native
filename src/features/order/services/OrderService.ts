@@ -10,9 +10,10 @@ import { translate as t } from '@/src/configs/translations/staticTranslations';
 export class InvalidOrder extends Error {
   constructor(message: string, public code?: string) {
     super(message);
-    this.name = 'UserServiceError';
+    this.name = 'InvalidOrderError';
   }
 }
+
 class OrderService {
   constructor(private deps: ServiceDependencies) {}
 
@@ -24,7 +25,47 @@ class OrderService {
     return await this.deps.apiClient.get(ENDPOINTS.ORDER.INDEX);
   }
 
-  async submitOrder(selected: Form): Promise<ApiResponse<Order>> {
+  private validateOrderColors(selected: Form, allServices: any[]): boolean {
+    // Check if all services with hasColor have colors selected
+    for (const [serviceId, options] of Object.entries(selected.options)) {
+      const service = allServices.find(s => s.id.toString() === serviceId);
+
+      if (service?.hasColor) {
+        if (!options.colors || options.colors.length === 0) {
+          Toast.show({
+            type: 'error',
+            text1: `لطفا رنگ برای ${service.title} را انتخاب کنید`
+          });
+          return false;
+        }
+      }
+
+      // Check addOns for hasColor
+      if (options.addOns) {
+        for (const addOnId of Object.keys(options.addOns)) {
+          const addOnService = allServices.find(s => s.id.toString() === addOnId);
+          if (addOnService?.hasColor) {
+            if (!options.colors || options.colors.length === 0) {
+              Toast.show({
+                type: 'error',
+                text1: `لطفا رنگ برای ${addOnService.title} را انتخاب کنید`
+              });
+              return false;
+            }
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+  async submitOrder(selected: Form, allServices?: any[]): Promise<ApiResponse<Order>> {
+    // Validate colors before submission if allServices is provided
+    if (allServices && !this.validateOrderColors(selected, allServices)) {
+      throw new InvalidOrder('Color selection is required for some services', 'COLOR_REQUIRED');
+    }
+
     const reqOptions: OrderRequest = {
       service: selected.service?.slug,
       attributes: selected.options,
@@ -38,9 +79,11 @@ class OrderService {
 
     return await this.deps.apiClient.post(ENDPOINTS.ORDER.INDEX, reqOptions);
   }
+
   async setSavedOrder(data: Form, step: Step): Promise<void> {
     await this.deps.storage.setItem(STORAGE_KEYS.NEW_ORDER, JSON.stringify({ ...data, step, timestamp: new Date() }));
   }
+
   async getSavedOrder(): Promise<OrderStorage | undefined> {
     const newOrderObject = await this.deps.storage.getItem(STORAGE_KEYS.NEW_ORDER)
     if (newOrderObject) {
@@ -52,6 +95,7 @@ class OrderService {
     }
     return
   }
+
   async removeSavedOrder(): Promise<void> {
     await this.deps.storage.removeItem(STORAGE_KEYS.NEW_ORDER)
   }
