@@ -3,6 +3,7 @@ import { PickColorDrawerStyles } from '@/src/features/order/styles/pickColorDraw
 import { Color, Form, PickingColor } from '@/src/features/order/types';
 import { Service } from '@/src/features/service/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
+import Typography from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
 import React, { useCallback } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View, } from 'react-native';
@@ -152,11 +153,11 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     backgroundColor: theme.background,
   },
   subtitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 16,
     color: theme.text,
     marginBottom: 16,
     textAlign: 'right',
+    ...Typography.weights.medium
   },
   colorRow: {
     flexDirection: 'row',
@@ -175,7 +176,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   colorTitle: {
     fontSize: 16,
     color: theme.text,
-    fontWeight: '500',
+    ...Typography.weights.medium
   },
   selectedColorRow: {
     borderColor: colors.pink,

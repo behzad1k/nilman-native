@@ -54,16 +54,19 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
 
   const timeSlots = useMemo(() => {
     const slots = [];
+    let section = 1;
+    const currentHour = parseInt(moment().format('HH'));
+    const currentSection = currentHour < 8 ? 0 : (Math.floor(currentHour / 2) - 3)
+
     for (let i = 8; i < 22; i += 2) {
       const day = moment().add(calTab, 'day').format('jYYYY/jMM/jDD');
-      const currentHour = Number(moment().format('HH'));
 
       const disabled =
-        (!selected.isUrgent && (calTab === 0 || (calTab === 1 && currentHour > i))) ||
-        (calTab === 0 && currentHour > (i - 5)) ||
-        (selected.isUrgent && calTab === 0 && currentHour >= 0 && currentHour < 8 && (i === 8 || i === 10)) ||
-        (calTab === 1 && currentHour >= 16 && currentHour < 18 && i < 10) ||
-        (calTab === 1 && currentHour >= 18 && i < 12);
+        (calTab === 0 && currentHour > i ) ||
+        (calTab === 0 && section - currentSection <= 2) ||
+        (!selected.isUrgent && calTab === 0 && section - currentSection <= 4) ||
+        (!selected.isUrgent && calTab === 1 && currentHour - i >= 6) ||
+        (selected.isUrgent && calTab === 1 && currentHour - i >= 10)
 
       const isSelected = selected.time === i && selected.date === day;
 
@@ -74,6 +77,7 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
         isSelected,
         label: `${i} - ${i + 2}`
       });
+      ++section;
     }
     return slots;
   }, [calTab, selected.isUrgent, selected.time, selected.date]);
@@ -266,7 +270,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   disabledTimeSlot: {
     backgroundColor: theme.third,
-    opacity: 0.8,
+    opacity: 0.3,
   },
   timeSlotText: {
     fontSize: 14,

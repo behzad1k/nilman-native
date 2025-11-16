@@ -1,6 +1,7 @@
 import TextView from '@/src/components/ui/TextView';
 import { addressRowStyles } from '@/src/features/address/styles';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
+import Typography from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
 import { Pencil } from 'phosphor-react-native';
 import React from 'react';
@@ -101,9 +102,9 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     color: theme.text,
   },
   addressTitle: {
-    fontSize: 18,
-    fontWeight: 500,
     color: theme.text,
+    fontSize: 16,
+    ...Typography.weights.normal
   },
   selected: {
     borderColor: colors.pink,
