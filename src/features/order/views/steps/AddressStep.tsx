@@ -1,3 +1,4 @@
+import SelectBoxView from '@/src/components/ui/SelectBoxView';
 import TextView from '@/src/components/ui/TextView';
 import { useAppSelector } from '@/src/configs/redux/hooks';
 import { Addresses } from '@/src/features/address/views/Addresses';
@@ -10,7 +11,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 
 interface AddressStepProps {
   selected: Form;
-  setSelected: (value: any) => void;
+  setSelected: React.Dispatch<React.SetStateAction<Form>>;
   setIsNextStepAllowed: (value: boolean) => void;
 }
 
@@ -21,7 +22,6 @@ const AddressStep = ({
                      }: AddressStepProps) => {
   const userReducer = useAppSelector(state => state.user);
   const styles = useThemedStyles(createStyles);
-
   const availableWorkers = useMemo(() => {
     return userReducer.workers.filter(worker =>
       Object.keys(selected.options).every(serviceId =>
@@ -44,41 +44,14 @@ const AddressStep = ({
         {availableWorkers.length > 0 && userReducer.data?.isWorkerChoosable && (
           <View style={styles.workerSection}>
             <TextView style={styles.hintText}>انتخاب از استایلیست های پیشین</TextView>
-            {/* <View style={styles.pickerContainer}> */}
-            {/*   <Controller */}
-            {/*     name="worker" */}
-            {/*     control={control} */}
-            {/*     defaultValue={selected?.worker || 0} */}
-            {/*     render={({ field: { onChange, value } }) => ( */}
-            {/*       <Picker */}
-            {/*         selectedValue={value} */}
-            {/*         onValueChange={(itemValue) => { */}
-            {/*           onChange(itemValue); */}
-            {/*           setSelected(prev => ({ */}
-            {/*             ...prev, */}
-            {/*             worker: itemValue */}
-            {/*           })); */}
-            {/*         }} */}
-            {/*         style={styles.picker} */}
-            {/*         itemStyle={styles.pickerItem} */}
-            {/*       > */}
-            {/*         <Picker.Item */}
-            {/*           label="انتخاب خودکار" */}
-            {/*           value={0} */}
-            {/*           color="#333" */}
-            {/*         /> */}
-            {/*         {availableWorkers?.map((worker: any) => ( */}
-            {/*           <Picker.Item */}
-            {/*             key={worker?.id} */}
-            {/*             label={`${worker?.name} ${worker?.lastName}`} */}
-            {/*             value={worker?.id} */}
-            {/*             color="#333" */}
-            {/*           /> */}
-            {/*         ))} */}
-            {/*       </Picker> */}
-            {/*     )} */}
-            {/*   /> */}
-            {/* </View> */}
+            <SelectBoxView
+              placeholder='انتخاب استایلیست'
+
+              showDropdownIcon={false}
+              options={[{value: null, label: 'انتخاب خودکار'} , ...availableWorkers.map(e => ({ label: `${e.name} ${e.lastName}`, value: e.id.toString()}))]}
+              onChange={(value) => setSelected((prev) => ({ ...prev, worker: value ? value.toString(): null }))}
+              value={selected.worker || null}
+            />
           </View>
         )}
 

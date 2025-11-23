@@ -1,11 +1,10 @@
 import ENDPOINTS from '@/src/configs/api/endpoints';
-import { Order, Color, Form, OrderRequest, Step, OrderStorage } from '@/src/features/order/types';
+import { Order, Color, Form, OrderRequest, Step, OrderStorage, Stylist } from '@/src/features/order/types';
 import { ApiResponse } from '@/src/types/api';
 import { ServiceDependencies } from '@/src/types/services';
 import { STORAGE_KEYS } from '@/src/utils/storage';
 import moment from 'jalali-moment';
 import { Toast } from 'toastify-react-native';
-import { translate as t } from '@/src/configs/translations/staticTranslations';
 
 export class InvalidOrder extends Error {
   constructor(message: string, public code?: string) {
@@ -82,6 +81,10 @@ class OrderService {
 
   async setSavedOrder(data: Form, step: Step): Promise<void> {
     await this.deps.storage.setItem(STORAGE_KEYS.NEW_ORDER, JSON.stringify({ ...data, step, timestamp: new Date() }));
+  }
+
+  async fetchWorkerOffs(): Promise<ApiResponse<Stylist[]>> {
+    return await this.deps.apiClient.get(ENDPOINTS.ORDER.INDEX);
   }
 
   async getSavedOrder(): Promise<OrderStorage | undefined> {

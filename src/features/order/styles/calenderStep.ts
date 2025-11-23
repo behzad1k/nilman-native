@@ -16,8 +16,8 @@ export const calenderStepStyles = StyleSheet.create({
     paddingBottom: 10,
   },
   timeSlotGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    minHeight: 250,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

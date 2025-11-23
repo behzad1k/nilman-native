@@ -1,3 +1,4 @@
+import DigitalTimePicker from '@/src/components/ui/DigitalTimePicker';
 import TextView from '@/src/components/ui/TextView';
 import { calenderStepStyles } from '@/src/features/order/styles/calenderStep';
 import { Form, Step } from '@/src/features/order/types';
@@ -5,15 +6,10 @@ import { useLanguage } from '@/src/hooks/useLanguage';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
 import { Theme } from '@/src/types/theme';
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
-import { Toast } from 'toastify-react-native';
 import moment from 'jalali-moment';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View, } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 interface Props {
   selected: Form;
@@ -21,13 +17,29 @@ interface Props {
   setStep: React.Dispatch<React.SetStateAction<Step>>;
 }
 
-const CalendarStep = ({ setSelected, selected }: Props) => {
+const CalendarStep = ({
+                        setSelected,
+                        selected
+                      }: Props) => {
   const [calTab, setCalTab] = useState(0);
-  const { t, isRTL } = useLanguage();
+  const {
+    t,
+    isRTL
+  } = useLanguage();
   const styles = useThemedStyles(createStyles);
   const scrollViewRef = useRef<ScrollView>(null);
+  const { execute: fetchWorkers, loading: fetchWorkersLoading } = useAsyncOperation()
 
+  const fetchWorkerOffs = async () => {
+    // await fetchWorkers(() => )
+  }
+
+  useEffect(() => {
+    fetchUserWorkers();
+  }, [])
   const calendarTabs = useMemo(() => {
+    if (!selected.date)
+      setSelected(prev => ({ ...prev, date: moment().format('jYYYY/jMM/jDD')}))
     const calTabs = Array.from({ length: 37 }, (_, i) => {
       const day = moment().add(i, 'd').locale('fa');
       return {
@@ -38,12 +50,12 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
         month: day.format('MMMM')
       };
     });
-    if (isRTL()) return calTabs.reverse()
+    if (isRTL()) return calTabs.reverse();
     else return calTabs;
   }, []);
 
-  // Scroll to the right (end) when component mounts
   useEffect(() => {
+    // Scroll to the right (end) when component mounts
     if (scrollViewRef.current && isRTL()) {
       // Use a small timeout to ensure the ScrollView has rendered
       setTimeout(() => {
@@ -56,17 +68,14 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
     const slots = [];
     let section = 1;
     const currentHour = parseInt(moment().format('HH'));
-    const currentSection = currentHour < 8 ? 0 : (Math.floor(currentHour / 2) - 3)
-
-    for (let i = 8; i < 22; i += 2) {
+    const currentSection = currentHour < 8 ? 0 : (Math.floor(currentHour) - 7);
+    for (let i = 8; i < 21; i += 1) {
       const day = moment().add(calTab, 'day').format('jYYYY/jMM/jDD');
-
       const disabled =
-        (calTab === 0 && currentHour > i ) ||
-        (calTab === 0 && section - currentSection <= 2) ||
-        (!selected.isUrgent && calTab === 0 && section - currentSection <= 4) ||
-        (!selected.isUrgent && calTab === 1 && currentHour - i >= 6) ||
-        (selected.isUrgent && calTab === 1 && currentHour - i >= 10)
+        (calTab === 0 && section - currentSection <= 4) ||
+        (!selected.isUrgent && calTab === 0 && section - currentSection <= 8) ||
+        (!selected.isUrgent && calTab === 1 && (currentHour > 20 ? 20 : currentHour) - i >= 5) ||
+        (calTab === 1 && (currentHour > 20 ? 20 : currentHour) - i >= 9);
 
       const isSelected = selected.time === i && selected.date === day;
 
@@ -75,29 +84,18 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
         day,
         disabled,
         isSelected,
-        label: `${i} - ${i + 2}`
+        label: `${i} - ${i + 1}`
       });
       ++section;
     }
     return slots;
   }, [calTab, selected.isUrgent, selected.time, selected.date]);
 
-  const handleTabPress = useCallback((index: number) => {
+  const handleTabPress = useCallback((index: number = 0) => {
     setCalTab(index);
+    setSelected(prev => ({ ...prev, date: moment().add(index, 'day').format('jYYYY/jMM/jDD') }))
   }, []);
-
-  const handleTimeSlotPress = useCallback((timeSlot: any) => {
-    if (timeSlot.disabled) {
-      Toast.warn(t('error.noAvailableStylistInDateTime'));
-    } else {
-      setSelected(prev => ({
-        ...prev,
-        time: timeSlot.time,
-        date: timeSlot.day
-      }));
-    }
-  }, [setSelected]);
-
+  console.log(selected);
   const renderCalendarTabs = () => {
     return calendarTabs.map((tab) => (
       <TouchableOpacity
@@ -131,25 +129,47 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
   };
 
   const renderTimeSlots = () => {
-    return timeSlots.map((timeSlot) => (
-      <TouchableOpacity
-        key={timeSlot.time}
-        style={[
-          styles.timeSlot,
-          timeSlot.isSelected && styles.selectedTimeSlot,
-          timeSlot.disabled && styles.disabledTimeSlot
-        ]}
-        onPress={() => handleTimeSlotPress(timeSlot)}
-      >
-        <TextView style={[
-          styles.timeSlotText,
-          timeSlot.isSelected && styles.selectedTimeSlotText,
-          timeSlot.disabled && styles.disabledTimeSlotText
-        ]}>
-          {timeSlot.label}
-        </TextView>
-      </TouchableOpacity>
-    ));
+    const disabledHours = timeSlots.filter(e => e.disabled).map(e => e.time);
+    if (disabledHours.length >= timeSlots.length)
+      return (<TextView>تمامی استایلیست ها در این تاریخ مشغول می باشند</TextView>)
+    return (
+      <DigitalTimePicker
+        onTimeChange={(hour, _minute) => setSelected(prev => ({
+          ...prev,
+          time: hour
+        }))}
+        minHour={6}
+        maxHour={22}
+        maxMinute={0}
+        initialHour={12}
+        disabledHours={[6, 7, ...disabledHours, 21, 22]}
+        onDisabledHourSelected={() =>
+          Toast.show({
+            type: 'error',
+            text1: t('error.noAvailableStylistInDateTime'),
+            position: 'top',
+          })}
+      />
+    );
+    // return timeSlots.map((timeSlot) => (
+    //   <TouchableOpacity
+    //     key={timeSlot.time}
+    //     style={[
+    //       styles.timeSlot,
+    //       timeSlot.isSelected && styles.selectedTimeSlot,
+    //       timeSlot.disabled && styles.disabledTimeSlot
+    //     ]}
+    //     onPress={() => handleTimeSlotPress(timeSlot)}
+    //   >
+    //     <TextView style={[
+    //       styles.timeSlotText,
+    //       timeSlot.isSelected && styles.selectedTimeSlotText,
+    //       timeSlot.disabled && styles.disabledTimeSlotText
+    //     ]}>
+    //       {timeSlot.label}
+    //     </TextView>
+    //   </TouchableOpacity>
+    // ));
   };
 
   return (
@@ -179,7 +199,7 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
         {!selected.isUrgent && (
           <View style={styles.urgentBox}>
             <TextView style={styles.urgentText}>
-              جهت ثبت سفارش برای ۲۴ ساعت آینده حالت سفارش فوری را انتخاب کنید
+              جهت ثبت سفارش برای ۴ سانس آینده حالت سفارش فوری را انتخاب کنید
             </TextView>
           </View>
         )}
@@ -216,7 +236,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     padding: 16,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -252,7 +275,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: theme.text,
-    marginBottom: 12,
   },
   timeSlot: {
     backgroundColor: theme.surface,

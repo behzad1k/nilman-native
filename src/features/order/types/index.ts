@@ -123,3 +123,5 @@ export interface OrderServiceAddOn {
   orderServiceId: number;
   addOn: Service;
 };
+
+export interface Stylist extends User {}
