@@ -6,7 +6,8 @@ const ENDPOINTS = {
   },
   USER: {
     INDEX: formatUrl('user'),
-    WORKERS: formatUrl('user/workers')
+    WORKERS: formatUrl('user/workers'),
+    WORKER_OFFS: formatUrl('user/workerOffs')
   },
   SERVICE: {
     INDEX: formatUrl('service')

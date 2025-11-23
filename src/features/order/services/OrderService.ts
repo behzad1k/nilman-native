@@ -83,8 +83,8 @@ class OrderService {
     await this.deps.storage.setItem(STORAGE_KEYS.NEW_ORDER, JSON.stringify({ ...data, step, timestamp: new Date() }));
   }
 
-  async fetchWorkerOffs(): Promise<ApiResponse<Stylist[]>> {
-    return await this.deps.apiClient.get(ENDPOINTS.ORDER.INDEX);
+  async fetchWorkerOffs(attributes: string[], addressId: number, workerId?: number | null): Promise<ApiResponse<Stylist[]>> {
+    return await this.deps.apiClient.post(ENDPOINTS.USER.WORKER_OFFS, { attributes, workerId, addressId });
   }
 
   async getSavedOrder(): Promise<OrderStorage | undefined> {

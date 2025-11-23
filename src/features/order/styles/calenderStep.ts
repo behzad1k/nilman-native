@@ -16,7 +16,7 @@ export const calenderStepStyles = StyleSheet.create({
     paddingBottom: 10,
   },
   timeSlotGrid: {
-    minHeight: 250,
+    minHeight: 220,
     alignItems: 'center',
     justifyContent: 'center',
   },

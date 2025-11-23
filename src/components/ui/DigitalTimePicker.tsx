@@ -1,5 +1,7 @@
 import TextView from '@/src/components/ui/TextView';
+import { colors } from '@/src/styles/theme/colors';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View, } from 'react-native';
 
 interface PickerComponentProps {
@@ -30,6 +32,8 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
 
   const hours = Array.from({ length: maxHour - minHour + 1 }, (_, i) => minHour + i);
   const minutes = Array.from({ length: maxMinute - minMinute + 1 }, (_, i) => minMinute + i);
+
+  const { t } = useTranslation()
 
   const availableHours = hours.filter(h => !disabledHours.includes(h));
 
@@ -179,7 +183,7 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
     return (
       <View style={styles.emptyContainer}>
         <TextView style={styles.emptyText}>
-          No available hours for this date
+          {t('error.noAvailableStylistInDateTime')}
         </TextView>
       </View>
     );
@@ -295,7 +299,7 @@ const styles = StyleSheet.create({
   },
   pickerItemTextSelected: {
     fontSize: 26,
-    color: '#000',
+    color: colors.pink,
     fontWeight: '600',
   },
   pickerItemTextDisabled: {
@@ -303,10 +307,12 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
   },
   pickerSeparator: {
-    fontSize: 32,
+    fontSize: 28,
+    marginBottom: 10,
+    textAlign: 'center',
     fontWeight: '600',
     marginHorizontal: 10,
-    color: '#000',
+    color: colors.pink,
   },
   pickerSelection: {
     position: 'absolute',

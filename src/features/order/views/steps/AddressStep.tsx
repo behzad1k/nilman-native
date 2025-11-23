@@ -46,7 +46,6 @@ const AddressStep = ({
             <TextView style={styles.hintText}>انتخاب از استایلیست های پیشین</TextView>
             <SelectBoxView
               placeholder='انتخاب استایلیست'
-
               showDropdownIcon={false}
               options={[{value: null, label: 'انتخاب خودکار'} , ...availableWorkers.map(e => ({ label: `${e.name} ${e.lastName}`, value: e.id.toString()}))]}
               onChange={(value) => setSelected((prev) => ({ ...prev, worker: value ? value.toString(): null }))}

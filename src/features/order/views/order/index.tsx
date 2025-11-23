@@ -154,7 +154,10 @@ const OrderPage = () => {
             attributeStep: allServices?.find(e => e.id === prev.attributeStep?.parent?.id)
           }));
         }
-      } else if (step?.index > 0) {
+      } else if (step?.index === 2){
+        setSelected(prev => ({ ...prev, worker: null }))
+      }
+      if (step?.index > 0) {
         setStep(STEPS[step?.index - 1]);
       }
     }

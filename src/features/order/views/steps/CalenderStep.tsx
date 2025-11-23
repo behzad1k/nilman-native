@@ -1,7 +1,11 @@
 import DigitalTimePicker from '@/src/components/ui/DigitalTimePicker';
+import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
 import TextView from '@/src/components/ui/TextView';
+import { useAppSelector } from '@/src/configs/redux/hooks';
+import { services } from '@/src/configs/services';
 import { calenderStepStyles } from '@/src/features/order/styles/calenderStep';
 import { Form, Step } from '@/src/features/order/types';
+import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import { useLanguage } from '@/src/hooks/useLanguage';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { colors } from '@/src/styles/theme/colors';
@@ -22,24 +26,30 @@ const CalendarStep = ({
                         selected
                       }: Props) => {
   const [calTab, setCalTab] = useState(0);
+  const [schedules, setSchedules] = useState<any>(undefined);
+  const userReducer = useAppSelector(state => state.user)
   const {
     t,
     isRTL
   } = useLanguage();
   const styles = useThemedStyles(createStyles);
   const scrollViewRef = useRef<ScrollView>(null);
-  const { execute: fetchWorkers, loading: fetchWorkersLoading } = useAsyncOperation()
+  const {
+    execute: fetchWorkers,
+    loading: fetchWorkersLoading
+  } = useAsyncOperation();
+  const selectedTimeRef = useRef(0);
 
   const fetchWorkerOffs = async () => {
-    // await fetchWorkers(() => )
-  }
+    const workerOffs = await fetchWorkers(() => services.order.fetchWorkerOffs(Object.keys(selected.options), selected.address?.id || userReducer?.addresses[0]?.id, parseInt(selected.worker || '')));
+    setSchedules(workerOffs.data);
+  };
 
   useEffect(() => {
-    fetchUserWorkers();
-  }, [])
+    fetchWorkerOffs();
+  }, []);
+
   const calendarTabs = useMemo(() => {
-    if (!selected.date)
-      setSelected(prev => ({ ...prev, date: moment().format('jYYYY/jMM/jDD')}))
     const calTabs = Array.from({ length: 37 }, (_, i) => {
       const day = moment().add(i, 'd').locale('fa');
       return {
@@ -63,8 +73,8 @@ const CalendarStep = ({
       }, 300);
     }
   }, [isRTL]);
-
   const timeSlots = useMemo(() => {
+    if (fetchWorkersLoading && !schedules) return []
     const slots = [];
     let section = 1;
     const currentHour = parseInt(moment().format('HH'));
@@ -73,10 +83,14 @@ const CalendarStep = ({
       const day = moment().add(calTab, 'day').format('jYYYY/jMM/jDD');
       const disabled =
         (calTab === 0 && section - currentSection <= 4) ||
+        (schedules && schedules[day] ? schedules[day].includes(i) : false) ||
         (!selected.isUrgent && calTab === 0 && section - currentSection <= 8) ||
         (!selected.isUrgent && calTab === 1 && (currentHour > 20 ? 20 : currentHour) - i >= 5) ||
         (calTab === 1 && (currentHour > 20 ? 20 : currentHour) - i >= 9);
 
+      if (!selectedTimeRef.current && !disabled) {
+        selectedTimeRef.current = i;
+      }
       const isSelected = selected.time === i && selected.date === day;
 
       slots.push({
@@ -89,13 +103,23 @@ const CalendarStep = ({
       ++section;
     }
     return slots;
-  }, [calTab, selected.isUrgent, selected.time, selected.date]);
+  }, [calTab, selected.isUrgent, selected.time, selected.date, schedules]);
 
-  const handleTabPress = useCallback((index: number = 0) => {
+  useEffect(() => {
+    setSelected((prev) => ({
+      ...prev,
+      time: selectedTimeRef.current
+    }));
+  }, [selectedTimeRef.current]);
+
+  const changeDay = useCallback((index: number = 0) => {
     setCalTab(index);
-    setSelected(prev => ({ ...prev, date: moment().add(index, 'day').format('jYYYY/jMM/jDD') }))
+    setSelected(prev => ({
+      ...prev,
+      date: moment().add(index, 'day').format('jYYYY/jMM/jDD')
+    }));
   }, []);
-  console.log(selected);
+
   const renderCalendarTabs = () => {
     return calendarTabs.map((tab) => (
       <TouchableOpacity
@@ -104,7 +128,7 @@ const CalendarStep = ({
           styles.calTabCell,
           calTab === tab.index && styles.selectedTab
         ]}
-        onPress={() => handleTabPress(tab.index)}
+        onPress={() => changeDay(tab.index)}
       >
         <TextView style={[
           styles.tabDayText,
@@ -130,8 +154,7 @@ const CalendarStep = ({
 
   const renderTimeSlots = () => {
     const disabledHours = timeSlots.filter(e => e.disabled).map(e => e.time);
-    if (disabledHours.length >= timeSlots.length)
-      return (<TextView>تمامی استایلیست ها در این تاریخ مشغول می باشند</TextView>)
+    if (!selected.date && disabledHours.length >= timeSlots.length) changeDay(calTab + 1);
     return (
       <DigitalTimePicker
         onTimeChange={(hour, _minute) => setSelected(prev => ({
@@ -141,7 +164,7 @@ const CalendarStep = ({
         minHour={6}
         maxHour={22}
         maxMinute={0}
-        initialHour={12}
+        initialHour={selectedTimeRef.current}
         disabledHours={[6, 7, ...disabledHours, 21, 22]}
         onDisabledHourSelected={() =>
           Toast.show({
@@ -178,22 +201,30 @@ const CalendarStep = ({
         <TextView style={styles.hintText}>لطفا تاریخ و ساعت را انتخاب کنید</TextView>
 
         <View style={styles.calendarContainer}>
-          <ScrollView
-            ref={scrollViewRef}
-            horizontal
-            showsHorizontalScrollIndicator={true}
-            style={[calenderStepStyles.calTabsContainer]}
-            contentContainerStyle={calenderStepStyles.calTabsContent}
-          >
-            {renderCalendarTabs()}
-          </ScrollView>
+          {fetchWorkersLoading ?
+            <LoadingSpinner/> :
+            <>
 
-          <View>
-            <TextView style={styles.timeSlotsTitle}>انتخاب ساعت</TextView>
-            <View style={calenderStepStyles.timeSlotGrid}>
-              {renderTimeSlots()}
-            </View>
-          </View>
+              <ScrollView
+                ref={scrollViewRef}
+                horizontal
+                showsHorizontalScrollIndicator={true}
+                style={[calenderStepStyles.calTabsContainer]}
+                contentContainerStyle={calenderStepStyles.calTabsContent}
+              >
+                {renderCalendarTabs()}
+              </ScrollView>
+
+              <View>
+                <TextView style={styles.timeSlotsTitle}>انتخاب ساعت</TextView>
+                <View style={calenderStepStyles.timeSlotGrid}>
+                  {renderTimeSlots()}
+                </View>
+              </View>
+            </>
+
+          }
+
         </View>
 
         {!selected.isUrgent && (
