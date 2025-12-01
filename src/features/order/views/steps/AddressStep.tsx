@@ -23,7 +23,7 @@ const AddressStep = ({
   const userReducer = useAppSelector(state => state.user);
   const styles = useThemedStyles(createStyles);
   const availableWorkers = useMemo(() => {
-    return userReducer.workers.filter(worker =>
+    return userReducer.workers?.filter(worker =>
       Object.keys(selected.options).every(serviceId =>
         worker.services?.some(service => service.id.toString() === serviceId)
       )
@@ -41,7 +41,7 @@ const AddressStep = ({
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
-        {availableWorkers.length > 0 && userReducer.data?.isWorkerChoosable && (
+        {availableWorkers?.length > 0 && userReducer.data?.isWorkerChoosable && (
           <View style={styles.workerSection}>
             <TextView style={styles.hintText}>انتخاب از استایلیست های پیشین</TextView>
             <SelectBoxView
