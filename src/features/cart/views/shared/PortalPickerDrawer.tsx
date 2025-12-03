@@ -273,7 +273,7 @@ const PortalPickerDrawer = ({
     const { authority, method, url } = portalData;
 
     if ((method === PaymentMethods.zarinpal || method === PaymentMethods.sep) && url) {
-      window.open(url);
+      window.open(url, '_self');
       onClose?.();
       return;
     }else {
