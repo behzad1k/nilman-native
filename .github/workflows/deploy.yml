@@ -119,6 +119,7 @@ jobs:
           # Copy Docker files
           cp Dockerfile deploy-package/Dockerfile
           cp docker-compose.yml deploy-package/docker-compose.yml
+          cp .dockerignore deploy-package/.dockerignore
 
           # Verify package structure
           echo "📦 Package structure:"
