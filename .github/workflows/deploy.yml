@@ -44,20 +44,20 @@ jobs:
             EOF
 
             # Stop existing containers
-            docker-compose down
+            docker compose down
 
             # Build and start new containers
-            docker-compose up -d --build
+            docker compose up -d --build
 
             # Wait for container to be healthy
             echo "Waiting for application to start..."
             sleep 15
 
             # Check container status
-            docker-compose ps
+            docker compose ps
 
             # Show recent logs
-            docker-compose logs --tail=50
+            docker compose logs --tail=50
 
             # Clean up unused images
             docker image prune -f
