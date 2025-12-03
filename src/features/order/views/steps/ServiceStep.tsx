@@ -1,3 +1,4 @@
+import { useTheme } from '@/src/components/contexts/ThemeContext';
 import TextView from '@/src/components/ui/TextView';
 import { useAppSelector } from '@/src/configs/redux/hooks';
 import { serviceStepStyles } from '@/src/features/order/styles/serviceStep';
@@ -7,7 +8,7 @@ import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import Typography from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
 import { getServiceIcon } from '@/src/utils/funs';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { Toast } from 'toastify-react-native';
@@ -23,12 +24,12 @@ const ServiceStep = ({ selected, setSelected, setStep }: Props) => {
   const cart = useAppSelector(state => state.order.cart);
   const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
+  const { isDark, theme } = useTheme()
+  const [filteredServices, setFilteredServices] = useState<Service[]>([])
 
-  const filteredServices = useMemo(() => {
-    return services
-    .filter(e => e.showInList)
-    .sort((a, b) => (a?.sort || 1000) - (b?.sort || 1000));
-  }, [services]);
+  useEffect(() => {
+    setFilteredServices(services.filter(e => e.showInList).sort((a, b) => (a?.sort || 1000) - (b?.sort || 1000)))
+  }, [services, isDark]);
 
   const handleSelectService = useCallback((service: Service) => {
     if (cart.find(e => e.serviceId === service.id)) {
@@ -50,10 +51,9 @@ const ServiceStep = ({ selected, setSelected, setStep }: Props) => {
       name: 'attribute'
     });
   }, [cart, setSelected, setStep]);
-
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={serviceStepStyles.cardsContainer}>
+      <ScrollView contentContainerStyle={serviceStepStyles.cardsContainer} >
         {filteredServices.map((service) => (
           <TouchableOpacity
             key={service.slug}
@@ -102,11 +102,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     marginBottom: 16,
     width: '100%',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
     borderWidth: 2,
     borderColor: 'transparent',
   }

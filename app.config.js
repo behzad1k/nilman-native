@@ -39,8 +39,7 @@ export default {
             description: "Online beauty service provider",
             favicon: "./src/assets/images/favicon.png",
             meta: {
-                "viewport": "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-            }
+                "viewport": "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content"            }
         },
         experiments: {
             typedRoutes: true,

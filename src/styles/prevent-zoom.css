@@ -1,0 +1,31 @@
+/* Prevent zoom on input focus for PWA */
+input,
+textarea,
+select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Prevent double-tap zoom */
+* {
+  touch-action: manipulation;
+}
+
+/* Additional iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Ensure inputs don't trigger zoom */
+input:focus,
+textarea:focus,
+select:focus {
+  font-size: 16px !important;
+}

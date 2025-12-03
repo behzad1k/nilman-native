@@ -23,6 +23,7 @@ export const colors = {
   blue: '#1482d2',
   border: '#E0E0E0',
   placeholder: '#9E9E9E',
+  red: '#ff4444'
 } as const;
 
 export const lightTheme = {

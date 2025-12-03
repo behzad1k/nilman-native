@@ -184,11 +184,11 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
           textAlign="center"
           // Enhanced auto-fill properties
           textContentType={isFirstInput ? "oneTimeCode" : undefined}
-          autoComplete={isFirstInput ? "sms-otp" : "off"}
+          autoComplete={isFirstInput ? "one-time-code" : "off"}
           // iOS specific properties
           {...(Platform.OS === 'ios' && {
             textContentType: isFirstInput ? 'oneTimeCode' : undefined,
-            autoComplete: isFirstInput ? 'sms-otp' : 'off',
+            autoComplete: isFirstInput ? 'one-time-code' : 'off',
           })}
           // Android specific properties
           {...(Platform.OS === 'android' && {
@@ -220,11 +220,44 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
     }
   }, [code]);
 
-  // Web-specific auto-fill handling
+  // Web-specific auto-fill handling with Web OTP API
   useEffect(() => {
     if (Platform.OS === 'web') {
       const handleWebAutoFill = () => {
-        // Add event listener for web auto-fill
+        // Check if Web OTP API is supported
+        if ('OTPCredential' in window) {
+          const abortController = new AbortController();
+
+          navigator.credentials.get({
+            // @ts-ignore - Web OTP API
+            otp: { transport: ['sms'] },
+            signal: abortController.signal
+          }).then((otp: any) => {
+            if (otp && otp.code) {
+              // Extract OTP code from the received SMS
+              const otpCode = otp.code;
+              if (otpCode.length === 6) {
+                const digits = otpCode.split('');
+                const newCode = new Array(6).fill('');
+                digits.forEach((char: string, i: number) => {
+                  if (i < 6) newCode[i] = char;
+                });
+                setCode(newCode);
+                hasTriggeredComplete.current = false;
+              }
+            }
+          }).catch((err: Error) => {
+            // User cancelled or error occurred
+            console.log('Web OTP API error:', err);
+          });
+
+          // Cleanup
+          return () => {
+            abortController.abort();
+          };
+        }
+
+        // Fallback: Add event listener for web auto-fill
         const firstInput = inputRefs.current[0];
         if (firstInput) {
           const handleInput = (event: any) => {
@@ -248,7 +281,7 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
 
       return handleWebAutoFill();
     }
-  }, [handleAutoFill]);
+  }, [handleAutoFill, setCode]);
 
   return (
     <View style={styles.otpContainer}>

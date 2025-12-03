@@ -71,7 +71,7 @@ export default function OrderCard({ item }: IOrderCardProps) {
           <TextView style={orderCardStyles.orderCardAddress}>آدرس: {item.address?.title}</TextView>
           {item.worker?.name && (
             <TextView style={orderCardStyles.orderCardAddress}>
-              استایلیست: {item.worker?.name + ' ' + item?.worker?.lastName}
+              استایلیست: {item.worker?.name}
             </TextView>
           )}
         </View>

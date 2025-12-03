@@ -244,7 +244,6 @@ const OrderPage = () => {
 
   useEffect(() => {
     // AsyncStorage.clear();
-    console.log('loading...');
     loadSavedData();
   }, [loadSavedData]);
 

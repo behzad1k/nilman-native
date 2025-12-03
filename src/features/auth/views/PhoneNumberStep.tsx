@@ -77,6 +77,9 @@ export const PhoneNumberStep: React.FC<PhoneNumberStepProps> = ({
             onChangeText={onChange}
             onBlur={onBlur}
             error={error?.message}
+            keyboardType="phone-pad"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
           />
         )}
       />
@@ -139,7 +142,7 @@ const createStyles = (theme: Theme) =>
       borderColor: '#ddd',
       borderRadius: 8,
       padding: 15,
-      fontSize: 12,
+      fontSize: 16,
       marginBottom: 15,
       textAlign: 'right',
       backgroundColor: colors.lightPink,

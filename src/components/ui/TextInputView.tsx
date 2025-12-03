@@ -21,6 +21,7 @@ const TextInputView = forwardRef<TextInput, TextInputViewProps>(
               borderColor: error ? 'red' : 'gray',
               padding: 10,
               borderRadius: 5,
+              fontSize: 16,
             },
             style,
           ]}

@@ -110,15 +110,16 @@ const CartTab = () => {
         </View>
       )}
       <View style={styles.cartIsCredit}>
+        <TouchableOpacity style={styles.cartDiscountButton} onPress={checkDiscountCode}>
+          <TextView>بررسی</TextView>
+        </TouchableOpacity>
         <View style={styles.cartDiscountBox}>
-          <TouchableOpacity style={styles.cartDiscountButton} onPress={checkDiscountCode}>
-            <TextView>بررسی</TextView>
-          </TouchableOpacity>
           <TextInputView style={styles.cartDiscountInput} onChangeText={(e) => setDiscountCode(e)}/>
+          <TextView>
+            کد تخفیف
+          </TextView>
         </View>
-        <TextView>
-          کد تخفیف
-        </TextView>
+
       </View>
       <View style={styles.cartItemContainer}>
         <View style={orderStyles.orderInfo}>
@@ -200,16 +201,19 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   cartDiscountBox: {
     flexDirection: 'row',
-    gap: 4
+    alignItems: 'center',
+    gap: 8
   },
   cartDiscountButton: {
+    height: 36,
     padding: 2,
-    paddingHorizontal: 8,
+    paddingHorizontal: 20,
     justifyContent: 'center',
     borderRadius: 4,
     backgroundColor: colors.pink
   },
   cartDiscountInput: {
+    height: 36,
     width: 100,
     color: theme.text
   }

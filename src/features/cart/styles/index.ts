@@ -287,7 +287,7 @@ export const cartItemStyle = StyleSheet.create({
     fontWeight: 'bold',
   },
   isUrgent: {
-    backgroundColor: '#ff4444',
+    backgroundColor: colors.red,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -298,13 +298,16 @@ export const cartItemStyle = StyleSheet.create({
     fontWeight: 'bold',
   },
   trashCart: {
+    borderColor: colors.red,
+    borderWidth: 1,
+    borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     padding: 8,
   },
   deleteText: {
-    color: '#ff4444',
+    color: colors.red,
     fontSize: 12,
   },
   orderInfoAddon: {
