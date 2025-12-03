@@ -101,7 +101,7 @@ const PortalDrawer = ({
         scalesPageToFit={true}
         mixedContentMode="compatibility"
         userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15"
-        onError={(syntheticEvent) => {
+        onError={(syntheticEvent: any) => {
           const { nativeEvent } = syntheticEvent;
           console.warn('WebView error:', nativeEvent);
           Toast.show({

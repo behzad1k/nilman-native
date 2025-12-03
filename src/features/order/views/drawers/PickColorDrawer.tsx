@@ -169,7 +169,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     paddingRight: 16,
     marginBottom: 8,
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: theme.primary,
     opacity: 1
 
   },

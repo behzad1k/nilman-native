@@ -5,31 +5,32 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View, } from 'react-native';
 
 interface PickerComponentProps {
+  hour: number;
+  setHour: (hour: number) => void;
+  minute: number;
+  setMinute: (minute: number) => void;
   minHour?: number;
   maxHour?: number;
   minMinute?: number;
   maxMinute?: number;
-  initialHour?: number;
-  initialMinute?: number;
   onTimeChange?: (hour: number, minute: number) => void;
   disabledHours?: number[];
   onDisabledHourSelected?: (disabledHour: number, closestAvailableHour: number) => void;
 }
 
 const DigitalTimePicker: React.FC<PickerComponentProps> = ({
+                                                             hour,
+                                                             setHour,
+                                                             minute,
+                                                             setMinute,
                                                              minHour = 0,
                                                              maxHour = 23,
                                                              maxMinute = 60,
                                                              minMinute = 0,
-                                                             initialHour = minHour,
-                                                             initialMinute = minMinute,
                                                              onTimeChange,
                                                              disabledHours = [],
                                                              onDisabledHourSelected,
                                                            }) => {
-  const [hour, setHour] = useState(initialHour);
-  const [minute, setMinute] = useState(initialMinute);
-
   const hours = Array.from({ length: maxHour - minHour + 1 }, (_, i) => minHour + i);
   const minutes = Array.from({ length: maxMinute - minMinute + 1 }, (_, i) => minMinute + i);
 
@@ -65,6 +66,7 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
   const minuteScrollRef = useRef<ScrollView>(null);
   const hourScrollTimer = useRef<NodeJS.Timeout | null>(null);
   const minuteScrollTimer = useRef<NodeJS.Timeout | null>(null);
+  const isUserScrolling = useRef(false);
 
   // Initialize scroll positions
   useEffect(() => {
@@ -87,7 +89,34 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
     }, 100);
   }, []);
 
+  // Handle external hour changes (from parent)
+  useEffect(() => {
+    if (!isUserScrolling.current) {
+      const hourIndex = hours.indexOf(hour);
+      if (hourIndex >= 0) {
+        hourScrollRef.current?.scrollTo({
+          y: hourIndex * itemHeight,
+          animated: true,
+        });
+      }
+    }
+  }, [hour]);
+
+  // Handle external minute changes (from parent)
+  useEffect(() => {
+    if (!isUserScrolling.current) {
+      const minuteIndex = minutes.indexOf(minute);
+      if (minuteIndex >= 0) {
+        minuteScrollRef.current?.scrollTo({
+          y: minuteIndex * itemHeight,
+          animated: true,
+        });
+      }
+    }
+  }, [minute]);
+
   const handleHourScroll = (event: any) => {
+    isUserScrolling.current = true;
     const y = event.nativeEvent.contentOffset.y;
     const index = Math.round(y / itemHeight);
     const clampedIndex = Math.max(0, Math.min(hours.length - 1, index));
@@ -133,19 +162,21 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
             animated: true,
           });
         }
-        return;
       }
 
+      isUserScrolling.current = false;
     }, 150);
   };
 
   const handleMinuteScroll = (event: any) => {
+    isUserScrolling.current = true;
     const y = event.nativeEvent.contentOffset.y;
     const index = Math.round(y / itemHeight);
     const clampedIndex = Math.max(0, Math.min(minutes.length - 1, index));
     const newMinute = minutes[clampedIndex];
 
     if (newMinute !== undefined && newMinute !== minute) {
+      setMinute(newMinute);
       onTimeChange?.(hour, newMinute);
     }
 
@@ -153,7 +184,7 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
     if (minuteScrollTimer.current) {
       clearTimeout(minuteScrollTimer.current);
     }
-    setMinute(newMinute);
+
     // Set timer to snap when scrolling stops
     // @ts-ignore
     minuteScrollTimer.current = setTimeout(() => {
@@ -162,8 +193,8 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
         y: snapY,
         animated: true,
       });
+      isUserScrolling.current = false;
     }, 150);
-    onTimeChange?.(hour, newMinute);
   };
 
   // Add padding items to allow centering

@@ -26,6 +26,8 @@ const CalendarStep = ({
                         selected
                       }: Props) => {
   const [calTab, setCalTab] = useState(0);
+  const [hour, setHour] = useState(8);
+  const [minute, setMinute] = useState(0);
   const [schedules, setSchedules] = useState<any>(undefined);
   const userReducer = useAppSelector(state => state.user)
   const {
@@ -38,8 +40,6 @@ const CalendarStep = ({
     execute: fetchWorkers,
     loading: fetchWorkersLoading
   } = useAsyncOperation();
-  const selectedTimeRef = useRef(0);
-
   const fetchWorkerOffs = async () => {
     const workerOffs = await fetchWorkers(() => services.order.fetchWorkerOffs(Object.keys(selected.options), selected.address?.id || userReducer?.addresses[0]?.id, parseInt(selected.worker || '')));
     setSchedules(workerOffs.data);
@@ -65,14 +65,13 @@ const CalendarStep = ({
   }, []);
 
   useEffect(() => {
-    // Scroll to the right (end) when component mounts
     if (scrollViewRef.current && isRTL()) {
-      // Use a small timeout to ensure the ScrollView has rendered
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 300);
+      }, 150);
     }
   }, [isRTL]);
+
   const timeSlots = useMemo(() => {
     if (fetchWorkersLoading && !schedules) return []
     const slots = [];
@@ -82,15 +81,12 @@ const CalendarStep = ({
     for (let i = 8; i < 21; i += 1) {
       const day = moment().add(calTab, 'day').format('jYYYY/jMM/jDD');
       const disabled =
-        (calTab === 0 && section - currentSection <= 4) ||
+        (calTab === 0 && section - currentSection <= 3) ||
         (schedules && schedules[day] ? schedules[day].includes(i) : false) ||
-        (!selected.isUrgent && calTab === 0 && section - currentSection <= 8) ||
+        (!selected.isUrgent && calTab === 0 && section - currentSection <= 7) ||
         (!selected.isUrgent && calTab === 1 && (currentHour > 20 ? 20 : currentHour) - i >= 5) ||
         (calTab === 1 && (currentHour > 20 ? 20 : currentHour) - i >= 9);
 
-      if (!selectedTimeRef.current && !disabled) {
-        selectedTimeRef.current = i;
-      }
       const isSelected = selected.time === i && selected.date === day;
 
       slots.push({
@@ -105,12 +101,7 @@ const CalendarStep = ({
     return slots;
   }, [calTab, selected.isUrgent, selected.time, selected.date, schedules]);
 
-  useEffect(() => {
-    setSelected((prev) => ({
-      ...prev,
-      time: selectedTimeRef.current
-    }));
-  }, [selectedTimeRef.current]);
+  const disabledHours = timeSlots.filter(e => e.disabled).map(e => e.time);
 
   const changeDay = useCallback((index: number = 0) => {
     setCalTab(index);
@@ -119,6 +110,22 @@ const CalendarStep = ({
       date: moment().add(index, 'day').format('jYYYY/jMM/jDD')
     }));
   }, []);
+
+  useEffect(() => {
+    if (timeSlots.length) {
+      if (timeSlots.filter(e => !e.disabled).length) {
+        const closestHour = timeSlots.filter(e => !e.disabled)[0]?.time;
+        if (disabledHours.includes(hour) || hour > closestHour)
+          setHour(closestHour);
+      } else {
+        changeDay(calTab + 1);
+      }
+      setSelected((prev) => ({
+        ...prev,
+        time: hour
+      }));
+    }
+  }, [hour, timeSlots]);
 
   const renderCalendarTabs = () => {
     return calendarTabs.map((tab) => (
@@ -152,28 +159,7 @@ const CalendarStep = ({
     ));
   };
 
-  const renderTimeSlots = () => {
-    const disabledHours = timeSlots.filter(e => e.disabled).map(e => e.time);
-    if (!selected.date && disabledHours.length >= timeSlots.length) changeDay(calTab + 1);
-    return (
-      <DigitalTimePicker
-        onTimeChange={(hour, _minute) => setSelected(prev => ({
-          ...prev,
-          time: hour
-        }))}
-        minHour={6}
-        maxHour={22}
-        maxMinute={0}
-        initialHour={selectedTimeRef.current}
-        disabledHours={[6, 7, ...disabledHours, 21, 22]}
-        onDisabledHourSelected={() =>
-          Toast.show({
-            type: 'error',
-            text1: t('error.noAvailableStylistInDateTime'),
-            position: 'top',
-          })}
-      />
-    );
+  const renderTimeSlots = useCallback(() => {
     // return timeSlots.map((timeSlot) => (
     //   <TouchableOpacity
     //     key={timeSlot.time}
@@ -193,7 +179,7 @@ const CalendarStep = ({
     //     </TextView>
     //   </TouchableOpacity>
     // ));
-  };
+  },[timeSlots, hour]);
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -218,7 +204,26 @@ const CalendarStep = ({
               <View>
                 <TextView style={styles.timeSlotsTitle}>انتخاب ساعت</TextView>
                 <View style={calenderStepStyles.timeSlotGrid}>
-                  {renderTimeSlots()}
+                  <DigitalTimePicker
+                    hour={hour}
+                    setHour={setHour}
+                    minute={minute}
+                    setMinute={setMinute}
+                    onTimeChange={(hour, _minute) => setSelected(prev => ({
+                      ...prev,
+                      time: hour
+                    }))}
+                    minHour={8}
+                    maxHour={20}
+                    maxMinute={0}
+                    disabledHours={timeSlots.filter(e => e.disabled).map(e => e.time)}
+                    onDisabledHourSelected={() =>
+                      Toast.show({
+                        type: 'error',
+                        text1: t('error.noAvailableStylistInDateTime'),
+                        position: 'top',
+                      })}
+                  />
                 </View>
               </View>
             </>

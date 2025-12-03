@@ -52,6 +52,7 @@ export const orderStyles = StyleSheet.create({
   cartContainer: {
     gap: spacing.sm,
     flex: 1,
+    paddingBottom: 10,
   },
 
   orderInfo: {
@@ -95,20 +96,14 @@ export const orderStyles = StyleSheet.create({
     fontWeight: '500',
   },
   payButton: {
+    position: 'sticky',
+    bottom: 40,
     width: '100%',
     backgroundColor: colors.green,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   emptyContainer: {
     alignItems: 'center',

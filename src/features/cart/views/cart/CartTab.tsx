@@ -196,7 +196,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   payButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme.textSecondary,
+    color: colors.white,
   },
   cartDiscountBox: {
     flexDirection: 'row',
