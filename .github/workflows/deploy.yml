@@ -196,11 +196,11 @@ jobs:
             if [ ! -f ".dockerignore" ]; then
               echo "⚠️  Warning: .dockerignore not found, creating minimal one"
               cat > .dockerignore << 'DOCKERIGNORE_EOF'
-node_modules
-.git
-.expo
-.env
-DOCKERIGNORE_EOF
+							node_modules
+							.git
+							.expo
+							.env
+							DOCKERIGNORE_EOF
             fi
 
             echo "✅ dist/ folder verified: $(du -sh dist | cut -f1)"
