@@ -17,6 +17,7 @@ import { useLanguage } from '@/src/hooks/useLanguage';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { FontFamilies } from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
+import { STORAGE_KEYS } from '@/src/utils/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -29,6 +30,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import ToastManager from 'toastify-react-native';
 import { ToastManagerProps } from 'toastify-react-native/utils/interfaces';
+import { services } from '@/src/configs/services';
 
 function AppContent() {
   const {
@@ -61,6 +63,10 @@ function AppContent() {
     checkAuthStatus
   } = useAuth();
   const initializeApp = async () => {
+    const themeToken = await AsyncStorage.getItem(STORAGE_KEYS.THEME);
+    if (!themeToken) {
+      await AsyncStorage.setItem(STORAGE_KEYS.THEME, 'dark')
+    }
     dispatch(fetchServices());
     dispatch(fetchColors());
 
@@ -79,7 +85,6 @@ function AppContent() {
 
   useEffect(() => {
     initializeApp();
-
   }, [dispatch, t]);
 
   useEffect(() => {
