@@ -103,8 +103,8 @@ jobs:
           # Create minimal deployment package
           mkdir -p deploy-package
           cp -r dist deploy-package/
-          cp Dockerfile.prebuilt deploy-package/Dockerfile
-          cp docker-compose.optimized.yml deploy-package/docker-compose.yml
+          cp Dockerfile deploy-package/Dockerfile
+          cp docker-compose.yml deploy-package/docker-compose.yml
 
           # Create tarball for faster transfer
           tar -czf deploy-package.tar.gz -C deploy-package .
