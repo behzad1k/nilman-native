@@ -226,13 +226,14 @@ export function OTP({ code, setCode, onComplete, disabled = false }: OTPProps) {
       const handleWebAutoFill = () => {
         // Check if Web OTP API is supported
         if ('OTPCredential' in window) {
+          console.log(window?.OTPCredential);
           const abortController = new AbortController();
-
           navigator.credentials.get({
             // @ts-ignore - Web OTP API
             otp: { transport: ['sms'] },
             signal: abortController.signal
           }).then((otp: any) => {
+            console.log('otp', otp);
             if (otp && otp.code) {
               // Extract OTP code from the received SMS
               const otpCode = otp.code;
