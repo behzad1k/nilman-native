@@ -104,7 +104,7 @@ class OrderService {
   }
 
   async paymentVerify(data: any): Promise<void> {
-    await this.deps.apiClient.post(ENDPOINTS.ORDER.PAYMENT_VERIFY, data)
+    return await this.deps.apiClient.post(ENDPOINTS.ORDER.PAYMENT_VERIFY, data)
   }
 }
 

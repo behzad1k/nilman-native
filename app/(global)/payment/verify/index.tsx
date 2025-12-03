@@ -30,7 +30,7 @@ const Payment = () => {
       refNum: searchParam.get('RefNum'),
       tranId: searchParam.get('PayGateTranID')
     }));
-
+    console.log(res);
     if (res.code == 200) {
       setIsSuccessful(true);
       dispatch(cart());
@@ -39,6 +39,7 @@ const Payment = () => {
       setIsSuccessful(false);
     }
   };
+
   useEffect(() => {
     if (isSuccessful) {
       send();
