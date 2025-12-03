@@ -102,6 +102,10 @@ class OrderService {
   async removeSavedOrder(): Promise<void> {
     await this.deps.storage.removeItem(STORAGE_KEYS.NEW_ORDER)
   }
+
+  async paymentVerify(data: any): Promise<void> {
+    await this.deps.apiClient.post(ENDPOINTS.ORDER.PAYMENT_VERIFY, data)
+  }
 }
 
 export default OrderService

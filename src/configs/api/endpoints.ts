@@ -26,7 +26,7 @@ const ENDPOINTS = {
   },
   GLOBAL: {
     COLOR: formatUrl('color')
-  }
+  },
 } as const
 
 export default ENDPOINTS
