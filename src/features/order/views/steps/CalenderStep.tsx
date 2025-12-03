@@ -30,6 +30,7 @@ const CalendarStep = ({
   const [minute, setMinute] = useState(0);
   const [schedules, setSchedules] = useState<any>(undefined);
   const userReducer = useAppSelector(state => state.user)
+  const selectedTimeRef = useRef<number | null>(null)
   const {
     t,
     isRTL
@@ -116,7 +117,7 @@ const CalendarStep = ({
       if (timeSlots.filter(e => !e.disabled).length) {
         const closestHour = timeSlots.filter(e => !e.disabled)[0]?.time;
         if (disabledHours.includes(hour) || hour > closestHour)
-          setHour(closestHour);
+          selectedTimeRef.current = closestHour
       } else {
         changeDay(calTab + 1);
       }
@@ -126,6 +127,12 @@ const CalendarStep = ({
       }));
     }
   }, [hour, timeSlots]);
+
+  useEffect(() => {
+    if (selectedTimeRef.current) {
+      setHour(selectedTimeRef.current);
+    }
+  }, [selectedTimeRef.current]);
 
   const renderCalendarTabs = () => {
     return calendarTabs.map((tab) => (
@@ -158,7 +165,7 @@ const CalendarStep = ({
       </TouchableOpacity>
     ));
   };
-
+  console.log(selected.time);
   const renderTimeSlots = useCallback(() => {
     // return timeSlots.map((timeSlot) => (
     //   <TouchableOpacity
