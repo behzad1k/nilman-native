@@ -4,6 +4,7 @@ import { LanguageProvider, useI18nContext } from '@/src/components/contexts/Lang
 import { LoadingProvider } from '@/src/components/contexts/LoadingContext';
 import { SplashProvider, useSplash } from '@/src/components/contexts/SplashContext';
 import { ThemeProvider, useTheme } from '@/src/components/contexts/ThemeContext';
+import InstallPrompt from '@/src/components/layouts/InstallPrompt';
 import Splash from '@/src/components/layouts/Splash';
 import { Drawer } from '@/src/components/ui/Drawer';
 import { LoadingGlobal } from '@/src/components/ui/LoadingGlobal';
@@ -145,6 +146,7 @@ export default function RootLayout() {
                 <KeyboardProvider>
                   <AppContent/>
                   <LoadingGlobal/>
+                  <InstallPrompt />
                 </KeyboardProvider>
               </SplashProvider>
             </ThemeProvider>

@@ -6,13 +6,13 @@ export default {
         slug: "Nilman",
         version: "1.0.0",
         orientation: "portrait",
-        icon: "./src/assets/images/favicon.png",
+        icon: "./src/assets/images/newLogo.png",
         scheme: "nilman",
         userInterfaceStyle: "automatic",
         newArchEnabled: true,
         jsEngine: "hermes",
         splash: {
-            image: "./src/assets/images/favicon.png",
+            image: "./src/assets/images/newLogo.png",
             resizeMode: "contain",
             backgroundColor: "#ffffff"
         },
@@ -27,7 +27,7 @@ export default {
             package: "com.nilman.app",
             edgeToEdgeEnabled: true,
             adaptiveIcon: {
-                foregroundImage: "./src/assets/images/favicon.png",
+                foregroundImage: "./src/assets/images/newLogo.png",
                 backgroundColor: "#FFFFFF"
             }
         },
@@ -37,9 +37,20 @@ export default {
             title: "Nilman",
             name: "Nilman",
             description: "Online beauty service provider",
-            favicon: "./src/assets/images/favicon.png",
+            favicon: "./src/assets/images/newLogo.png",
             meta: {
-                "viewport": "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content"            }
+                "viewport": "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content" ,
+                "og:type": "website",
+                "og:url": "https://app.nilman.co/",
+                "og:title": "Nilman",
+                "og:description": "Beauty Service Provider",
+                "og:image": "https://app.nilman.co/assets/?unstable_path=.%2Fsrc%2Fassets%2Fimages/newLogo.png",
+                "twitter:card": "summary_large_image",
+                "twitter:url": "https://app.nilman.co/",
+                "twitter:title": "Nilman",
+                "twitter:description": "Beauty Service Provider",
+                "twitter:image": "https://app.nilman.co/assets/?unstable_path=.%2Fsrc%2Fassets%2Fimages/newLogo.png"
+            }
         },
         experiments: {
             typedRoutes: true,
@@ -68,7 +79,7 @@ export default {
         [
             "expo-splash-screen",
             {
-                "image": "./src/assets/images/favicon.png",
+                "image": "./src/assets/images/newLogo.png",
                 "imageWidth": 200,
                 "resizeMode": "contain",
                 "backgroundColor": "#ffffff"
