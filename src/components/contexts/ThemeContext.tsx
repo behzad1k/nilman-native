@@ -10,6 +10,7 @@ interface ThemeContextType {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   isDark: boolean;
+  isThemeReady: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -20,10 +21,11 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
   const [systemColorScheme, setSystemColorScheme] = useState<ColorSchemeName>(
     Appearance.getColorScheme()
   );
+  const [isThemeReady, setIsThemeReady] = useState(false);
 
   // Load theme preference from AsyncStorage on app start
   useEffect(() => {
@@ -35,6 +37,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         }
       } catch (error) {
         console.error('Error loading theme preference:', error);
+      } finally {
+        // Always set theme as ready after attempting to load
+        setIsThemeReady(true);
       }
     };
 
@@ -76,7 +81,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     themeMode,
     setThemeMode,
     isDark,
+    isThemeReady,
   };
+
+  // Don't render children until theme is loaded to prevent hydration mismatch
+  if (!isThemeReady) {
+    return null;
+  }
 
   return (
     <ThemeContext.Provider value={value}>

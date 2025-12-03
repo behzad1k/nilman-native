@@ -13,9 +13,9 @@ import { cart, order } from '@/src/configs/redux/slices/orderSlice';
 import { fetchServices } from '@/src/configs/redux/slices/serviceSlice';
 import { addresses, fetchUser, getWorkers } from '@/src/configs/redux/slices/userSlice';
 import { store } from '@/src/configs/redux/store';
+import { services } from '@/src/configs/services';
 import { useLanguage } from '@/src/hooks/useLanguage';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
-import { FontFamilies } from '@/src/styles/theme/typography';
 import { Theme } from '@/src/types/theme';
 import { STORAGE_KEYS } from '@/src/utils/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,7 +30,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import ToastManager from 'toastify-react-native';
 import { ToastManagerProps } from 'toastify-react-native/utils/interfaces';
-import { services } from '@/src/configs/services';
 
 function AppContent() {
   const {
@@ -41,14 +40,14 @@ function AppContent() {
     theme,
     isDark
   } = useTheme();
-  const { isRTL } = useI18nContext()
+  const { isRTL } = useI18nContext();
   const toastConfig: ToastManagerProps = {
     useModal: false,
     isRTL: isRTL,
-    theme: isDark? 'dark' : 'light',
+    theme: isDark ? 'dark' : 'light',
     topOffset: 60,
 
-  }
+  };
   const {
     t,
     isLanguageLoaded,
@@ -65,7 +64,7 @@ function AppContent() {
   const initializeApp = async () => {
     const themeToken = await AsyncStorage.getItem(STORAGE_KEYS.THEME);
     if (!themeToken) {
-      await AsyncStorage.setItem(STORAGE_KEYS.THEME, 'dark')
+      await AsyncStorage.setItem(STORAGE_KEYS.THEME, 'dark');
     }
     dispatch(fetchServices());
     dispatch(fetchColors());
@@ -79,7 +78,7 @@ function AppContent() {
         dispatch(addresses()),
       ]);
     } else {
-      AsyncStorage.removeItem('token')
+      AsyncStorage.removeItem('token');
     }
   };
 
@@ -141,14 +140,14 @@ export default function RootLayout() {
       <LoadingProvider>
         <LanguageProvider>
           <AuthProvider>
+            <ThemeProvider>
               <SplashProvider>
                 <KeyboardProvider>
-                  <ThemeProvider>
-                    <AppContent/>
-                    <LoadingGlobal/>
-                  </ThemeProvider>
+                  <AppContent/>
+                  <LoadingGlobal/>
                 </KeyboardProvider>
               </SplashProvider>
+            </ThemeProvider>
           </AuthProvider>
         </LanguageProvider>
       </LoadingProvider>

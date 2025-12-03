@@ -25,11 +25,16 @@ export default function TabLayout() {
     t,
   } = useLanguage();
   const styles = useThemedStyles(createStyles)
-  const { theme } = useTheme()
+  const { theme, isThemeReady } = useTheme()
   const { openDrawer } = useDrawer();
   const {
     isAuthenticated,
   } = useAuth();
+
+  // Don't render until theme is ready
+  if (!isThemeReady) {
+    return null;
+  }
 
   return (
     <Tabs
@@ -37,7 +42,8 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.pink,
         tabBarInactiveTintColor: theme.text,
         headerShown: false,
-        tabBarStyle: styles.container
+        tabBarStyle: styles.container,
+        tabBarItemStyle: styles.tabItem,
       }}>
       <Tabs.Screen
         name="cart"
@@ -107,15 +113,20 @@ const createStyles = (theme: Theme) =>
     container: {
       flexDirection: 'row',
       justifyContent: 'space-around',
+      alignItems: 'center',
       backgroundColor: theme.background,
       height: 80,
       width: width,
       position: 'absolute',
       bottom: 0,
+      borderTopWidth: 0.5,
+      borderTopColor: theme.border,
     },
     tabItem: {
+      flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
+      paddingHorizontal: spacing.xs,
     },
     tabText: {
       color: colors.white,
