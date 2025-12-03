@@ -63,4 +63,4 @@ export const engNumToPersian = (str: any) => str.toString().replace(/[0-9]/g, (d
 
 
 
-export const getServiceIcon = (slug: string) => ({ uri: `https://app.nilman.co/img/${slug}.png`})
+export const getServiceIcon = (slug: string) => ({ uri: `https://api.nilman.co/public/uploads/service-icons/${slug}.png`})

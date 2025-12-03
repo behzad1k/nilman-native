@@ -1,29 +1,143 @@
-name: Deploy to VPS
+name: Deploy to VPS (Optimized)
 
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
 
+env:
+  NODE_VERSION: '18'
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Copy files to server
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache Expo dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.expo
+            node_modules/.cache
+          key: ${{ runner.os }}-expo-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-expo-
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Apply patches
+        run: |
+          # Patch AsyncStorage
+          ASYNC_PATH="node_modules/@react-native-async-storage/async-storage/lib/commonjs/AsyncStorage.js"
+          if [ -f "$ASYNC_PATH" ]; then
+            cat > "$ASYNC_PATH" << 'EOF'
+          const storage = typeof window !== "undefined" && window.localStorage;
+          const AsyncStorage = {
+            getItem: (k, cb) => Promise.resolve(storage?.getItem(k) || null).then(r => (cb?.(null, r), r)),
+            setItem: (k, v, cb) => Promise.resolve(storage?.setItem(k, v)).then(() => (cb?.(null), undefined)),
+            removeItem: (k, cb) => Promise.resolve(storage?.removeItem(k)).then(() => (cb?.(null), undefined)),
+            clear: (cb) => Promise.resolve(storage?.clear()).then(() => (cb?.(null), undefined)),
+            getAllKeys: (cb) => Promise.resolve(storage ? Object.keys(storage) : []).then(r => (cb?.(null, r), r)),
+            multiGet: (ks, cb) => Promise.resolve(ks.map(k => [k, storage?.getItem(k) || null])).then(r => (cb?.(null, r), r)),
+            multiSet: (kvs, cb) => Promise.resolve(kvs.forEach(([k, v]) => storage?.setItem(k, v))).then(() => (cb?.(null), undefined)),
+            multiRemove: (ks, cb) => Promise.resolve(ks.forEach(k => storage?.removeItem(k))).then(() => (cb?.(null), undefined))
+          };
+          module.exports = AsyncStorage;
+          EOF
+          fi
+
+          # Patch MapLibre
+          MAPLIBRE_PATH="node_modules/@maplibre/maplibre-react-native/lib/module/MLRNModule.js"
+          if [ -f "$MAPLIBRE_PATH" ]; then
+            cat > "$MAPLIBRE_PATH" << 'EOF'
+          module.exports = () => ({
+            MapView: () => null,
+            Camera: () => null,
+            MarkerView: () => null,
+            PointAnnotation: () => null,
+            Callout: () => null,
+            UserLocation: () => null
+          });
+          EOF
+          fi
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          EXPO_PUBLIC_API_BASE_URL=${{ secrets.EXPO_PUBLIC_API_BASE_URL }}
+          EXPO_PUBLIC_API_TIMEOUT=${{ secrets.EXPO_PUBLIC_API_TIMEOUT }}
+          EXPO_PLATFORM=web
+          EOF
+
+      - name: Build web app
+        env:
+          NODE_ENV: production
+          EXPO_PLATFORM: web
+          EXPO_USE_FAST_RESOLVER: 1
+          EXPO_NO_TELEMETRY: 1
+        run: |
+          npx expo export --platform web --clear
+
+          # Verify build
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "❌ Build failed - dist directory is missing or empty"
+            exit 1
+          fi
+
+          echo "✅ Build successful - $(du -sh dist | cut -f1)"
+          ls -lah dist/
+
+      - name: Create deployment package
+        run: |
+          # Create minimal deployment package
+          mkdir -p deploy-package
+          cp -r dist deploy-package/
+          cp Dockerfile.prebuilt deploy-package/Dockerfile
+          cp docker-compose.optimized.yml deploy-package/docker-compose.yml
+
+          # Create tarball for faster transfer
+          tar -czf deploy-package.tar.gz -C deploy-package .
+
+          echo "📦 Package size: $(du -sh deploy-package.tar.gz | cut -f1)"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: deploy-package.tar.gz
+          retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+
+      - name: Copy package to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
-          source: ".,!node_modules,!dist,!.git,!.expo"
+          source: "deploy-package.tar.gz"
           target: ${{ secrets.DEPLOY_PATH || '/opt/nilman' }}
-          strip_components: 1
-          rm: false
+          strip_components: 0
 
       - name: Deploy application
         uses: appleboy/ssh-action@v1.0.3
@@ -33,34 +147,40 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
-            # Navigate to deployment directory
             cd ${{ secrets.DEPLOY_PATH || '/opt/nilman' }}
 
-            # Create .env file from GitHub secrets
+            # Extract package
+            echo "📦 Extracting deployment package..."
+            tar -xzf deploy-package.tar.gz
+            rm deploy-package.tar.gz
+
+            # Create .env file
             cat > .env << 'EOF'
             EXPO_PUBLIC_API_BASE_URL=${{ secrets.EXPO_PUBLIC_API_BASE_URL }}
             EXPO_PUBLIC_API_TIMEOUT=${{ secrets.EXPO_PUBLIC_API_TIMEOUT }}
             EXPO_PLATFORM=web
             EOF
 
-            # Stop existing containers
-            docker compose down
+            # Deploy with zero-downtime
+            echo "🚀 Deploying application..."
+            docker compose up -d --build --remove-orphans
 
-            # Build and start new containers
-            docker compose up -d --build
+            # Wait for health check
+            echo "⏳ Waiting for application to be healthy..."
+            timeout 60 bash -c 'until docker compose ps | grep -q "healthy"; do sleep 2; done' || {
+              echo "❌ Health check timeout"
+              docker compose logs --tail=100
+              exit 1
+            }
 
-            # Wait for container to be healthy
-            echo "Waiting for application to start..."
-            sleep 15
+            echo "✅ Application deployed and healthy"
 
-            # Check container status
-            docker compose ps
-
-            # Show recent logs
-            docker compose logs --tail=50
-
-            # Clean up unused images
+            # Cleanup
             docker image prune -f
+
+            # Show status
+            docker compose ps
+            docker compose logs --tail=20
 
       - name: Verify deployment
         uses: appleboy/ssh-action@v1.0.3
@@ -70,28 +190,23 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
-            # Check if container is running
-            if [ "$(docker ps -q -f name=nilman-native)" ]; then
-              echo "Container is running"
+            # Test endpoint
+            response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3003)
 
-              # Test the application endpoint
-              response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3003)
-              if [ "$response" = "200" ]; then
-                echo "Application is responding correctly"
-              else
-                echo "Application returned status code: $response"
-                exit 1
-              fi
+            if [ "$response" = "200" ]; then
+              echo "✅ Application is responding correctly (HTTP $response)"
             else
-              echo "Container is not running"
+              echo "❌ Application returned status code: $response"
+              docker compose logs --tail=50
               exit 1
             fi
 
-      - name: Send notification
+      - name: Deployment summary
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "Deployment completed successfully!"
+            echo "✅ Deployment completed successfully!"
+            echo "🌐 Application is now live"
           else
-            echo "Deployment failed. Please check the logs."
+            echo "❌ Deployment failed. Check the logs above."
           fi

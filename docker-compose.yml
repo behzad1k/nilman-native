@@ -5,27 +5,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        NODE_ENV: production
-        EXPO_PLATFORM: web
     image: nilman-native:latest
     container_name: nilman-native
     ports:
       - "3003:3003"
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
       - NODE_ENV=production
-      - EXPO_PLATFORM=web
-    volumes:
-      - ./.env:/app/.env:ro
+    # Removed env_file and volume since .env is baked into build
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3003"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 20s
     networks:
       - nilman-network
     logging:
