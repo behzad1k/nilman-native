@@ -11,4 +11,5 @@ export interface User {
   profilePic: { url: string }
   services?: Service[]
   isWorkerChoosable: boolean
+  isVerified: boolean
 }

@@ -3,6 +3,7 @@ import { translate as t } from '@/src/configs/translations/staticTranslations';
 import { LoginForm, LoginRequest, LoginResponse, VerifyRequest, VerifyResponse } from '@/src/features/auth/authTypes';
 import { ApiResponse } from '@/src/types/api';
 import { ServiceDependencies } from '@/src/types/services';
+import { STORAGE_KEYS } from '@/src/utils/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Toast } from 'toastify-react-native';
 
@@ -58,8 +59,6 @@ export class AuthService {
         { skipAuth: true }
       );
       await this.deps.storage.setTempToken(response.token);
-
-      // Don't emit login event yet - wait for OTP verification
       return true;
     } catch (error) {
       console.error('Login error:', error);
@@ -79,12 +78,16 @@ export class AuthService {
         { skipAuth: true }
       );
 
-      await this.deps.storage.removeTempToken();
-      await this.deps.storage.setToken(response.data.token);
+      if (response.data.user.isVerified){
+        await this.deps.storage.removeTempToken();
+        await this.deps.storage.setToken(response.data.token);
 
-      // Emit login event after successful verification
-      this.emitAuthEvent('login', { token: response.data.token });
-      this.emitAuthEvent('authStateChanged', { isAuthenticated: true });
+        // Emit login event after successful verification
+        this.emitAuthEvent('login', { token: response.data.token });
+        this.emitAuthEvent('authStateChanged', { isAuthenticated: true });
+      } else {
+
+      }
 
       return response;
     } catch (error) {
@@ -236,13 +239,13 @@ export class AuthService {
       throw new AuthServiceError(t('validation.nationalCodeInvalid'));
     }
     try{
-      const res: VerifyResponse = await this.deps.apiClient.put(ENDPOINTS.USER.INDEX, data);
+      const res: VerifyResponse = await this.deps.apiClient.put(ENDPOINTS.AUTH.COMPLETE_PROFILE, { ...data, token: await this.deps.storage.getTempToken() });
       if (res.code == 200){
         await Promise.all([
           this.deps.storage.setToken(res.token),
-          this.deps.storage.removeItem('login-step'),
-          this.deps.storage.removeItem('login-step-token')
-        ]);
+          this.deps.storage.removeTempToken(),
+          this.deps.storage.removeItem(STORAGE_KEYS.LOGIN_STEP),
+        ])
         Toast.show({
           type: 'success',
           text1: t('general.welcome'),

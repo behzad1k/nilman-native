@@ -137,7 +137,6 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
         code: persianNumToEn(codeString),
         token: tempToken,
       }));
-
       // Check if user profile is complete
       if (!res.data?.user?.isVerified) {
         await StorageService.setItem(STORAGE_KEYS.LOGIN_STEP, 'complete-profile');

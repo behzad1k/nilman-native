@@ -2,7 +2,8 @@ const formatUrl = (endpoint: string) => `/${endpoint}/`
 const ENDPOINTS = {
   AUTH: {
     LOGIN: formatUrl('login'),
-    VERIFY: formatUrl('check')
+    VERIFY: formatUrl('check'),
+    COMPLETE_PROFILE: formatUrl('verify-user'),
   },
   USER: {
     INDEX: formatUrl('user'),
