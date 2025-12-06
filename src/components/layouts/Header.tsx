@@ -10,7 +10,7 @@ import { Theme } from '@/src/types/theme';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { ArrowLeft } from 'react-native-feather';
+import { ArrowLeft, ArrowRight } from 'react-native-feather';
 
 interface HeaderProps {
   title?: string;
@@ -34,20 +34,20 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.leftContainer}>
-        {onBackPress != undefined && (
-          <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
-            <ArrowLeft width={24} color={colors.pink}/>
-          </TouchableOpacity>
-        )}
+      <View style={styles.rightContainer}>
+        {/* <LanguageSwitchButton/> */}
+        <ThemeSwitchButton/>
       </View>
       <View style={styles.titleContainer}>
         <LogoIcon width={35} height={35} fill={colors.pink}/>
         <TextView style={styles.title}>{currentLanguage == 'fa' ? 'نیلمان' : 'nilman'}</TextView>
       </View>
-      <View style={styles.rightContainer}>
-        {/* <LanguageSwitchButton/> */}
-        <ThemeSwitchButton/>
+      <View style={styles.leftContainer}>
+        {onBackPress != undefined && (
+          <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+            <ArrowRight width={24} color={colors.pink}/>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

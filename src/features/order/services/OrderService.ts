@@ -75,8 +75,12 @@ class OrderService {
       discount: selected.discount,
       isUrgent: selected.isUrgent,
     };
+    const res = await this.deps.apiClient.post<ApiResponse<Order>>(ENDPOINTS.ORDER.INDEX, reqOptions)
 
-    return await this.deps.apiClient.post(ENDPOINTS.ORDER.INDEX, reqOptions);
+    if (res.code == 413){
+      Toast.error('حجم عکس ارسالی بیش از حد مجاز می‌باشد')
+    }
+    return res;
   }
 
   async setSavedOrder(data: Form, step: Step): Promise<void> {

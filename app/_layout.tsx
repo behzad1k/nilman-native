@@ -22,6 +22,7 @@ import { STORAGE_KEYS } from '@/src/utils/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
+import Head from 'expo-router/head';
 import { useEffect } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -106,6 +107,14 @@ function AppContent() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <DrawerProvider>
           <Drawer>
+            <Head>
+              <title data-rh="true">Nilman - Beauty Service Provider</title>
+
+              <link rel="icon" type="image/png" href="./newLogo.png"/>
+              <link rel="apple-touch-icon" href="./newLogo.png"/>
+
+              <link rel="manifest" href="./manifest.json"/>
+            </Head>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)"/>
               <Stack.Screen name="+not-found"/>

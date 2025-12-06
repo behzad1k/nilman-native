@@ -34,23 +34,7 @@ export default {
         web: {
             bundler: "metro",
             output: "static",
-            title: "Nilman",
-            name: "Nilman",
-            description: "Online beauty service provider",
             favicon: "./src/assets/images/newLogo.png",
-            meta: {
-                "viewport": "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content" ,
-                "og:type": "website",
-                "og:url": "https://app.nilman.co/",
-                "og:title": "Nilman",
-                "og:description": "Beauty Service Provider",
-                "og:image": "https://app.nilman.co/assets/?unstable_path=.%2Fsrc%2Fassets%2Fimages/newLogo.png",
-                "twitter:card": "summary_large_image",
-                "twitter:url": "https://app.nilman.co/",
-                "twitter:title": "Nilman",
-                "twitter:description": "Beauty Service Provider",
-                "twitter:image": "https://app.nilman.co/assets/?unstable_path=.%2Fsrc%2Fassets%2Fimages/newLogo.png"
-            }
         },
         experiments: {
             typedRoutes: true,

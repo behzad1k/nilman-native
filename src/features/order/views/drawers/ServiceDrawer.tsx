@@ -84,7 +84,7 @@ const ServiceDrawer = ({
               }}
               activeOpacity={0.7}
             >
-              {secAttr.price > 0 && (
+              {secAttr.price > 0 ? (
                 <View style={serviceDrawerStyles.priceContainer}>
                   <View style={serviceDrawerStyles.priceRow}>
                     <TextView style={styles.currency}>تومان</TextView>
@@ -138,7 +138,7 @@ const ServiceDrawer = ({
                     </View>
                   )}
                 </View>
-              )}
+              ) : <View></View>}
 
               <View style={{ flexDirection: 'row', gap: 10}}>
                 <TextView style={styles.attrTitle}>

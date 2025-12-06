@@ -238,7 +238,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   cardImage: {
     width: 40,
     height: 40,
-    marginBottom: 12,
     tintColor: theme.text,
   },
   attributeTitle: {
