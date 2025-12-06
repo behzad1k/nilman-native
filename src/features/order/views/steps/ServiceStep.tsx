@@ -3,6 +3,7 @@ import TextView from '@/src/components/ui/TextView';
 import { useAppSelector } from '@/src/configs/redux/hooks';
 import { serviceStepStyles } from '@/src/features/order/styles/serviceStep';
 import { Form, Step } from '@/src/features/order/types';
+import ServiceIcon from '@/src/features/order/views/shared/ServiceIcon';
 import { Service } from '@/src/features/service/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import Typography from '@/src/styles/theme/typography';
@@ -65,11 +66,7 @@ const ServiceStep = ({ selected, setSelected, setStep }: Props) => {
             activeOpacity={0.7}
           >
             <TextView style={styles.cardTitle}>{service.title}</TextView>
-            <Image
-              source={getServiceIcon(service.slug)}
-              style={styles.cardImage}
-              resizeMode="contain"
-            />
+            <ServiceIcon slug={service.slug} />
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -87,7 +84,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   cardImage: {
     width: 60,
     height: 60,
-    tintColor: theme.text
   },
   cardTitle: {
     ...Typography.weights.normal,

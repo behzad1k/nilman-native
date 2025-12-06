@@ -3,6 +3,7 @@ import TextView from '@/src/components/ui/TextView';
 import { useAppSelector } from '@/src/configs/redux/hooks';
 import { Form } from '@/src/features/order/types';
 import SecAttrDrawer from '@/src/features/order/views/drawers/SecAttrDrawer';
+import ServiceIcon from '@/src/features/order/views/shared/ServiceIcon';
 import { Service } from '@/src/features/service/types';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import Typography from '@/src/styles/theme/typography';
@@ -192,11 +193,7 @@ const AttributeStep = ({ selected, setSelected, setIsNextStepAllowed }: Props) =
                 )}
                 <View style={attributeStepStyles.attributeCardRight}>
                   <TextView style={styles.attributeTitle}>{attribute.title}</TextView>
-                  <Image
-                    source={getServiceIcon(attribute.slug)}
-                    style={styles.cardImage}
-                    resizeMode="contain"
-                  />
+                  <ServiceIcon slug={attribute.slug} />
                 </View>
               </TouchableOpacity>
             </Animated.View>
