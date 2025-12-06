@@ -53,7 +53,10 @@ const ServiceStep = ({ selected, setSelected, setStep }: Props) => {
   }, [cart, setSelected, setStep]);
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={serviceStepStyles.cardsContainer} >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={serviceStepStyles.cardsContainer}
+      >
         {filteredServices.map((service) => (
           <TouchableOpacity
             key={service.slug}

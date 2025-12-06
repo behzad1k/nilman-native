@@ -8,6 +8,7 @@ import { fetchServices } from '@/src/configs/redux/slices/serviceSlice';
 import { addresses, fetchUser, getWorkers } from '@/src/configs/redux/slices/userSlice';
 import LoginDrawer from '@/src/features/auth/views/LoginDrawer';
 import { useLanguage } from '@/src/hooks/useLanguage';
+import { usePWADisplayMode } from '@/src/hooks/usePWADisplayMode';
 import { useThemedStyles } from '@/src/hooks/useThemedStyles';
 import { Theme } from '@/src/types/theme';
 import { colors } from '@/src/styles/theme/colors';
@@ -24,13 +25,11 @@ export default function TabLayout() {
   const {
     t,
   } = useLanguage();
+  const { isStandalone } = usePWADisplayMode();
   const styles = useThemedStyles(createStyles)
   const { theme, isThemeReady } = useTheme()
   const { openDrawer } = useDrawer();
-  const {
-    isAuthenticated,
-  } = useAuth();
-
+  const { isAuthenticated, } = useAuth();
   // Don't render until theme is ready
   if (!isThemeReady) {
     return null;
@@ -42,7 +41,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.pink,
         tabBarInactiveTintColor: theme.text,
         headerShown: false,
-        tabBarStyle: styles.container,
+        tabBarStyle: [styles.container, { height: isStandalone ? 120 : 80}],
         tabBarItemStyle: styles.tabItem,
       }}>
       <Tabs.Screen
@@ -117,7 +116,7 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.background,
       height: 80,
       width: width,
-      position: 'absolute',
+      position: 'fixed',
       bottom: 0,
       borderTopWidth: 0.5,
       borderTopColor: theme.border,

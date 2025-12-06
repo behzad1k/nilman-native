@@ -63,4 +63,4 @@ export const engNumToPersian = (str: any) => str.toString().replace(/[0-9]/g, (d
 
 
 
-export const getServiceIcon = (slug: string) => ({ uri: encodeURIComponent(`/images/services/${slug}.png`)})
+export const getServiceIcon = (slug: string) => ({ uri: `/images/services/${encodeURIComponent(slug)}.png`})

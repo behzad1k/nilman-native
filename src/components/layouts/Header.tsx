@@ -86,6 +86,7 @@ const createStyles = (theme: Theme) =>
     },
     backButton: {
       padding: spacing.xs,
+      alignItems: 'flex-end'
     },
     title: {
       color: colors.pink,
