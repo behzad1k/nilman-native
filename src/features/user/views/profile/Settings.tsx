@@ -19,13 +19,13 @@ const Settings = () => {
 
   return (
     <View style={styles.infoBox}>
-      <TouchableOpacity
-        style={styles.profileButton}
-        onPress={() => openDrawer('changeLanguage', <LanguageSwitcher/>, { drawerHeight: 200 })}
-      >
-        <TextView style={profileStyles.profileButtonText}>{t('general.changeLanguage')}</TextView>
-        <Translate size={24} color={theme.text}/>
-      </TouchableOpacity>
+      {/* <TouchableOpacity */}
+      {/*   style={styles.profileButton} */}
+      {/*   onPress={() => openDrawer('changeLanguage', <LanguageSwitcher/>, { drawerHeight: 200 })} */}
+      {/* > */}
+      {/*   <TextView style={profileStyles.profileButtonText}>{t('general.changeLanguage')}</TextView> */}
+      {/*   <Translate size={24} color={theme.text}/> */}
+      {/* </TouchableOpacity> */}
       <TouchableOpacity
         style={[styles.profileButton, styles.lastProfile]}
         onPress={() => openDrawer('changeTheme', <ThemeSwitcher/>, { drawerHeight: 250 })}
