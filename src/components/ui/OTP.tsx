@@ -183,7 +183,7 @@ function WebOTP({ onComplete, disabled }: OTPProps) {
               onPaste={handlePaste}
               style={{
                 flex: 1,
-                maxWidth: "40px",
+                maxWidth: "35px",
                 height: "50px",
                 border: "2px solid #ddd",
                 borderRadius: "8px",

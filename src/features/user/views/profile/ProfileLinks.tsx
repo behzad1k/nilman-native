@@ -2,20 +2,16 @@ import { useAuth } from "@/src/components/contexts/AuthContext";
 import TextView from "@/src/components/ui/TextView";
 import { profileStyles } from "@/src/features/user/styles";
 import { useThemedStyles } from "@/src/hooks/useThemedStyles";
-import { useNavigation } from "@react-navigation/native";
 import { MapPin, Shield, SignOut } from "phosphor-react-native";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { colors } from "@/src/styles/theme/colors";
 import { Theme } from "@/src/types/theme";
 import { useTheme } from "@/src/components/contexts/ThemeContext";
-import { useRouter } from "expo-router";
 
 const ProfileLinks = () => {
   const { logout } = useAuth();
   const styles = useThemedStyles(createStyles);
   const { theme } = useTheme();
-  const router = useRouter();
 
   const handleLogout = async () => {
     await logout();
