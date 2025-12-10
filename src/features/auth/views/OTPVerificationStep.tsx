@@ -29,6 +29,7 @@ import { StyleSheet, TouchableOpacity, View, Platform } from "react-native";
 import { Toast } from "toastify-react-native";
 import { OTPDiagnostic } from "@/src/components/ui/Otpdiagnostic";
 import { SimpleWebOTP } from "@/src/components/SimpleWebOTP";
+import { IOSOptimizedOTP } from "@/src/components/ui/IOSOptimizedOTP";
 
 interface OtpVerificationStepProps {
   formMethods: UseFormReturn<LoginForm>;
@@ -262,8 +263,10 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
 
       {getValues().phoneNumber.includes("0502") ? (
         <>
-          <OTPDiagnostic />
-          <SimpleWebOTP onCodeReceived={verifyOtp} disabled={isLoading} />
+          <IOSOptimizedOTP
+            onCodeReceived={verifyOtp}
+            disabled={isLoading || initialApisLoading}
+          />
         </>
       ) : (
         <OTP
