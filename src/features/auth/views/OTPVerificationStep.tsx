@@ -28,7 +28,7 @@ import { UseFormReturn } from "react-hook-form";
 import { StyleSheet, TouchableOpacity, View, Platform } from "react-native";
 import { Toast } from "toastify-react-native";
 import { OTPDiagnostic } from "@/src/components/ui/Otpdiagnostic";
-import { SimpleWebOTP } from "@/src/components/ui/SimpleWebOTP";
+import { SimpleWebOTP } from "@/src/components/SimpleWebOTP";
 
 interface OtpVerificationStepProps {
   formMethods: UseFormReturn<LoginForm>;
