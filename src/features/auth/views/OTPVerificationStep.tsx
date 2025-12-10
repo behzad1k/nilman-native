@@ -27,6 +27,7 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { StyleSheet, TouchableOpacity, View, Platform } from "react-native";
 import { Toast } from "toastify-react-native";
+import { TestOTPAutoFill } from "@/src/components/ui/Testotpautofill";
 
 interface OtpVerificationStepProps {
   formMethods: UseFormReturn<LoginForm>;
@@ -258,6 +259,15 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
         ارسال شد
       </TextView>
 
+      {Platform.OS === "web" && (
+        <TestOTPAutoFill
+          onCodeReceived={(code) => {
+            console.log("Code received in parent:", code);
+            // You can test calling verifyOtp with this code
+            verifyOtp(code);
+          }}
+        />
+      )}
       <OTP onComplete={verifyOtp} disabled={isLoading || initialApisLoading} />
 
       <View style={styles.loginTicker}>

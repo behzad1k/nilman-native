@@ -1,5 +1,5 @@
-import { useLoading } from '@/src/components/contexts/LoadingContext';
-import React from 'react';
+import { useLoading } from "@/src/components/contexts/LoadingContext";
+import React from "react";
 import {
   View,
   Modal,
@@ -7,7 +7,11 @@ import {
   Text,
   StyleSheet,
   Dimensions,
-} from 'react-native';
+} from "react-native";
+import { useTheme } from "../contexts/ThemeContext";
+import TextView from "./TextView";
+import { Theme } from "@/src/types/theme";
+import { useThemedStyles } from "@/src/hooks/useThemedStyles";
 
 interface LoadingOverlayProps {
   visible: boolean;
@@ -17,11 +21,14 @@ interface LoadingOverlayProps {
 }
 
 const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
-                                                                visible,
-                                                                message,
-                                                                transparent = true,
-                                                                color = '#007AFF',
-                                                              }) => {
+  visible,
+  message,
+  transparent = true,
+  color = "#007AFF",
+}) => {
+  const styles = useThemedStyles(createStyles);
+
+  const { theme } = useTheme();
   return (
     <Modal
       transparent={transparent}
@@ -31,8 +38,8 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <ActivityIndicator size="large" color={color} />
-          {message && <Text style={styles.message}>{message}</Text>}
+          <ActivityIndicator size={70} color={"white"} />
+          {message && <TextView style={styles.message}>{message}</TextView>}
         </View>
       </View>
     </Modal>
@@ -42,42 +49,26 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
 export const LoadingGlobal: React.FC = () => {
   const { isLoading, loadingMessage } = useLoading();
 
-  return (
-    <LoadingOverlay
-      visible={isLoading}
-      message={loadingMessage}
-    />
-  );
+  return <LoadingOverlay visible={isLoading} message={loadingMessage} />;
 };
 
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    backgroundColor: 'white',
-    padding: 30,
-    borderRadius: 10,
-    alignItems: 'center',
-    minWidth: 120,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, .7)",
+      justifyContent: "center",
+      alignItems: "center",
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  message: {
-    marginTop: 15,
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
-    maxWidth: Dimensions.get('window').width * 0.7,
-  },
-});
+    container: {
+      backgroundColor: "transparent",
+      alignItems: "center",
+    },
+    message: {
+      marginTop: 15,
+      fontSize: 16,
+      color: theme.text,
+      textAlign: "center",
+      maxWidth: Dimensions.get("window").width * 0.7,
+    },
+  });

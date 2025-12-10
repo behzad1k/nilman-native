@@ -20,6 +20,8 @@ import {
 import Map from "@/src/features/address/views/layouts/Map";
 import { Address } from "../../types";
 import { set } from "react-hook-form";
+import { useAsyncOperation } from "@/src/hooks/useAsyncOperation";
+import { Toast } from "toastify-react-native";
 
 const defaultPosition = [51.42929855649689, 35.806494532492124];
 
@@ -31,6 +33,8 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
   const dispatch = useAppDispatch();
   const styles = useThemedStyles(createStyles);
   const userReducer = useAppSelector((state) => state.user);
+  const { execute: sumbitPosition, loading: submitPositionLoading } =
+    useAsyncOperation();
   const [step, setStep] = useState(1);
   const [address, setAddress] = useState<Address>();
   const [position, setPosition] = useState<number[]>(
@@ -63,10 +67,11 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
             !districts.includes(Number(res.data.municipality_zone)) ||
             res.data.city != "تهران"
           ) {
-            // Toast.show({
-            //   type: 'error',
-            //   text1: 'موقعیت مکانی انتخاب شده در محدوده پشتیانی نیلمان نمی باشد'
-            // });
+            Toast.show({
+              type: "error",
+              text1:
+                "موقعیت مکانی انتخاب شده در محدوده پشتیانی نیلمان نمی باشد",
+            });
             return;
           }
           if (!paramId) {
@@ -82,19 +87,19 @@ const AddressManagePage = ({ paramId }: AddressManageProps) => {
           setStep((prev) => prev + 1);
         }
       } else {
-        // Toast.show({
-        //   type: 'error',
-        //   text1: 'لطفا موقعیت مکانی خود را به درستی وارد کنید'
-        // });
+        Toast.show({
+          type: "error",
+          text1: "لطفا موقعیت مکانی خود را به درستی وارد کنید",
+        });
       }
       return;
     }
 
     if (!form?.description || !form.pelak || !form.vahed) {
-      // Toast.show({
-      //   type: 'error',
-      //   text1: 'لطفا تمامی اطلاعات را به درستی وارد کنید'
-      // });
+      Toast.show({
+        type: "error",
+        text1: "لطفا تمامی اطلاعات را به درستی وارد کنید",
+      });
       return;
     }
     const res = await services.address.basicAddress(
