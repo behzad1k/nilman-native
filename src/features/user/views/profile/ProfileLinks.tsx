@@ -4,7 +4,7 @@ import { profileStyles } from "@/src/features/user/styles";
 import { useThemedStyles } from "@/src/hooks/useThemedStyles";
 import { MapPin, Shield, SignOut } from "phosphor-react-native";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Theme } from "@/src/types/theme";
 import { useTheme } from "@/src/components/contexts/ThemeContext";
 import { useRouter } from "expo-router";
@@ -17,6 +17,9 @@ const ProfileLinks = () => {
 
   const handleLogout = async () => {
     await logout();
+    if (Platform.OS == "web") {
+      window.location.reload();
+    }
   };
 
   return (
