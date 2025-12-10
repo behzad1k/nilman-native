@@ -27,7 +27,6 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { StyleSheet, TouchableOpacity, View, Platform } from "react-native";
 import { Toast } from "toastify-react-native";
-import { TestOTPAutoFill } from "@/src/components/ui/Testotpautofill";
 import { OTPDiagnostic } from "@/src/components/ui/Otpdiagnostic";
 import { SimpleWebOTP } from "@/src/components/ui/SimpleWebOTP";
 
