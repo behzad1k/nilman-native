@@ -58,7 +58,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
     useAsyncOperation();
 
   const { t } = useLanguage();
-
+  console.log(code);
   const handleResendCode = useCallback(async () => {
     try {
       const phoneNumber = getValues().phoneNumber;
