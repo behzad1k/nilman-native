@@ -17,7 +17,6 @@ const ProfileLinks = () => {
 
   const handleLogout = async () => {
     await logout();
-    router.push("/");
   };
 
   return (

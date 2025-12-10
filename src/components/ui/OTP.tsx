@@ -152,62 +152,53 @@ function WebOTP({ onComplete, disabled }: OTPProps) {
           e.preventDefault();
         }}
         style={{
+          display: "flex",
+          justifyContent: "space-between",
           width: "100%",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            width: "100%",
-          }}
-        >
-          {[0, 1, 2, 3, 4, 5].map((index) => (
-            <input
-              key={index}
-              ref={(el) => {
-                inputRefs.current[index] = el;
-              }}
-              type="text"
-              inputMode="numeric"
-              autoComplete={index === 0 ? "one-time-code" : "off"}
-              name={index === 0 ? "one-time-code" : `otp-${index}`}
-              maxLength={index === 0 ? 10 : 1}
-              autoFocus={index === 0}
-              disabled={disabled}
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              onInput={(e) => handleInput(e, index)}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-              onPaste={handlePaste}
-              style={{
-                flex: 1,
-                maxWidth: "35px",
-                height: "50px",
-                border: "2px solid #ddd",
-                borderRadius: "8px",
-                fontSize: "18px",
-                fontWeight: "bold",
-                color: "#333",
-                backgroundColor: disabled ? "#f0f0f0" : "#f9f9f9",
-                textAlign: "center",
-                outline: "none",
-                transition: "all 0.2s",
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = "#e91e63";
-                e.target.style.backgroundColor = "#fff";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "#ddd";
-                e.target.style.backgroundColor = disabled
-                  ? "#f0f0f0"
-                  : "#f9f9f9";
-              }}
-            />
-          ))}
-        </div>
+        {[0, 1, 2, 3, 4, 5].map((index) => (
+          <input
+            key={index}
+            ref={(el) => {
+              inputRefs.current[index] = el;
+            }}
+            type="text"
+            inputMode="numeric"
+            autoComplete={index === 0 ? "one-time-code" : "off"}
+            name={index === 0 ? "one-time-code" : `otp-${index}`}
+            maxLength={index === 0 ? 10 : 1}
+            autoFocus={index === 0}
+            disabled={disabled}
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            onInput={(e) => handleInput(e, index)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
+            onPaste={handlePaste}
+            style={{
+              width: "11%",
+              height: "50px",
+              border: "2px solid #ddd",
+              borderRadius: "8px",
+              fontSize: "18px",
+              fontWeight: "bold",
+              color: "#333",
+              backgroundColor: disabled ? "#f0f0f0" : "#f9f9f9",
+              textAlign: "center",
+              outline: "none",
+              transition: "all 0.2s",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#e91e63";
+              e.target.style.backgroundColor = "#fff";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "#ddd";
+              e.target.style.backgroundColor = disabled ? "#f0f0f0" : "#f9f9f9";
+            }}
+          />
+        ))}
       </form>
     </div>
   );
