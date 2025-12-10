@@ -7,14 +7,17 @@ import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Theme } from "@/src/types/theme";
 import { useTheme } from "@/src/components/contexts/ThemeContext";
+import { useRouter } from "expo-router";
 
 const ProfileLinks = () => {
   const { logout } = useAuth();
   const styles = useThemedStyles(createStyles);
   const { theme } = useTheme();
+  const router = useRouter();
 
   const handleLogout = async () => {
     await logout();
+    router.push("/");
   };
 
   return (
