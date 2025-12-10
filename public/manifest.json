@@ -27,6 +27,7 @@
       "purpose": "any maskable"
     }
   ],
+  "permissions": ["otp-credentials"],
   "categories": ["beauty", "lifestyle"],
   "lang": "fa-IR",
   "dir": "rtl"

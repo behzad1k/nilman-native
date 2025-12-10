@@ -146,14 +146,13 @@ function WebOTP({ onComplete, disabled }: OTPProps) {
   }, []);
 
   return (
-    <div style={{ width: "100%", padding: "0 10px" }}>
+    <div style={{ width: "100%" }}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
         }}
         style={{
           width: "100%",
-          margin: "20px 0",
         }}
       >
         <div
@@ -161,7 +160,6 @@ function WebOTP({ onComplete, disabled }: OTPProps) {
             display: "flex",
             justifyContent: "space-between",
             width: "100%",
-            gap: "8px",
           }}
         >
           {[0, 1, 2, 3, 4, 5].map((index) => (
@@ -185,7 +183,7 @@ function WebOTP({ onComplete, disabled }: OTPProps) {
               onPaste={handlePaste}
               style={{
                 flex: 1,
-                maxWidth: "45px",
+                maxWidth: "40px",
                 height: "50px",
                 border: "2px solid #ddd",
                 borderRadius: "8px",
