@@ -261,16 +261,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
         ارسال شد
       </TextView>
 
-      {getValues().phoneNumber.includes("0502") ? (
-        <>
-          <IOSOptimizedOTP onCodeReceived={verifyOtp} />
-        </>
-      ) : (
-        <OTP
-          onComplete={verifyOtp}
-          disabled={isLoading || initialApisLoading}
-        />
-      )}
+      <OTP onComplete={verifyOtp} disabled={isLoading || initialApisLoading} />
 
       <View style={styles.loginTicker}>
         <View style={styles.loginTickerLeft}>
