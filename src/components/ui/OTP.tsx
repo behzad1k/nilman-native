@@ -13,13 +13,216 @@ interface OTPProps {
 }
 
 export function OTP({ onComplete, disabled = false }: OTPProps) {
+  // Web implementation - pure HTML with form wrapper
+  if (Platform.OS === "web") {
+    return <WebOTP onComplete={onComplete} disabled={disabled} />;
+  }
+
+  // Native implementation - keep existing logic
+  return <NativeOTP onComplete={onComplete} disabled={disabled} />;
+}
+
+// Web-specific OTP component with form wrapper and uncontrolled inputs
+function WebOTP({ onComplete, disabled }: OTPProps) {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const hasSubmitted = useRef(false);
+
+  const handleInput = (e: any, index: number) => {
+    if (disabled || hasSubmitted.current) return;
+
+    const value = e.target.value;
+    console.log(`Input ${index} changed:`, value);
+
+    // Handle auto-fill or paste (multiple characters)
+    if (value.length > 1) {
+      const digits = value.replace(/\D/g, "").slice(0, 6);
+      console.log("Auto-fill/paste detected, digits:", digits);
+
+      // Fill all inputs
+      digits.split("").forEach((digit: any, i: number) => {
+        if (inputRefs.current[i]) {
+          inputRefs.current[i]!.value = digit;
+        }
+      });
+
+      // Check if complete
+      if (digits.length === 6) {
+        hasSubmitted.current = true;
+        console.log("Code complete:", digits);
+        onComplete(digits);
+        setTimeout(() => {
+          hasSubmitted.current = false;
+        }, 1000);
+      } else {
+        // Focus next empty input
+        const nextIndex = Math.min(digits.length, 5);
+        inputRefs.current[nextIndex]?.focus();
+      }
+      return;
+    }
+
+    // Handle single character input
+    const digit = value.replace(/\D/g, "");
+    if (digit) {
+      e.target.value = digit;
+
+      // Move to next input
+      if (index < 5) {
+        inputRefs.current[index + 1]?.focus();
+      }
+
+      // Check if all inputs are filled
+      const allValues = inputRefs.current
+        .map((input) => input?.value || "")
+        .join("");
+
+      if (allValues.length === 6 && !hasSubmitted.current) {
+        hasSubmitted.current = true;
+        console.log("Code complete:", allValues);
+        onComplete(allValues);
+        setTimeout(() => {
+          hasSubmitted.current = false;
+        }, 1000);
+      }
+    } else {
+      e.target.value = "";
+    }
+  };
+
+  const handleKeyDown = (e: any, index: number) => {
+    if (disabled) return;
+
+    // Handle backspace
+    if (e.key === "Backspace") {
+      const input = inputRefs.current[index];
+      if (!input?.value && index > 0) {
+        // If current input is empty, move to previous and clear it
+        const prevInput = inputRefs.current[index - 1];
+        if (prevInput) {
+          prevInput.value = "";
+          prevInput.focus();
+        }
+      }
+    }
+  };
+
+  const handlePaste = (e: any) => {
+    if (disabled) return;
+
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text");
+    const digits = pastedData.replace(/\D/g, "").slice(0, 6);
+
+    console.log("Paste detected, digits:", digits);
+
+    // Fill inputs with pasted digits
+    digits.split("").forEach((digit: any, i: number) => {
+      if (inputRefs.current[i]) {
+        inputRefs.current[i]!.value = digit;
+      }
+    });
+
+    // Check if complete
+    if (digits.length === 6 && !hasSubmitted.current) {
+      hasSubmitted.current = true;
+      console.log("Code complete from paste:", digits);
+      onComplete(digits);
+      setTimeout(() => {
+        hasSubmitted.current = false;
+      }, 1000);
+    } else {
+      // Focus next empty input
+      const nextIndex = Math.min(digits.length, 5);
+      inputRefs.current[nextIndex]?.focus();
+    }
+  };
+
+  useEffect(() => {
+    // Reset on mount
+    hasSubmitted.current = false;
+    inputRefs.current.forEach((input) => {
+      if (input) input.value = "";
+    });
+  }, []);
+
+  return (
+    <div style={{ width: "100%", padding: "0 10px" }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
+        style={{
+          width: "100%",
+          margin: "20px 0",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+            gap: "8px",
+          }}
+        >
+          {[0, 1, 2, 3, 4, 5].map((index) => (
+            <input
+              key={index}
+              ref={(el) => {
+                inputRefs.current[index] = el;
+              }}
+              type="text"
+              inputMode="numeric"
+              autoComplete={index === 0 ? "one-time-code" : "off"}
+              name={index === 0 ? "one-time-code" : `otp-${index}`}
+              maxLength={index === 0 ? 10 : 1}
+              autoFocus={index === 0}
+              disabled={disabled}
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              onInput={(e) => handleInput(e, index)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              onPaste={handlePaste}
+              style={{
+                flex: 1,
+                maxWidth: "45px",
+                height: "50px",
+                border: "2px solid #ddd",
+                borderRadius: "8px",
+                fontSize: "18px",
+                fontWeight: "bold",
+                color: "#333",
+                backgroundColor: disabled ? "#f0f0f0" : "#f9f9f9",
+                textAlign: "center",
+                outline: "none",
+                transition: "all 0.2s",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#e91e63";
+                e.target.style.backgroundColor = "#fff";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#ddd";
+                e.target.style.backgroundColor = disabled
+                  ? "#f0f0f0"
+                  : "#f9f9f9";
+              }}
+            />
+          ))}
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// Native OTP component - existing implementation
+function NativeOTP({ onComplete, disabled }: OTPProps) {
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const codeRef = useRef<string[]>(new Array(6).fill(""));
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
-  const [inputKeys, setInputKeys] = useState<number[]>([0, 1, 2, 3, 4, 5]); // Force re-render by changing keys
+  const [inputKeys, setInputKeys] = useState<number[]>([0, 1, 2, 3, 4, 5]);
   const hasTriggeredComplete = useRef<boolean>(false);
   const lastCompleteCode = useRef<string>("");
-  const isAutoFilling = useRef<boolean>(false);
 
   const checkCompletion = useCallback(() => {
     const currentCode = codeRef.current.join("");
@@ -39,7 +242,6 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
 
   const resetInputs = (newCode: string[]) => {
     codeRef.current = [...newCode];
-    // Force re-render by updating keys
     setInputKeys((prev) => prev.map((k) => k + 6));
     hasTriggeredComplete.current = false;
   };
@@ -47,12 +249,10 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
   const setCodeData = (value: string, index: number) => {
     if (disabled) return;
 
-    // Handle multiple characters (paste scenario or auto-fill)
     if (value.length > 1) {
       const chars = value.replace(/\D/g, "").slice(0, 6).split("");
       const newCode = new Array(6).fill("");
 
-      // Fill with new characters
       chars.forEach((char, i) => {
         if (i < 6) {
           newCode[i] = char;
@@ -61,7 +261,6 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
 
       resetInputs(newCode);
 
-      // Focus on the next empty input or last filled input
       const nextIndex = Math.min(chars.length, 5);
       setTimeout(() => {
         inputRefs.current[nextIndex]?.focus();
@@ -70,11 +269,9 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
       return;
     }
 
-    // Handle single character
     if (!value || /^\d$/.test(value)) {
       codeRef.current[index] = value;
 
-      // Move to next input if value is entered and not the last input
       if (value && index < 5) {
         setTimeout(() => {
           inputRefs.current[index + 1]?.focus();
@@ -88,15 +285,12 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
   const handleKeyPress = (key: string, index: number) => {
     if (disabled) return;
 
-    // Handle backspace
     if (key === "Backspace") {
       if (codeRef.current[index]) {
-        // Clear current input
         const newCode = [...codeRef.current];
         newCode[index] = "";
         resetInputs(newCode);
       } else if (index > 0) {
-        // Move to previous input and clear it
         const newCode = [...codeRef.current];
         newCode[index - 1] = "";
         resetInputs(newCode);
@@ -107,71 +301,6 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
     }
   };
 
-  const handlePaste = async () => {
-    if (disabled) return;
-
-    try {
-      const clipboardContent = await Clipboard.getString();
-      if (clipboardContent) {
-        const pastedCode = clipboardContent
-          .replace(/\D/g, "")
-          .slice(0, 6)
-          .split("");
-        const newCode = new Array(6).fill("");
-
-        pastedCode.forEach((char, i) => {
-          if (i < 6) {
-            newCode[i] = char;
-          }
-        });
-
-        resetInputs(newCode);
-
-        const nextIndex = Math.min(pastedCode.length, 5);
-        setTimeout(() => {
-          inputRefs.current[nextIndex]?.focus();
-          checkCompletion();
-        }, 50);
-      }
-    } catch (error) {
-      console.log("Error reading clipboard:", error);
-    }
-  };
-
-  // Handle auto-fill from SMS (iOS/Android)
-  const handleAutoFill = useCallback(
-    (value: string, index: number) => {
-      if (disabled) return;
-
-      // Check if this is an auto-fill event (typically longer strings)
-      if (value.length >= 6) {
-        isAutoFilling.current = true;
-        const digits = value.replace(/\D/g, "").slice(0, 6);
-        const newCode = new Array(6).fill("");
-
-        // Fill with auto-filled code
-        digits.split("").forEach((char, i) => {
-          if (i < 6) {
-            newCode[i] = char;
-          }
-        });
-
-        resetInputs(newCode);
-
-        // Focus on the last input
-        setTimeout(() => {
-          inputRefs.current[5]?.focus();
-          isAutoFilling.current = false;
-          checkCompletion();
-        }, 50);
-      } else {
-        // Handle normal single character input
-        setCodeData(value, index);
-      }
-    },
-    [disabled, checkCompletion],
-  );
-
   const renderInputs = (): ReactElement[] => {
     const inputs: ReactElement[] = [];
 
@@ -180,7 +309,7 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
 
       inputs.push(
         <TextInput
-          key={`${inputKeys[index]}`} // Use dynamic key to force re-mount
+          key={`${inputKeys[index]}`}
           ref={(ref) => {
             inputRefs.current[index] = ref;
           }}
@@ -191,9 +320,19 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
           ]}
           defaultValue={codeRef.current[index] || ""}
           onChangeText={(value) => {
-            // When pasting into first input, it receives the full code
             if (isFirstInput && value.length > 1) {
-              handleAutoFill(value, index);
+              const digits = value.replace(/\D/g, "").slice(0, 6);
+              const newCode = new Array(6).fill("");
+              digits.split("").forEach((char, i) => {
+                if (i < 6) {
+                  newCode[i] = char;
+                }
+              });
+              resetInputs(newCode);
+              setTimeout(() => {
+                inputRefs.current[5]?.focus();
+                checkCompletion();
+              }, 50);
             } else {
               setCodeData(value, index);
             }
@@ -212,11 +351,9 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
           autoComplete={isFirstInput ? "one-time-code" : "off"}
           {...(Platform.OS === "ios" && {
             textContentType: isFirstInput ? "oneTimeCode" : undefined,
-            autoComplete: isFirstInput ? "one-time-code" : "off",
           })}
           {...(Platform.OS === "android" && {
             autoComplete: isFirstInput ? "sms-otp" : "off",
-            textContentType: isFirstInput ? "oneTimeCode" : undefined,
           })}
           editable={!disabled}
           importantForAutofill={isFirstInput ? "yes" : "no"}
@@ -229,64 +366,6 @@ export function OTP({ onComplete, disabled = false }: OTPProps) {
 
     return inputs;
   };
-
-  // Web-specific auto-fill handling with Web OTP API
-  useEffect(() => {
-    if (Platform.OS === "web") {
-      const handleWebAutoFill = () => {
-        if ("OTPCredential" in window) {
-          const abortController = new AbortController();
-
-          navigator.credentials
-            .get({
-              // @ts-ignore - Web OTP API
-              otp: { transport: ["sms"] },
-              signal: abortController.signal,
-            })
-            .then((otp: any) => {
-              if (otp && otp.code) {
-                const otpCode = otp.code;
-                if (otpCode.length === 6) {
-                  const newCode = otpCode.split("");
-                  resetInputs(newCode);
-
-                  setTimeout(() => {
-                    checkCompletion();
-                  }, 50);
-                }
-              }
-            })
-            .catch((err: Error) => {
-              console.log("Web OTP API error:", err);
-            });
-
-          return () => {
-            abortController.abort();
-          };
-        }
-
-        const firstInput = inputRefs.current[0];
-        if (firstInput) {
-          const handleInput = (event: any) => {
-            const value = event.target.value;
-            if (value.length >= 6) {
-              handleAutoFill(value, 0);
-            }
-          };
-
-          const webInput = firstInput as any;
-          if (webInput.addEventListener) {
-            webInput.addEventListener("input", handleInput);
-            return () => {
-              webInput.removeEventListener("input", handleInput);
-            };
-          }
-        }
-      };
-
-      return handleWebAutoFill();
-    }
-  }, [handleAutoFill, checkCompletion]);
 
   return (
     <View style={styles.otpContainer}>
