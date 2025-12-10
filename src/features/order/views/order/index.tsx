@@ -97,7 +97,6 @@ const OrderPage = () => {
   const loadSavedData = useCallback(async () => {
     try {
       const savedOrder = await services.order.getSavedOrder();
-      console.log("l", savedOrder);
       if (savedOrder) {
         setSelected(savedOrder);
         if (savedOrder.step) {

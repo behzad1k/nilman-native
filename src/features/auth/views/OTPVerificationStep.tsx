@@ -259,14 +259,14 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
         ارسال شد
       </TextView>
 
-      <TestOTPAutoFill
-        onCodeReceived={(code) => {
-          console.log("Code received in parent:", code);
-          // You can test calling verifyOtp with this code
-          verifyOtp(code);
-        }}
-      />
-      {/*<OTP onComplete={verifyOtp} disabled={isLoading || initialApisLoading} />*/}
+      {/*<TestOTPAutoFill
+          onCodeReceived={(code) => {
+            console.log("Code received in parent:", code);
+            // You can test calling verifyOtp with this code
+            verifyOtp(code);
+          }}
+        />*/}
+      <OTP onComplete={verifyOtp} disabled={isLoading || initialApisLoading} />
 
       <View style={styles.loginTicker}>
         <View style={styles.loginTickerLeft}>
