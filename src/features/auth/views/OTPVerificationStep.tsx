@@ -1,27 +1,32 @@
-import { useDrawer } from '@/src/components/contexts/DrawerContext';
-import { useAuth } from '@/src/components/contexts/AuthContext';
-import LogoIcon from '@/src/components/icons/LogoIcon';
-import ButtonView from '@/src/components/ui/ButtonView';
-import { OTP } from '@/src/components/ui/OTP';
-import TextView from '@/src/components/ui/TextView';
-import { cart, order } from '@/src/configs/redux/slices/orderSlice';
-import { addresses, getWorkers, setUser, fetchUser } from '@/src/configs/redux/slices/userSlice';
-import { AppDispatch } from '@/src/configs/redux/store';
-import { services } from '@/src/configs/services';
-import { LoginForm, LoginState } from '@/src/features/auth/authTypes';
-import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
-import { useLanguage } from '@/src/hooks/useLanguage';
-import { useOtpTimer } from '@/src/hooks/useOTPTimer';
-import { useThemedStyles } from '@/src/hooks/useThemedStyles';
-import { colors } from '@/src/styles/theme/colors';
-import { Theme } from '@/src/types/theme';
-import { spacing } from '@/src/styles/theme/spacing';
-import { persianNumToEn } from '@/src/utils/funs';
-import { STORAGE_KEYS, StorageService } from '@/src/utils/storage';
-import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { StyleSheet, TouchableOpacity, View, Platform } from 'react-native';
-import { Toast } from 'toastify-react-native';
+import { useDrawer } from "@/src/components/contexts/DrawerContext";
+import { useAuth } from "@/src/components/contexts/AuthContext";
+import LogoIcon from "@/src/components/icons/LogoIcon";
+import ButtonView from "@/src/components/ui/ButtonView";
+import { OTP } from "@/src/components/ui/OTP";
+import TextView from "@/src/components/ui/TextView";
+import { cart, order } from "@/src/configs/redux/slices/orderSlice";
+import {
+  addresses,
+  getWorkers,
+  setUser,
+  fetchUser,
+} from "@/src/configs/redux/slices/userSlice";
+import { AppDispatch } from "@/src/configs/redux/store";
+import { services } from "@/src/configs/services";
+import { LoginForm, LoginState } from "@/src/features/auth/authTypes";
+import { useAsyncOperation } from "@/src/hooks/useAsyncOperation";
+import { useLanguage } from "@/src/hooks/useLanguage";
+import { useOtpTimer } from "@/src/hooks/useOTPTimer";
+import { useThemedStyles } from "@/src/hooks/useThemedStyles";
+import { colors } from "@/src/styles/theme/colors";
+import { Theme } from "@/src/types/theme";
+import { spacing } from "@/src/styles/theme/spacing";
+import { persianNumToEn } from "@/src/utils/funs";
+import { STORAGE_KEYS, StorageService } from "@/src/utils/storage";
+import React, { useCallback, useEffect, useState, useRef } from "react";
+import { UseFormReturn } from "react-hook-form";
+import { StyleSheet, TouchableOpacity, View, Platform } from "react-native";
+import { Toast } from "toastify-react-native";
 
 interface OtpVerificationStepProps {
   formMethods: UseFormReturn<LoginForm>;
@@ -31,34 +36,24 @@ interface OtpVerificationStepProps {
 }
 
 export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
-                                                                          formMethods,
-                                                                          setLoginState,
-                                                                          dispatch,
-                                                                          onLoginSuccess,
-                                                                        }) => {
+  formMethods,
+  setLoginState,
+  dispatch,
+  onLoginSuccess,
+}) => {
   const { getValues } = formMethods;
-  const [code, setCode] = useState<string[]>(new Array(6).fill(''));
+  const [code, setCode] = useState<string[]>(new Array(6).fill(""));
   const styles = useThemedStyles(createStyles);
   const { closeDrawer } = useDrawer();
   const { checkAuthStatus } = useAuth();
   const isVerifying = useRef(false);
 
-  const {
-    formattedTime,
-    canResend,
-    startTimer,
-    resetTimer
-  } = useOtpTimer();
+  const { formattedTime, canResend, startTimer, resetTimer } = useOtpTimer();
 
-  const {
-    execute: codeSubmit,
-    loading: isLoading
-  } = useAsyncOperation();
+  const { execute: codeSubmit, loading: isLoading } = useAsyncOperation();
 
-  const {
-    execute: initialApis,
-    loading: initialApisLoading
-  } = useAsyncOperation();
+  const { execute: initialApis, loading: initialApisLoading } =
+    useAsyncOperation();
 
   const { t } = useLanguage();
 
@@ -66,25 +61,25 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
     try {
       const phoneNumber = getValues().phoneNumber;
       if (!phoneNumber) {
-        setLoginState('phoneNumber');
+        setLoginState("phoneNumber");
         return;
       }
 
       await services.auth.login({ phoneNumber });
       resetTimer();
       startTimer();
-      setCode(new Array(6).fill(''));
+      setCode(new Array(6).fill(""));
       isVerifying.current = false;
 
       Toast.show({
-        text1: t('message.otpResent'),
-        type: 'success'
+        text1: t("message.otpResent"),
+        type: "success",
       });
     } catch (error) {
-      console.error('Resend OTP error:', error);
+      console.error("Resend OTP error:", error);
       Toast.show({
-        text1: t('error.otpResendFailed'),
-        type: 'error'
+        text1: t("error.otpResendFailed"),
+        type: "error",
       });
     }
   }, [getValues, resetTimer, startTimer, setLoginState, t]);
@@ -98,125 +93,131 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
           dispatch(cart()),
           dispatch(getWorkers()),
           dispatch(addresses()),
-        ])
+        ]),
       );
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error("Error loading user data:", error);
     }
   }, [dispatch, initialApis]);
 
-  const verifyOtp = useCallback(async () => {
-    const codeString = code.join('');
-
-    // Prevent multiple simultaneous verification attempts
-    if (isVerifying.current || codeString.length !== 6) {
-      if (codeString.length !== 6) {
-        Toast.show({
-          text1: t('error.otpInvalid'),
-          type: 'error'
-        });
-      }
-      return;
-    }
-
-    isVerifying.current = true;
-
-    try {
-      const tempToken = await services.auth.getTempToken();
-
-      if (!tempToken) {
-        Toast.show({
-          text1: t('error.sessionExpired'),
-          type: 'error'
-        });
-        setLoginState('phoneNumber');
-        return;
-      }
-
-      const res = await codeSubmit(() => services.auth.verifyOTP({
-        code: persianNumToEn(codeString),
-        token: tempToken,
-      }));
-      // Check if user profile is complete
-      if (!res.data?.user?.isVerified) {
-        await StorageService.setItem(STORAGE_KEYS.LOGIN_STEP, 'complete-profile');
-        setLoginState('complete-profile');
-        return;
-      }
-
-      dispatch(setUser(res.data?.user));
-
-      await loadUserData();
-
-      await checkAuthStatus();
-
-      if (onLoginSuccess) {
-        await onLoginSuccess();
-      }
-
-      Toast.show({
-        text1: t('general.welcome'),
-        type: 'success'
-      });
-
-      // Close the drawer
-      closeDrawer('login');
-
-    } catch (error) {
-      console.error('Verification error:', error);
-
-      // Handle specific error types
-      if (error instanceof Error) {
-        if (error.message.includes('expired')) {
+  const verifyOtp = useCallback(
+    async (codeString: string = code.join("")) => {
+      setCode(codeString.split(""));
+      // Prevent multiple simultaneous verification attempts
+      if (isVerifying.current || codeString.length !== 6) {
+        if (codeString.length !== 6) {
           Toast.show({
-            text1: t('error.otpExpired'),
-            type: 'error'
-          });
-          setLoginState('phoneNumber');
-        } else if (error.message.includes('invalid')) {
-          Toast.show({
-            text1: t('error.otpInvalid'),
-            type: 'error'
-          });
-          setCode(new Array(6).fill(''));
-        } else {
-          Toast.show({
-            text1: t('error.otpNotVerified'),
-            type: 'error'
+            text1: t("validation.otpInvalid"),
+            type: "error",
           });
         }
-      } else {
-        Toast.show({
-          text1: t('error.otpNotVerified'),
-          type: 'error'
-        });
+        return;
       }
-    } finally {
-      isVerifying.current = false;
-    }
-  }, [
-    code,
-    codeSubmit,
-    dispatch,
-    setLoginState,
-    loadUserData,
-    checkAuthStatus,
-    onLoginSuccess,
-    closeDrawer,
-    t
-  ]);
+
+      isVerifying.current = true;
+
+      try {
+        const tempToken = await services.auth.getTempToken();
+
+        if (!tempToken) {
+          Toast.show({
+            text1: t("error.sessionExpired"),
+            type: "error",
+          });
+          setLoginState("phoneNumber");
+          return;
+        }
+
+        const res = await codeSubmit(() =>
+          services.auth.verifyOTP({
+            code: persianNumToEn(codeString),
+            token: tempToken,
+          }),
+        );
+        // Check if user profile is complete
+        if (!res.data?.user?.isVerified) {
+          await StorageService.setItem(
+            STORAGE_KEYS.LOGIN_STEP,
+            "complete-profile",
+          );
+          setLoginState("complete-profile");
+          return;
+        }
+
+        dispatch(setUser(res.data?.user));
+
+        await loadUserData();
+
+        await checkAuthStatus();
+
+        if (onLoginSuccess) {
+          await onLoginSuccess();
+        }
+
+        Toast.show({
+          text1: t("general.welcome"),
+          type: "success",
+        });
+
+        // Close the drawer
+        closeDrawer("login");
+      } catch (error) {
+        console.error("Verification error:", error);
+
+        // Handle specific error types
+        if (error instanceof Error) {
+          if (error.message.includes("expired")) {
+            Toast.show({
+              text1: t("error.otpExpired"),
+              type: "error",
+            });
+            setLoginState("phoneNumber");
+          } else if (error.message.includes("invalid")) {
+            Toast.show({
+              text1: t("error.otpInvalid"),
+              type: "error",
+            });
+            setCode(new Array(6).fill(""));
+          } else {
+            Toast.show({
+              text1: t("error.otpNotVerified"),
+              type: "error",
+            });
+          }
+        } else {
+          Toast.show({
+            text1: t("error.otpNotVerified"),
+            type: "error",
+          });
+        }
+      } finally {
+        isVerifying.current = false;
+      }
+    },
+    [
+      code,
+      codeSubmit,
+      dispatch,
+      setLoginState,
+      loadUserData,
+      checkAuthStatus,
+      onLoginSuccess,
+      closeDrawer,
+      t,
+    ],
+  );
 
   const handleGoBack = useCallback(() => {
     resetTimer();
-    setCode(new Array(6).fill(''));
+    setCode(new Array(6).fill(""));
     isVerifying.current = false;
-    setLoginState('phoneNumber');
+    setLoginState("phoneNumber");
   }, [resetTimer, setLoginState]);
 
   useEffect(() => {
     startTimer();
     // Initialize code state
-    setCode(new Array(6).fill(''));
+    setCode(new Array(6).fill(""));
     isVerifying.current = false;
 
     // Cleanup on unmount
@@ -228,7 +229,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
 
   // Auto-submit when code is complete (with debounce)
   useEffect(() => {
-    const codeString = code.join('');
+    const codeString = code.join("");
     if (codeString.length === 6 && !isLoading && !isVerifying.current) {
       // Add a small delay to prevent rapid-fire submissions
       const timeoutId = setTimeout(() => {
@@ -239,27 +240,25 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
     }
   }, [code, isLoading, verifyOtp]);
 
-  const isButtonDisabled = code.join('').length !== 6 || isLoading || initialApisLoading;
+  const isButtonDisabled =
+    code.join("").length !== 6 || isLoading || initialApisLoading;
 
   return (
     <View style={styles.loginBox}>
       <View style={styles.loginNilman}>
-        <LogoIcon width={85} height={85} fill={colors.pink}/>
+        <LogoIcon width={85} height={85} fill={colors.pink} />
         <TextView style={styles.logoTextView}>nilman</TextView>
       </View>
 
       <TextView style={styles.loginSpan}>
-        رمز یکبار مصرف به شماره{' '}
-        <TextView style={styles.phoneNumber}>{getValues().phoneNumber}</TextView>
-        {' '}ارسال شد
+        رمز یکبار مصرف به شماره{" "}
+        <TextView style={styles.phoneNumber}>
+          {getValues().phoneNumber}
+        </TextView>{" "}
+        ارسال شد
       </TextView>
 
-      <OTP
-        onComplete={verifyOtp}
-        code={code}
-        setCode={setCode}
-        disabled={isLoading || initialApisLoading}
-      />
+      <OTP onComplete={verifyOtp} disabled={isLoading || initialApisLoading} />
 
       <View style={styles.loginTicker}>
         <View style={styles.loginTickerLeft}>
@@ -285,13 +284,21 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
           onPress={handleGoBack}
           disabled={isLoading || initialApisLoading}
         >
-          <TextView style={[styles.loginButtonTextView, styles.loginButtonTextViewCancel]}>
+          <TextView
+            style={[
+              styles.loginButtonTextView,
+              styles.loginButtonTextViewCancel,
+            ]}
+          >
             مرحله قبل
           </TextView>
         </ButtonView>
 
         <ButtonView
-          style={[styles.loginButton, isButtonDisabled ? styles.loginButtonDisabled : {  }]}
+          style={[
+            styles.loginButton,
+            isButtonDisabled ? styles.loginButtonDisabled : {},
+          ]}
           onPress={verifyOtp}
           loading={isLoading || initialApisLoading}
           disabled={isButtonDisabled}
@@ -312,9 +319,9 @@ const createStyles = (theme: Theme) =>
       elevation: 5,
     },
     loginNilman: {
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
       marginBottom: 10,
     },
     logo: {
@@ -324,40 +331,40 @@ const createStyles = (theme: Theme) =>
     },
     logoTextView: {
       fontSize: 24,
-      fontWeight: 'bold',
+      fontWeight: "bold",
       color: colors.pink,
     },
     loginSpan: {
       fontSize: 16,
-      fontWeight: 'medium',
-      textAlign: 'center',
+      fontWeight: "medium",
+      textAlign: "center",
       marginVertical: spacing.sm,
-      alignSelf: 'flex-end'
+      alignSelf: "flex-end",
     },
     loginOtpSent: {
       fontSize: 16,
-      textAlign: 'center',
+      textAlign: "center",
       marginBottom: 20,
       lineHeight: 24,
     },
     phoneNumber: {
-      fontWeight: 'bold',
+      fontWeight: "bold",
       color: colors.pink,
     },
     loginTicker: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
       marginVertical: 20,
       paddingHorizontal: 10,
     },
     loginTickerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
     },
     loginCountdown: {
       fontSize: 18,
-      fontWeight: 'bold',
+      fontWeight: "bold",
       marginRight: 10,
     },
     tickerText: {
@@ -366,34 +373,34 @@ const createStyles = (theme: Theme) =>
     loginCodeNotReceived: {
       fontSize: 14,
       color: colors.pink,
-      textAlign: 'center',
+      textAlign: "center",
       marginBottom: 20,
-      textDecorationLine: 'underline',
+      textDecorationLine: "underline",
     },
     buttonsContainer: {
-      flexDirection: 'row',
+      flexDirection: "row",
       gap: 10,
     },
     loginButton: {
-      width: '70%',
+      width: "70%",
       backgroundColor: colors.pink,
       borderRadius: 8,
       paddingVertical: spacing.sm,
       paddingHorizontal: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     },
     loginButtonDisabled: {
-      backgroundColor: '#cccccc',
+      backgroundColor: "#cccccc",
     },
     cancelButton: {
-      backgroundColor: '#6c757d',
-      width: '30%'
+      backgroundColor: "#6c757d",
+      width: "30%",
     },
     loginButtonTextView: {
-      color: '#fff',
+      color: "#fff",
       fontSize: 16,
-      fontWeight: 'medium',
+      fontWeight: "medium",
     },
     loginButtonTextViewCancel: {
       fontSize: 12,
