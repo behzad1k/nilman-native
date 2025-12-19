@@ -21,7 +21,8 @@
     "general": "مشکلی پیش آمده لطفا دوباره امتحان کنید",
     "atLeastOneAddOn": "باید حداقل یکی از خدمات اجباری را انتخاب کنید",
     "duplicateCart": "این سرویس را در سبد خرید خود تعیین وضعیت کنید",
-    "noAvailableStylistInDateTime": "تمامی استایلیست ها در این زمان مشغول می باشند"
+    "noAvailableStylistInDateTime": "تمامی استایلیست ها در این زمان مشغول می باشند",
+    "tooManyColors": "حداکثر چهار رنگ را انتخاب کنید"
   },
   "api_error": {
     "invalidRequest": "مشکل در ارسال اطلاعات",
