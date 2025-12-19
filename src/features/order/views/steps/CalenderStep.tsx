@@ -227,7 +227,7 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
                     setHour={setHour}
                     minute={minute}
                     setMinute={setMinute}
-                    onTimeChange={(hour, _minute) =>
+                    onTimeChange={(hour: number, _minute: number) =>
                       setSelected((prev) => ({
                         ...prev,
                         time: hour,
