@@ -29,7 +29,7 @@ interface Props {
 
 const CalendarStep = ({ setSelected, selected }: Props) => {
   const [calTab, setCalTab] = useState(0);
-  const [hour, setHour] = useState(8);
+  const [hour, setHour] = useState(0);
   const [minute, setMinute] = useState(0);
   const [schedules, setSchedules] = useState<any>(undefined);
   const userReducer = useAppSelector((state) => state.user);
@@ -72,10 +72,11 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
   useEffect(() => {
     if (scrollViewRef.current && isRTL()) {
       setTimeout(() => {
+        console.log("hi");
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 150);
     }
-  }, []);
+  }, [scrollViewRef.current]);
 
   const timeSlots = useMemo(() => {
     if (fetchWorkersLoading && !schedules) return [];
@@ -122,7 +123,7 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
     if (timeSlots.length) {
       if (timeSlots.filter((e) => !e.disabled).length) {
         const closestHour = timeSlots.filter((e) => !e.disabled)[0]?.time;
-        if (disabledHours.includes(hour) || hour > closestHour)
+        if (disabledHours.includes(hour) || hour > closestHour || hour == 0)
           selectedTimeRef.current = closestHour;
       } else {
         changeDay(calTab + 1);
@@ -174,7 +175,7 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
       </TouchableOpacity>
     ));
   };
-  console.log(selected.time);
+
   const renderTimeSlots = useCallback(() => {
     // return timeSlots.map((timeSlot) => (
     //   <TouchableOpacity
@@ -239,13 +240,15 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
                     disabledHours={timeSlots
                       .filter((e) => e.disabled)
                       .map((e) => e.time)}
-                    onDisabledHourSelected={() =>
+                    onDisabledHourSelected={() => {
+                      console.log("h: ", hour);
+                      console.log("c: ", calTab);
                       Toast.show({
                         type: "error",
                         text1: t("error.noAvailableStylistInDateTime"),
                         position: "top",
-                      })
-                    }
+                      });
+                    }}
                   />
                 </View>
               </View>
