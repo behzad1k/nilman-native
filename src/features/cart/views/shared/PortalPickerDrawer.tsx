@@ -1,12 +1,13 @@
-import TextView from '@/src/components/ui/TextView';
-import { useAppSelector } from '@/src/configs/redux/hooks';
-import { services } from '@/src/configs/services';
-import { useThemedStyles } from '@/src/hooks/useThemedStyles';
-import { colors } from '@/src/styles/theme/colors';
-import { Theme } from '@/src/types/theme';
-import { PaymentMethods } from '@/src/utils/enums';
-import { CheckCircle } from 'phosphor-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import TextView from "@/src/components/ui/TextView";
+import { useAppDispatch, useAppSelector } from "@/src/configs/redux/hooks";
+import { cart, order } from "@/src/configs/redux/slices/orderSlice";
+import { services } from "@/src/configs/services";
+import { useThemedStyles } from "@/src/hooks/useThemedStyles";
+import { colors } from "@/src/styles/theme/colors";
+import { Theme } from "@/src/types/theme";
+import { PaymentMethods } from "@/src/utils/enums";
+import { CheckCircle } from "phosphor-react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -14,14 +15,14 @@ import {
   View,
   Platform,
   Alert,
-  Linking
-} from 'react-native';
-import { Toast } from 'toastify-react-native';
+  Linking,
+} from "react-native";
+import { Toast } from "toastify-react-native";
 
 // Conditional import for WebView (only on native)
 let WebView: any = null;
-if (Platform.OS !== 'web') {
-  WebView = require('react-native-webview').default;
+if (Platform.OS !== "web") {
+  WebView = require("react-native-webview").default;
 }
 
 interface Props {
@@ -32,7 +33,7 @@ interface Props {
 }
 
 interface PaymentResult {
-  status: 'success' | 'failed' | 'cancelled';
+  status: "success" | "failed" | "cancelled";
   method?: string;
   authority?: string;
   refId?: string;
@@ -46,31 +47,33 @@ const PaymentOptions = {
   //   slug: 'ap',
   // },
   sep: {
-    title: 'بانک سامان',
-    icon: require('@/src/assets/images/sep.png'),
-    slug: 'sep',
+    title: "بانک سامان",
+    icon: require("@/src/assets/images/sep.png"),
+    slug: "sep",
   },
   zarinpal: {
-    title: 'زرین پال',
-    icon: require('@/src/assets/images/zarinpal.png'),
-    slug: 'zarinpal',
-  }
+    title: "زرین پال",
+    icon: require("@/src/assets/images/zarinpal.png"),
+    slug: "zarinpal",
+  },
 };
 
 const PortalPickerDrawer = ({
-                        finalPrice,
-                        isCredit,
-                        onPaymentComplete,
-                        onClose
-                      }: Props) => {
+  finalPrice,
+  isCredit,
+  onPaymentComplete,
+  onClose,
+}: Props) => {
   const styles = useThemedStyles(createStyles);
-  const [portal, setPortal] = useState<keyof typeof PaymentOptions>(PaymentMethods.sep);
+  const [portal, setPortal] = useState<keyof typeof PaymentOptions>(
+    PaymentMethods.sep,
+  );
   const [showPaymentView, setShowPaymentView] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState('');
+  const [paymentUrl, setPaymentUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const webViewRef = useRef<any>(null);
-  const userReducer = useAppSelector(state => state.user.data);
-
+  const userReducer = useAppSelector((state) => state.user.data);
+  const dispatch = useAppDispatch();
   // Platform-specific payment handling
   const generatePaymentHTML = useCallback((portalData: any) => {
     const { authority, method } = portalData;
@@ -265,142 +268,136 @@ const PortalPickerDrawer = ({
       `;
     }
 
-    return '';
+    return "";
   }, []);
 
   // Web-specific form submission
-  const handleWebPayment = useCallback((portalData: any) => {
-    const { authority, method, url } = portalData;
+  const handleWebPayment = useCallback(
+    (portalData: any) => {
+      const { authority, method, url } = portalData;
 
-    if ((method === PaymentMethods.zarinpal || method === PaymentMethods.sep) && url) {
-      window.open(url, '_self');
-      onClose?.();
-      return;
-    }else {
-      //error
-    }
-
-    // Create and submit forms for banks
-    const form = document.createElement('form');
-    form.method = 'post';
-    form.style.display = 'none';
-
-    if (method === PaymentMethods.ap) {
-      form.action = 'https://asan.shaparak.ir';
-
-      const refIdInput = document.createElement('input');
-      refIdInput.type = 'hidden';
-      refIdInput.name = 'RefID';
-      refIdInput.value = authority;
-      form.appendChild(refIdInput);
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-    onClose?.();
-  }, [onClose]);
-
-  // Native-specific WebView handling
-  const handleNativePayment = useCallback((portalData: any) => {
-    const { authority, method, url } = portalData;
-
-    if (method === PaymentMethods.ap) {
-      const formHTML = generatePaymentHTML({ authority, method });
-      const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(formHTML)}`;
-      setPaymentUrl(dataUrl);
-    } else {
-      setPaymentUrl(url);
-    }
-
-    setShowPaymentView(true);
-  }, [generatePaymentHTML]);
-
-  // Handle payment navigation changes (native only)
-  const handleWebViewNavigationStateChange = useCallback((navState: any) => {
-    const { url } = navState;
-    console.log(url);
-    // Check for payment result URLs
-    if (url.includes('payment/verify')){
-
-      setShowPaymentView(false);
-
-      try {
-        const urlParams = new URLSearchParams(url.split('?')[1] || '');
-        const status = urlParams.get('status') || urlParams.get('Status') || urlParams.get('State')
-        const authority = urlParams.get('authority') || urlParams.get('Authority');
-        const refId = urlParams.get('RefId') || urlParams.get('refId');
-        console.log(status, authority, refId);
-        if (status === 'OK' || status === 'success' || refId) {
-          Toast.show({
-            type: 'success',
-            text1: 'پرداخت با موفقیت انجام شد',
-          });
-          onPaymentComplete?.({
-            status: 'success',
-            authority: authority || '',
-            refId: refId || '',
-            method: portal
-          });
-        } else {
-          Toast.show({
-            type: 'error',
-            text1: 'پرداخت ناموفق بود',
-          });
-          onPaymentComplete?.({
-            status: 'failed',
-            error: status || '',
-            method: portal
-          });
-        }
-      } catch (error) {
-        console.warn('Error parsing payment result:', error);
-        // Ask user about payment status
-        Alert.alert(
-          'وضعیت پرداخت',
-          'آیا پرداخت شما با موفقیت انجام شد؟',
-          [
-            {
-              text: 'خیر',
-              onPress: () => onPaymentComplete?.({ status: 'failed', method: portal })
-            },
-            {
-              text: 'بله',
-              onPress: () => onPaymentComplete?.({ status: 'success', method: portal })
-            },
-          ]
-        );
+      if (
+        (method === PaymentMethods.zarinpal || method === PaymentMethods.sep) &&
+        url
+      ) {
+        window.open(url, "_self");
+        onClose?.();
+        return;
+      } else {
+        //error
       }
 
+      // Create and submit forms for banks
+      const form = document.createElement("form");
+      form.method = "post";
+      form.style.display = "none";
+
+      if (method === PaymentMethods.ap) {
+        form.action = "https://asan.shaparak.ir";
+
+        const refIdInput = document.createElement("input");
+        refIdInput.type = "hidden";
+        refIdInput.name = "RefID";
+        refIdInput.value = authority;
+        form.appendChild(refIdInput);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
       onClose?.();
-    }
-  }, [portal, onPaymentComplete, onClose]);
+    },
+    [onClose],
+  );
 
-  // Credit payment handling
-  const handleCreditPayment = useCallback(() => {
-    Alert.alert(
-      'پرداخت از کیف پول',
-      `مبلغ ${finalPrice.toLocaleString()} تومان از کیف پول شما کسر خواهد شد. آیا ادامه می‌دهید؟`,
-      [
-        { text: 'انصراف', style: 'cancel' },
-        {
-          text: 'تایید',
-          onPress: async () => {
-            setIsLoading(true);
+  // Native-specific WebView handling
+  const handleNativePayment = useCallback(
+    (portalData: any) => {
+      const { authority, method, url } = portalData;
 
-            onClose?.();
-          },
-        },
-      ]
-    );
-  }, [finalPrice, onPaymentComplete, onClose]);
+      if (method === PaymentMethods.ap) {
+        const formHTML = generatePaymentHTML({ authority, method });
+        const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(formHTML)}`;
+        setPaymentUrl(dataUrl);
+      } else {
+        setPaymentUrl(url);
+      }
+
+      setShowPaymentView(true);
+    },
+    [generatePaymentHTML],
+  );
+
+  // Handle payment navigation changes (native only)
+  const handleWebViewNavigationStateChange = useCallback(
+    (navState: any) => {
+      const { url } = navState;
+      console.log(url);
+      // Check for payment result URLs
+      if (url.includes("payment/verify")) {
+        setShowPaymentView(false);
+
+        try {
+          const urlParams = new URLSearchParams(url.split("?")[1] || "");
+          const status =
+            urlParams.get("status") ||
+            urlParams.get("Status") ||
+            urlParams.get("State");
+          const authority =
+            urlParams.get("authority") || urlParams.get("Authority");
+          const refId = urlParams.get("RefId") || urlParams.get("refId");
+          console.log(status, authority, refId);
+          if (status === "OK" || status === "success" || refId) {
+            Toast.show({
+              type: "success",
+              text1: "پرداخت با موفقیت انجام شد",
+            });
+            onPaymentComplete?.({
+              status: "success",
+              authority: authority || "",
+              refId: refId || "",
+              method: portal,
+            });
+          } else {
+            Toast.show({
+              type: "error",
+              text1: "پرداخت ناموفق بود",
+            });
+            onPaymentComplete?.({
+              status: "failed",
+              error: status || "",
+              method: portal,
+            });
+          }
+        } catch (error) {
+          console.warn("Error parsing payment result:", error);
+          // Ask user about payment status
+          Alert.alert("وضعیت پرداخت", "آیا پرداخت شما با موفقیت انجام شد؟", [
+            {
+              text: "خیر",
+              onPress: () =>
+                onPaymentComplete?.({ status: "failed", method: portal }),
+            },
+            {
+              text: "بله",
+              onPress: () =>
+                onPaymentComplete?.({ status: "success", method: portal }),
+            },
+          ]);
+        }
+
+        onClose?.();
+      }
+    },
+    [portal, onPaymentComplete, onClose],
+  );
 
   // Main payment handler
   const pay = async () => {
     if (!portal) {
       Toast.show({
-        type: 'error',
-        text1: 'لطفا یکی از درگاه های زیر را انتخاب کنید',
+        type: "error",
+        text1: "لطفا یکی از درگاه های زیر را انتخاب کنید",
       });
       return;
     }
@@ -410,34 +407,42 @@ const PortalPickerDrawer = ({
     try {
       const res = await services.cart.sendPortal({
         isCredit: isCredit,
-        method: portal
+        method: portal,
       });
 
       if (res.code === 200) {
         // Platform-specific handling
-        if (Platform.OS === 'web') {
+        if (Platform.OS === "web") {
           handleWebPayment({
             authority: res.data.authority,
             method: portal,
-            url: res.data?.url
+            url: res.data?.url,
           });
         } else {
           handleNativePayment({
             authority: res.data.authority,
             method: portal,
-            url: res.data?.url
+            url: res.data?.url,
           });
         }
+      } else if (res.code == 1015) {
+        Toast.show({
+          type: "error",
+          text1: "از ثبت سفارش شما بیش از یک ساعت گذشته لطفا دوباره ثبت کنید",
+        });
+        dispatch(cart());
+        dispatch(order());
+        return;
       } else {
         Toast.show({
-          type: 'error',
-          text1: 'مشکلی پیش آمده، لطفا مجددا امتحان کنید',
+          type: "error",
+          text1: "مشکلی پیش آمده، لطفا مجددا امتحان کنید",
         });
       }
     } catch (error) {
       Toast.show({
-        type: 'error',
-        text1: 'خطا در برقراری ارتباط با سرور',
+        type: "error",
+        text1: "خطا در برقراری ارتباط با سرور",
       });
     } finally {
       setIsLoading(false);
@@ -446,7 +451,7 @@ const PortalPickerDrawer = ({
 
   // Open in external browser (native only)
   const openInExternalBrowser = useCallback(async () => {
-    if (paymentUrl && Platform.OS !== 'web') {
+    if (paymentUrl && Platform.OS !== "web") {
       const supported = await Linking.canOpenURL(paymentUrl);
       if (supported) {
         await Linking.openURL(paymentUrl);
@@ -456,9 +461,8 @@ const PortalPickerDrawer = ({
     }
   }, [paymentUrl, onClose]);
 
-
   // Render WebView for native platforms
-  if (showPaymentView && Platform.OS !== 'web' && WebView) {
+  if (showPaymentView && Platform.OS !== "web" && WebView) {
     return (
       <View style={styles.webViewContainer}>
         <View style={styles.webViewHeader}>
@@ -489,10 +493,10 @@ const PortalPickerDrawer = ({
           userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15"
           onError={(syntheticEvent: any) => {
             const { nativeEvent } = syntheticEvent;
-            console.warn('WebView error:', nativeEvent);
+            console.warn("WebView error:", nativeEvent);
             Toast.show({
-              type: 'error',
-              text1: 'خطا در بارگذاری درگاه پرداخت',
+              type: "error",
+              text1: "خطا در بارگذاری درگاه پرداخت",
             });
           }}
         />
@@ -504,37 +508,53 @@ const PortalPickerDrawer = ({
     <View style={styles.drawerContainer}>
       <TextView style={styles.title}>روش های پرداخت</TextView>
 
-      {Object.values(PaymentOptions).map(e => {
+      {Object.values(PaymentOptions).map((e) => {
         const isSelected = e.slug === portal;
-        const isDisabled = e.slug === PaymentMethods.credit && (!isCredit || userReducer?.walletBalance < finalPrice);
+        const isDisabled =
+          e.slug === PaymentMethods.credit &&
+          (!isCredit || userReducer?.walletBalance < finalPrice);
 
         return (
           <TouchableOpacity
             style={[
               styles.optionRow,
               isSelected && styles.selectedOptionRow,
-              isDisabled && styles.disabledOptionRow
+              isDisabled && styles.disabledOptionRow,
             ]}
             key={e.slug}
-            onPress={() => !isDisabled && setPortal(e.slug as keyof typeof PaymentOptions)}
+            onPress={() =>
+              !isDisabled && setPortal(e.slug as keyof typeof PaymentOptions)
+            }
             disabled={isDisabled}
           >
-            {isSelected && <CheckCircle style={styles.selectedIcon} color={colors.pink} size={40}/>}
+            {isSelected && (
+              <CheckCircle
+                style={styles.selectedIcon}
+                color={colors.pink}
+                size={40}
+              />
+            )}
             <View style={styles.optionContent}>
-              <TextView style={[
-                styles.optionText,
-                isSelected && styles.selectedOptionText,
-                isDisabled && styles.disabledOptionText
-              ]}>
+              <TextView
+                style={[
+                  styles.optionText,
+                  isSelected && styles.selectedOptionText,
+                  isDisabled && styles.disabledOptionText,
+                ]}
+              >
                 {e.title}
               </TextView>
-              {e.slug === PaymentMethods.credit && userReducer?.walletBalance && (
-                <TextView style={styles.balanceText}>
-                  موجودی: {userReducer.walletBalance.toLocaleString()} تومان
-                </TextView>
-              )}
+              {e.slug === PaymentMethods.credit &&
+                userReducer?.walletBalance && (
+                  <TextView style={styles.balanceText}>
+                    موجودی: {userReducer.walletBalance.toLocaleString()} تومان
+                  </TextView>
+                )}
             </View>
-            <Image style={[styles.optionIcon, isDisabled && styles.disabledIcon]} source={e.icon}/>
+            <Image
+              style={[styles.optionIcon, isDisabled && styles.disabledIcon]}
+              source={e.icon}
+            />
           </TouchableOpacity>
         );
       })}
@@ -545,143 +565,145 @@ const PortalPickerDrawer = ({
         disabled={isLoading}
       >
         <TextView style={styles.payButtonText}>
-          {isLoading ? 'در حال پردازش...' : `پرداخت ${finalPrice.toLocaleString()} تومان`}
+          {isLoading
+            ? "در حال پردازش..."
+            : `پرداخت ${finalPrice.toLocaleString()} تومان`}
         </TextView>
       </TouchableOpacity>
     </View>
   );
 };
 
-const createStyles = (theme: Theme) => StyleSheet.create({
-  drawerContainer: {
-    flex: 1,
-    height: 'auto',
-    backgroundColor: theme.background,
-    paddingHorizontal: 16,
-    borderTopRightRadius: 24,
-    borderTopLeftRadius: 24,
-    gap: 16,
-    paddingTop: 16,
-    paddingBottom: 24
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: theme.text,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    gap: 16,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    backgroundColor: theme.primary,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  optionContent: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  optionIcon: {
-    width: 50,
-    height: 50,
-  },
-  disabledIcon: {
-    opacity: 0.5,
-  },
-  optionText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.text,
-  },
-  balanceText: {
-    fontSize: 12,
-    color: theme.textSecondary,
-    marginTop: 2,
-  },
-  selectedIcon: {
-    marginRight: 'auto',
-  },
-  selectedOptionRow: {
-    borderColor: colors.pink,
-  },
-  selectedOptionText: {
-  },
-  disabledOptionRow: {
-    opacity: 0.6,
-    backgroundColor: theme.third,
-  },
-  disabledOptionText: {
-    color: theme.textSecondary,
-  },
-  payButton: {
-    width: '100%',
-    backgroundColor: colors.green,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    drawerContainer: {
+      flex: 1,
+      height: "auto",
+      backgroundColor: theme.background,
+      paddingHorizontal: 16,
+      borderTopRightRadius: 24,
+      borderTopLeftRadius: 24,
+      gap: 16,
+      paddingTop: 16,
+      paddingBottom: 24,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  disabledButton: {
-    backgroundColor: theme.textSecondary,
-    opacity: 0.7,
-  },
-  payButtonText: {
-    fontSize: 18,
-    color: colors.white,
-  },
-  webViewContainer: {
-    height: 700,
-    flex: 1,
-    backgroundColor: theme.background,
-  },
-  webViewHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.border,
-    backgroundColor: theme.primary,
-  },
-  closeButton: {
-    padding: 8,
-    borderRadius: 4,
-  },
-  closeButtonText: {
-    fontSize: 18,
-    color: theme.text,
-  },
-  webViewTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    flex: 1,
-    textAlign: 'center',
-    color: theme.text,
-  },
-  externalButton: {
-    padding: 8,
-    borderRadius: 4,
-  },
-  externalButtonText: {
-    fontSize: 18,
-    color: colors.pink,
-  },
-  webView: {
-    flex: 1,
-  },
-});
+    title: {
+      fontSize: 20,
+      fontWeight: "bold",
+      textAlign: "center",
+      color: theme.text,
+    },
+    optionRow: {
+      flexDirection: "row",
+      gap: 16,
+      alignItems: "center",
+      justifyContent: "flex-end",
+      backgroundColor: theme.primary,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderWidth: 2,
+      borderColor: "transparent",
+    },
+    optionContent: {
+      flex: 1,
+      alignItems: "flex-end",
+    },
+    optionIcon: {
+      width: 50,
+      height: 50,
+    },
+    disabledIcon: {
+      opacity: 0.5,
+    },
+    optionText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    balanceText: {
+      fontSize: 12,
+      color: theme.textSecondary,
+      marginTop: 2,
+    },
+    selectedIcon: {
+      marginRight: "auto",
+    },
+    selectedOptionRow: {
+      borderColor: colors.pink,
+    },
+    selectedOptionText: {},
+    disabledOptionRow: {
+      opacity: 0.6,
+      backgroundColor: theme.third,
+    },
+    disabledOptionText: {
+      color: theme.textSecondary,
+    },
+    payButton: {
+      width: "100%",
+      backgroundColor: colors.green,
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    disabledButton: {
+      backgroundColor: theme.textSecondary,
+      opacity: 0.7,
+    },
+    payButtonText: {
+      fontSize: 18,
+      color: colors.white,
+    },
+    webViewContainer: {
+      height: 700,
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    webViewHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
+      backgroundColor: theme.primary,
+    },
+    closeButton: {
+      padding: 8,
+      borderRadius: 4,
+    },
+    closeButtonText: {
+      fontSize: 18,
+      color: theme.text,
+    },
+    webViewTitle: {
+      fontSize: 16,
+      fontWeight: "500",
+      flex: 1,
+      textAlign: "center",
+      color: theme.text,
+    },
+    externalButton: {
+      padding: 8,
+      borderRadius: 4,
+    },
+    externalButtonText: {
+      fontSize: 18,
+      color: colors.pink,
+    },
+    webView: {
+      flex: 1,
+    },
+  });
 
 export default PortalPickerDrawer;

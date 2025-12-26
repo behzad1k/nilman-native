@@ -209,7 +209,7 @@ const OrderPage = () => {
           type: "success",
           text1: "سفارش شما با موفقیت ثبت شد",
         });
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         router.push("/cart");
       } else {
         Toast.error(
