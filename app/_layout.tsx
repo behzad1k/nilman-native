@@ -1,72 +1,73 @@
-import { AuthProvider, useAuth } from '@/src/components/contexts/AuthContext';
-import { DrawerProvider } from '@/src/components/contexts/DrawerContext';
-import { LanguageProvider, useI18nContext } from '@/src/components/contexts/LanguageContext';
-import { LoadingProvider } from '@/src/components/contexts/LoadingContext';
-import { SplashProvider, useSplash } from '@/src/components/contexts/SplashContext';
-import { ThemeProvider, useTheme } from '@/src/components/contexts/ThemeContext';
-import InstallPrompt from '@/src/components/layouts/InstallPrompt';
-import Splash from '@/src/components/layouts/Splash';
-import { Drawer } from '@/src/components/ui/Drawer';
-import { LoadingGlobal } from '@/src/components/ui/LoadingGlobal';
-import { useAppDispatch, useAppSelector } from '@/src/configs/redux/hooks';
-import { fetchColors } from '@/src/configs/redux/slices/globalSlice';
-import { cart, order } from '@/src/configs/redux/slices/orderSlice';
-import { fetchServices } from '@/src/configs/redux/slices/serviceSlice';
-import { addresses, fetchUser, getWorkers } from '@/src/configs/redux/slices/userSlice';
-import { store } from '@/src/configs/redux/store';
-import { services } from '@/src/configs/services';
-import { useLanguage } from '@/src/hooks/useLanguage';
-import { useThemedStyles } from '@/src/hooks/useThemedStyles';
-import { Theme } from '@/src/types/theme';
-import { STORAGE_KEYS } from '@/src/utils/storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import Head from 'expo-router/head';
-import { useEffect } from 'react';
-import { StatusBar, StyleSheet } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import 'react-native-reanimated';
-import { KeyboardProvider } from 'react-native-keyboard-controller';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Provider } from 'react-redux';
-import ToastManager from 'toastify-react-native';
-import { ToastManagerProps } from 'toastify-react-native/utils/interfaces';
+import { AuthProvider, useAuth } from "@/src/components/contexts/AuthContext";
+import { DrawerProvider } from "@/src/components/contexts/DrawerContext";
+import {
+  LanguageProvider,
+  useI18nContext,
+} from "@/src/components/contexts/LanguageContext";
+import { LoadingProvider } from "@/src/components/contexts/LoadingContext";
+import {
+  SplashProvider,
+  useSplash,
+} from "@/src/components/contexts/SplashContext";
+import {
+  ThemeProvider,
+  useTheme,
+} from "@/src/components/contexts/ThemeContext";
+import InstallPrompt from "@/src/components/layouts/InstallPrompt";
+import Splash from "@/src/components/layouts/Splash";
+import { Drawer } from "@/src/components/ui/Drawer";
+import { LoadingGlobal } from "@/src/components/ui/LoadingGlobal";
+import { useAppDispatch, useAppSelector } from "@/src/configs/redux/hooks";
+import { fetchColors } from "@/src/configs/redux/slices/globalSlice";
+import { cart, order } from "@/src/configs/redux/slices/orderSlice";
+import { fetchServices } from "@/src/configs/redux/slices/serviceSlice";
+import {
+  addresses,
+  fetchUser,
+  getWorkers,
+} from "@/src/configs/redux/slices/userSlice";
+import { store } from "@/src/configs/redux/store";
+import { services } from "@/src/configs/services";
+import { useLanguage } from "@/src/hooks/useLanguage";
+import { useThemedStyles } from "@/src/hooks/useThemedStyles";
+import { Theme } from "@/src/types/theme";
+import { STORAGE_KEYS } from "@/src/utils/storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import Head from "expo-router/head";
+import { useEffect } from "react";
+import { StatusBar, StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "react-native-reanimated";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Provider } from "react-redux";
+import ToastManager from "toastify-react-native";
+import { ToastManagerProps } from "toastify-react-native/utils/interfaces";
+import ChristmasSnow from "@/src/components/ui/ChristmasSnow";
 
 function AppContent() {
-  const {
-    showSplash,
-    textValue
-  } = useSplash();
-  const {
-    theme,
-    isDark
-  } = useTheme();
+  const { showSplash, textValue } = useSplash();
+  const { theme, isDark } = useTheme();
   const { isRTL } = useI18nContext();
   const toastConfig: ToastManagerProps = {
     useModal: false,
     isRTL: isRTL,
-    theme: isDark ? 'dark' : 'light',
+    theme: isDark ? "dark" : "light",
     topOffset: 60,
-
   };
-  const {
-    t,
-    isLanguageLoaded,
-  } = useLanguage();
+  const { t, isLanguageLoaded } = useLanguage();
   const dispatch = useAppDispatch();
-  const {
-    loading: serviceLoading,
-    error: serviceError
-  } = useAppSelector((state) => state.service);
+  const { loading: serviceLoading, error: serviceError } = useAppSelector(
+    (state) => state.service,
+  );
   const { hideSplash } = useSplash();
-  const {
-    checkAuthStatus
-  } = useAuth();
+  const { checkAuthStatus } = useAuth();
   const initializeApp = async () => {
     const themeToken = await AsyncStorage.getItem(STORAGE_KEYS.THEME);
     if (!themeToken) {
-      await AsyncStorage.setItem(STORAGE_KEYS.THEME, 'dark');
+      await AsyncStorage.setItem(STORAGE_KEYS.THEME, "dark");
     }
     dispatch(fetchServices());
     dispatch(fetchColors());
@@ -80,7 +81,7 @@ function AppContent() {
         dispatch(addresses()),
       ]);
     } else {
-      AsyncStorage.removeItem('token');
+      AsyncStorage.removeItem("token");
     }
   };
 
@@ -99,7 +100,7 @@ function AppContent() {
   }, [serviceLoading, hideSplash, isLanguageLoaded]);
 
   if (serviceError && !serviceLoading) {
-    console.error('Service fetch error:', serviceError);
+    console.error("Service fetch error:", serviceError);
   }
 
   return (
@@ -110,24 +111,24 @@ function AppContent() {
             <Head>
               <title data-rh="true">Nilman - Beauty Service Provider</title>
 
-              <link rel="icon" type="image/png" href="./newLogo.png"/>
-              <link rel="apple-touch-icon" href="./newLogo.png"/>
+              <link rel="icon" type="image/png" href="./newLogo.png" />
+              <link rel="apple-touch-icon" href="./newLogo.png" />
 
-              <link rel="manifest" href="./manifest.json"/>
+              <link rel="manifest" href="./manifest.json" />
             </Head>
             <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)"/>
-              <Stack.Screen name="+not-found"/>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="+not-found" />
             </Stack>
+            <ChristmasSnow />
             <StatusBar
-              barStyle={(isDark ? 'light-content' : 'dark-content')}
+              barStyle={isDark ? "light-content" : "dark-content"}
               backgroundColor={theme.background}
             />
-            {showSplash && <Splash textValue={textValue}/>}
+            {showSplash && <Splash textValue={textValue} />}
           </Drawer>
         </DrawerProvider>
         <ToastManager {...toastConfig} />
-
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );
@@ -135,10 +136,10 @@ function AppContent() {
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    'Vazir-Thin': require('../src/assets/fonts/Vazir-Thin.ttf'),
-    'Vazir-Light': require('../src/assets/fonts/Vazir-Light.ttf'),
-    'Vazir-Medium': require('../src/assets/fonts/Vazir-Medium.ttf'),
-    'Vazir-Bold': require('../src/assets/fonts/Vazir-Bold.ttf'),
+    "Vazir-Thin": require("../src/assets/fonts/Vazir-Thin.ttf"),
+    "Vazir-Light": require("../src/assets/fonts/Vazir-Light.ttf"),
+    "Vazir-Medium": require("../src/assets/fonts/Vazir-Medium.ttf"),
+    "Vazir-Bold": require("../src/assets/fonts/Vazir-Bold.ttf"),
   });
 
   if (!loaded) {
@@ -153,8 +154,8 @@ export default function RootLayout() {
             <ThemeProvider>
               <SplashProvider>
                 <KeyboardProvider>
-                  <AppContent/>
-                  <LoadingGlobal/>
+                  <AppContent />
+                  <LoadingGlobal />
                   <InstallPrompt />
                 </KeyboardProvider>
               </SplashProvider>
@@ -171,5 +172,5 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.background,
-    }
+    },
   });

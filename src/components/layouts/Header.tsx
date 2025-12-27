@@ -1,16 +1,18 @@
-import LogoIcon from '@/src/components/icons/LogoIcon';
-import ThemeSwitchButton from '@/src/components/ui/DarkModeButton';
-import LanguageSwitchButton from '@/src/components/ui/LanguageSwitchButton';
-import TextView from '@/src/components/ui/TextView';
-import { useLanguage } from '@/src/hooks/useLanguage';
-import { useThemedStyles } from '@/src/hooks/useThemedStyles';
-import { colors } from '@/src/styles/theme/colors';
-import { spacing } from '@/src/styles/theme/spacing';
-import { Theme } from '@/src/types/theme';
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { ArrowLeft, ArrowRight } from 'react-native-feather';
+import LogoIcon from "@/src/components/icons/LogoIcon";
+import ThemeSwitchButton from "@/src/components/ui/DarkModeButton";
+import LanguageSwitchButton from "@/src/components/ui/LanguageSwitchButton";
+import TextView from "@/src/components/ui/TextView";
+import ChristmasHeaderDecoration from "@/src/components/ui/ChristmasHeaderDecoration";
+import ChristmasSparkle from "@/src/components/ui/ChristmasSparkle";
+import { useLanguage } from "@/src/hooks/useLanguage";
+import { useThemedStyles } from "@/src/hooks/useThemedStyles";
+import { colors } from "@/src/styles/theme/colors";
+import { spacing } from "@/src/styles/theme/spacing";
+import { Theme } from "@/src/types/theme";
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { ArrowLeft, ArrowRight } from "react-native-feather";
 
 interface HeaderProps {
   title?: string;
@@ -18,14 +20,14 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-                                                title = 'nilman',
-                                                onBackPress = undefined,
-                                              }) => {
+  title = "nilman",
+  onBackPress = undefined,
+}) => {
   const navigation = useNavigation();
   const styles = useThemedStyles(createStyles);
-  const { currentLanguage } = useLanguage()
+  const { currentLanguage } = useLanguage();
   const handleBackPress = () => {
-    if (typeof onBackPress === 'function') {
+    if (typeof onBackPress === "function") {
       onBackPress();
     } else {
       navigation.goBack();
@@ -33,21 +35,33 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.rightContainer}>
-        {/* <LanguageSwitchButton/> */}
-        <ThemeSwitchButton/>
-      </View>
-      <View style={styles.titleContainer}>
-        <LogoIcon width={35} height={35} fill={colors.pink}/>
-        <TextView style={styles.title}>{currentLanguage == 'fa' ? 'نیلمان' : 'nilman'}</TextView>
-      </View>
-      <View style={styles.leftContainer}>
-        {onBackPress != undefined && (
-          <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
-            <ArrowRight width={24} color={colors.pink}/>
-          </TouchableOpacity>
-        )}
+    <View>
+      {/* Christmas Lights Decoration */}
+
+      <View style={styles.container}>
+        <View style={styles.rightContainer}>
+          {/* <LanguageSwitchButton/> */}
+          <ThemeSwitchButton />
+        </View>
+        <ChristmasSparkle>
+          <View style={styles.titleContainer}>
+            <LogoIcon width={35} height={35} fill={colors.pink} />
+            <TextView style={styles.title}>
+              {currentLanguage == "fa" ? "نیلمان" : "nilman"}
+            </TextView>
+          </View>
+        </ChristmasSparkle>
+
+        <View style={styles.leftContainer}>
+          {onBackPress != undefined && (
+            <TouchableOpacity
+              onPress={handleBackPress}
+              style={styles.backButton}
+            >
+              <ArrowRight width={24} color={colors.pink} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -59,39 +73,37 @@ const createStyles = (theme: Theme) =>
       height: 50,
       backgroundColor: theme.primary,
       paddingHorizontal: 16,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderBottomWidth: .5,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderBottomWidth: 0.5,
       borderBottomColor: theme.border,
-      borderStyle: 'solid',
+      borderStyle: "solid",
     },
     leftContainer: {
       width: 60,
-      justifyContent: 'center',
+      justifyContent: "center",
     },
     titleContainer: {
-      flexDirection: 'row',
+      flexDirection: "row",
       gap: 8,
-      alignItems: 'center',
-      height: '100%',
-      justifyContent: 'center',
-      flex: 1
+      alignItems: "center",
+      height: "auto",
+      justifyContent: "center",
+      flex: 1,
     },
     rightContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 4
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
     },
     backButton: {
       padding: spacing.xs,
-      alignItems: 'flex-end'
+      alignItems: "flex-end",
     },
     title: {
       color: colors.pink,
       fontSize: 25,
-      marginTop: 10,
-      height: '100%',
+      height: "100%",
     },
   });
