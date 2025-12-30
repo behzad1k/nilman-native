@@ -92,8 +92,8 @@ const CalendarStep = ({ setSelected, selected }: Props) => {
         (!selected.isUrgent && calTab === 0 && section - currentSection <= 7) ||
         (!selected.isUrgent &&
           calTab === 1 &&
-          (currentHour > 20 ? 20 : currentHour) - i >= 5) ||
-        (calTab === 1 && (currentHour > 20 ? 20 : currentHour) - i >= 9);
+          (currentHour > 20 ? 20 : currentHour) - i >= 7) ||
+        (calTab === 1 && (currentHour > 20 ? 20 : currentHour) - i >= 10);
 
       const isSelected = selected.time === i && selected.date === day;
 

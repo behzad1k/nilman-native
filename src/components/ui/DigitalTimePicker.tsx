@@ -1,8 +1,9 @@
-import TextView from '@/src/components/ui/TextView';
-import { colors } from '@/src/styles/theme/colors';
-import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, View, } from 'react-native';
+import TextView from "@/src/components/ui/TextView";
+import { colors } from "@/src/styles/theme/colors";
+import moment from "jalali-moment";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 interface PickerComponentProps {
   hour: number;
@@ -15,28 +16,59 @@ interface PickerComponentProps {
   maxMinute?: number;
   onTimeChange?: (hour: number, minute: number) => void;
   disabledHours?: number[];
-  onDisabledHourSelected?: (disabledHour: number, closestAvailableHour: number) => void;
+  onDisabledHourSelected?: (
+    disabledHour: number,
+    closestAvailableHour: number,
+  ) => void;
 }
 
+// Convert decimal time to hour and minute
+export const decimalToTime = (
+  decimal: number,
+): { hour: number; minute: number } => {
+  const hour = Math.floor(decimal);
+  const minuteDecimal = decimal - hour;
+  const minute = Math.round(minuteDecimal * 60);
+  return { hour, minute };
+};
+
+export const decimalToTimeFormat = (decimal: number): string => {
+  const hour = Math.floor(decimal);
+  const minuteDecimal = decimal - hour;
+  const minute = Math.round(minuteDecimal * 60);
+  return moment(`${hour}:${minute}`, "HH:mm").format("HH:mm");
+};
+
+// Convert hour and minute to decimal time
+export const timeToDecimal = (hour: number, minute: number): number => {
+  return hour + minute / 60;
+};
+
 const DigitalTimePicker: React.FC<PickerComponentProps> = ({
-                                                             hour,
-                                                             setHour,
-                                                             minute,
-                                                             setMinute,
-                                                             minHour = 0,
-                                                             maxHour = 23,
-                                                             maxMinute = 60,
-                                                             minMinute = 0,
-                                                             onTimeChange,
-                                                             disabledHours = [],
-                                                             onDisabledHourSelected,
-                                                           }) => {
-  const hours = Array.from({ length: maxHour - minHour + 1 }, (_, i) => minHour + i);
-  const minutes = Array.from({ length: maxMinute - minMinute + 1 }, (_, i) => minMinute + i);
+  hour,
+  setHour,
+  minute,
+  setMinute,
+  minHour = 0,
+  maxHour = 23,
+  maxMinute = 60,
+  minMinute = 0,
+  onTimeChange,
+  disabledHours = [],
+  onDisabledHourSelected,
+}) => {
+  const hours = Array.from(
+    { length: maxHour - minHour + 1 },
+    (_, i) => minHour + i,
+  );
+  const minutes = Array.from(
+    { length: maxMinute - minMinute + 1 },
+    (_, i) => minMinute + i,
+  );
 
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
-  const availableHours = hours.filter(h => !disabledHours.includes(h));
+  const availableHours = hours.filter((h) => !disabledHours.includes(h));
 
   const findClosestAvailableHour = (targetHour: number): number => {
     if (!disabledHours.includes(targetHour)) {
@@ -214,7 +246,7 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
     return (
       <View style={styles.emptyContainer}>
         <TextView style={styles.emptyText}>
-          {t('error.noAvailableStylistInDateTime')}
+          {t("error.noAvailableStylistInDateTime")}
         </TextView>
       </View>
     );
@@ -237,7 +269,10 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
             {paddedHours.map((h, index) => {
               const isDisabled = h !== null && disabledHours.includes(h);
               return (
-                <View key={`hour-${index}`} style={[styles.pickerItem, { height: itemHeight }]}>
+                <View
+                  key={`hour-${index}`}
+                  style={[styles.pickerItem, { height: itemHeight }]}
+                >
                   {h !== null && (
                     <TextView
                       style={[
@@ -246,7 +281,7 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
                         isDisabled && styles.pickerItemTextDisabled,
                       ]}
                     >
-                      {h.toString().padStart(2, '0')}
+                      {h.toString().padStart(2, "0")}
                     </TextView>
                   )}
                 </View>
@@ -269,7 +304,10 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
             contentContainerStyle={styles.pickerScrollContent}
           >
             {paddedMinutes.map((m, index) => (
-              <View key={`minute-${index}`} style={[styles.pickerItem, { height: itemHeight }]}>
+              <View
+                key={`minute-${index}`}
+                style={[styles.pickerItem, { height: itemHeight }]}
+              >
                 {m !== null && (
                   <TextView
                     style={[
@@ -277,7 +315,7 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
                       m === minute && styles.pickerItemTextSelected,
                     ]}
                   >
-                    {m.toString().padStart(2, '0')}
+                    {m.toString().padStart(2, "0")}
                   </TextView>
                 )}
               </View>
@@ -286,83 +324,83 @@ const DigitalTimePicker: React.FC<PickerComponentProps> = ({
         </View>
       </View>
 
-      <View style={styles.pickerSelection} pointerEvents="none"/>
+      <View style={styles.pickerSelection} pointerEvents="none" />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   digitalContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 20,
   },
   emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 40,
     paddingHorizontal: 20,
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
   },
   pickerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   pickerColumn: {
-    overflow: 'hidden',
+    overflow: "hidden",
     width: 80,
   },
   pickerScrollContent: {
     paddingVertical: 0,
   },
   pickerItem: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   pickerItemText: {
     fontSize: 20,
-    color: '#CCC',
+    color: "#CCC",
   },
   pickerItemTextSelected: {
     fontSize: 26,
     color: colors.pink,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   pickerItemTextDisabled: {
-    color: '#E0E0E0',
-    textDecorationLine: 'line-through',
+    color: "#E0E0E0",
+    textDecorationLine: "line-through",
   },
   pickerSeparator: {
     fontSize: 28,
     marginBottom: 10,
-    textAlign: 'center',
-    fontWeight: '600',
+    textAlign: "center",
+    fontWeight: "600",
     marginHorizontal: 10,
     color: colors.pink,
   },
   pickerSelection: {
-    position: 'absolute',
-    top: '50%',
+    position: "absolute",
+    top: "50%",
     left: 0,
     right: 0,
     height: 44,
     marginTop: -22,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#E0E0E0',
-    backgroundColor: 'rgba(0, 122, 255, 0.05)',
+    borderColor: "#E0E0E0",
+    backgroundColor: "rgba(0, 122, 255, 0.05)",
   },
   doneButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
 });
 

@@ -14,6 +14,7 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Order } from "@/src/features/order/types";
 import { services } from "@/src/configs/services";
 import { useLoading } from "@/src/components/contexts/LoadingContext";
+import { decimalToTime } from "@/src/components/ui/DigitalTimePicker";
 
 interface IOrderCardProps {
   item: Order;
@@ -79,9 +80,12 @@ export default function OrderCard({ item }: IOrderCardProps) {
             {item.service.title}
           </TextView>
           <TextView style={orderCardStyles.orderCardDate}>
-            {moment(item.date + " " + item.fromTime, "jYYYY/jMM/jDD HH")
+            {moment(
+              `${item.date} ${decimalToTime(item.fromTime)?.hour}:${decimalToTime(item.fromTime)?.minute}`,
+              "jYYYY/jMM/jDD HH:mm",
+            )
               .locale("fa")
-              .format("dddd jD jMMMM  .  ساعت HH")}
+              .format("dddd jD jMMMM  .  ساعت HH:mm")}
           </TextView>
           <TextView style={orderCardStyles.orderCardAddress}>
             آدرس: {item.address?.title}
