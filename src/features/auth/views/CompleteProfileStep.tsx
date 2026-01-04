@@ -1,29 +1,37 @@
-import { useAuth } from '@/src/components/contexts/AuthContext';
-import LogoIcon from '@/src/components/icons/LogoIcon';
-import TextInputView from '@/src/components/ui/TextInputView';
-import TextView from '@/src/components/ui/TextView';
-import { useAppDispatch } from '@/src/configs/redux/hooks';
-import { cart, order } from '@/src/configs/redux/slices/orderSlice';
-import { addresses, fetchUser, getWorkers, setUser } from '@/src/configs/redux/slices/userSlice';
-import { services } from '@/src/configs/services';
-import { LoginForm } from '@/src/features/auth/authTypes';
-import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
-import { useLanguage } from '@/src/hooks/useLanguage';
-import { useThemedStyles } from '@/src/hooks/useThemedStyles';
-import { colors } from '@/src/styles/theme/colors';
-import { spacing } from '@/src/styles/theme/spacing';
-import React, { useCallback } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { UseFormReturn } from 'react-hook-form';
-import { useDrawer } from '@/src/components/contexts/DrawerContext';
-import { Theme } from '@/src/types/theme';
-import { Toast } from 'toastify-react-native';
+import { useAuth } from "@/src/components/contexts/AuthContext";
+import LogoIcon from "@/src/components/icons/LogoIcon";
+import TextInputView from "@/src/components/ui/TextInputView";
+import TextView from "@/src/components/ui/TextView";
+import { useAppDispatch } from "@/src/configs/redux/hooks";
+import { cart, order } from "@/src/configs/redux/slices/orderSlice";
+import {
+  addresses,
+  fetchUser,
+  getWorkers,
+  setUser,
+} from "@/src/configs/redux/slices/userSlice";
+import { services } from "@/src/configs/services";
+import { LoginForm } from "@/src/features/auth/authTypes";
+import { useAsyncOperation } from "@/src/hooks/useAsyncOperation";
+import { useLanguage } from "@/src/hooks/useLanguage";
+import { useThemedStyles } from "@/src/hooks/useThemedStyles";
+import { colors } from "@/src/styles/theme/colors";
+import { spacing } from "@/src/styles/theme/spacing";
+import React, { useCallback } from "react";
+import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { UseFormReturn } from "react-hook-form";
+import { useDrawer } from "@/src/components/contexts/DrawerContext";
+import { Theme } from "@/src/types/theme";
+import { Toast } from "toastify-react-native";
+import { persianNumToEn } from "@/src/utils/funs";
 
 interface CompleteProfileStepProps {
   formMethods: UseFormReturn<LoginForm>;
 }
 
-export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMethods }) => {
+export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({
+  formMethods,
+}) => {
   const { register, setValue, handleSubmit } = formMethods;
   const { closeDrawer } = useDrawer();
   const dispatch = useAppDispatch();
@@ -33,15 +41,13 @@ export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMe
   const { t } = useLanguage();
 
   React.useEffect(() => {
-    register('name');
-    register('lastName');
-    register('nationalCode');
+    register("name");
+    register("lastName");
+    register("nationalCode");
   }, [register]);
 
-  const {
-    execute: initialApis,
-    loading: initialApisLoading
-  } = useAsyncOperation();
+  const { execute: initialApis, loading: initialApisLoading } =
+    useAsyncOperation();
 
   const loadUserData = useCallback(async () => {
     try {
@@ -52,17 +58,23 @@ export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMe
           dispatch(cart()),
           dispatch(getWorkers()),
           dispatch(addresses()),
-        ])
+        ]),
       );
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error("Error loading user data:", error);
     }
   }, [dispatch]);
 
-
   const onSubmit = async (data: LoginForm) => {
     try {
-      const res = await submit(() => services.auth.completeProfile(data));
+      const res = await submit(() =>
+        services.auth.completeProfile({
+          ...data,
+          phoneNumber: persianNumToEn(data.phoneNumber),
+          otp: persianNumToEn(data.otp),
+          nationalCode: persianNumToEn(data.otp),
+        }),
+      );
       dispatch(setUser(res.data?.user));
 
       await loadUserData();
@@ -72,9 +84,9 @@ export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMe
       // if (onLoginSuccess) {
       //   await onLoginSuccess();
       // }
-      closeDrawer('login');
+      closeDrawer("login");
     } catch (error) {
-      console.error('Verification error:', error);
+      console.error("Verification error:", error);
     }
   };
 
@@ -89,14 +101,14 @@ export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMe
       <TextInputView
         style={styles.loginInput}
         placeholder=""
-        onChangeText={(text) => setValue('name', text)}
+        onChangeText={(text) => setValue("name", text)}
       />
 
       <TextView style={styles.loginLabels}>نام خانوادگی</TextView>
       <TextInput
         style={styles.loginInput}
         placeholder=""
-        onChangeText={(text) => setValue('lastName', text)}
+        onChangeText={(text) => setValue("lastName", text)}
       />
 
       <TextView style={styles.loginLabels}>کد ملی</TextView>
@@ -105,7 +117,7 @@ export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMe
         placeholder=""
         keyboardType="numeric"
         maxLength={10}
-        onChangeText={(text) => setValue('nationalCode', text)}
+        onChangeText={(text) => setValue("nationalCode", text)}
       />
 
       <View style={styles.buttonsContainer}>
@@ -124,72 +136,73 @@ export const CompleteProfileStep: React.FC<CompleteProfileStepProps> = ({ formMe
         </TouchableOpacity>
       </View>
     </View>
-  )
+  );
 };
 
-const createStyles = (theme: Theme) => StyleSheet.create({
-  loginBox: {
-    backgroundColor: theme.background,
-    padding: spacing.sm,
-    margin: spacing.md
-  },
-  loginNilman: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 30,
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
-  },
-  nilmanText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  loginLabels: {
-    fontSize: 14,
-    color: theme.text,
-    marginBottom: 5,
-    textAlign: 'right',
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  loginButton: {
-    flex: 1,
-    height: 50,
-    backgroundColor: '#4CAF50',
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 5,
-  },
-  cancelButton: {
-    backgroundColor: '#f44336',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  loginInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 12,
-    marginBottom: 15,
-    textAlign: 'right',
-    backgroundColor: colors.lightPink,
-  },
-  logoTextView: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.pink,
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    loginBox: {
+      backgroundColor: theme.background,
+      padding: spacing.sm,
+      margin: spacing.md,
+    },
+    loginNilman: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 30,
+    },
+    logo: {
+      width: 40,
+      height: 40,
+      marginRight: 10,
+    },
+    nilmanText: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: "#333",
+    },
+    loginLabels: {
+      fontSize: 14,
+      color: theme.text,
+      marginBottom: 5,
+      textAlign: "right",
+    },
+    buttonsContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 20,
+    },
+    loginButton: {
+      flex: 1,
+      height: 50,
+      backgroundColor: "#4CAF50",
+      borderRadius: 5,
+      justifyContent: "center",
+      alignItems: "center",
+      marginHorizontal: 5,
+    },
+    cancelButton: {
+      backgroundColor: "#f44336",
+    },
+    buttonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    loginInput: {
+      borderWidth: 1,
+      borderColor: "#ddd",
+      borderRadius: 8,
+      padding: 15,
+      fontSize: 12,
+      marginBottom: 15,
+      textAlign: "right",
+      backgroundColor: colors.lightPink,
+    },
+    logoTextView: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: colors.pink,
+    },
+  });
